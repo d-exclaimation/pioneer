@@ -1,6 +1,6 @@
 //
 //  Jet+EventStream.swift
-//  GraphQLAsyncSequence
+//  Pioneer
 //
 //  Created by d-exclaimation on 3:33 PM.
 //  Copyright © 2021 d-exclaimation. All rights reserved.

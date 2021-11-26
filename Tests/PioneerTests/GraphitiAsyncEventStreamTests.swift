@@ -1,6 +1,6 @@
 //
 //  GraphitiAsyncEventStreamTests.swift
-//  GraphQLAsyncSequence
+//  Pioneer
 //
 //  Created by d-exclaimation on 7:17 PM.
 //  Copyright © 2021 d-exclaimation. All rights reserved.
@@ -12,7 +12,7 @@ import GraphQL
 import Graphiti
 import NIO
 import Desolate
-@testable import GraphQLAsyncSequence
+@testable import Pioneer
 
 
 struct Message: Codable, Identifiable {
