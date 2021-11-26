@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Desolate",
+        "repositoryURL": "https://github.com/d-exclaimation/desolate.git",
+        "state": {
+          "branch": null,
+          "revision": "be7a161f36524da1907aacc4b6b49064577dddb5",
+          "version": "1.2.1"
+        }
+      },
+      {
+        "package": "Graphiti",
+        "repositoryURL": "https://github.com/GraphQLSwift/Graphiti.git",
+        "state": {
+          "branch": null,
+          "revision": "c9bc9d1cc9e62e71a824dc178630bfa8b8a6e2a4",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "GraphQL",
+        "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
+        "state": {
+          "branch": null,
+          "revision": "588b7b4dc9dcb352ad185012003f84823108540d",
+          "version": "2.1.2"
+        }
+      },
+      {
+        "package": "swift-collections",
+        "repositoryURL": "https://github.com/apple/swift-collections",
+        "state": {
+          "branch": null,
+          "revision": "48254824bb4248676bf7ce56014ff57b142b77eb",
+          "version": "1.0.2"
+        }
+      },
+      {
+        "package": "swift-nio",
+        "repositoryURL": "https://github.com/apple/swift-nio.git",
+        "state": {
+          "branch": null,
+          "revision": "addf69cfe60376c325397c8926589415576b1dd1",
+          "version": "2.34.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
