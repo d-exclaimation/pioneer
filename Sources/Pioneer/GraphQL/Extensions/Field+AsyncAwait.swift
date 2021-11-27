@@ -26,6 +26,19 @@ public extension Field where FieldType : Encodable {
 
         self.init(name, at: resolve, argument)
     }
+
+    convenience init(
+        _ name: String,
+        at function: @escaping AsyncAwaitResolve<ObjectType, Context, Arguments, FieldType>
+    ) where Arguments == NoArguments {
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
+            { context, arguments, eventLoopGroup in
+                eventLoopGroup.task { try await function(type)(context, arguments) }
+            }
+        }
+
+        self.init(name, at: resolve, {})
+    }
 }
 
 extension EventLoopGroup {
