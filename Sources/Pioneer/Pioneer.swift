@@ -62,9 +62,7 @@ public struct Pioneer<Resolver, Context> {
             let variables: [String: Map]? = (req.query[String.self, at: "variables"])
                 .flatMap { (str: String) -> [String: Map]? in
                     str.data(using: .utf8).flatMap { data -> [String: Map]? in
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .iso8601
-                        return try? decoder.decode([String: Map]?.self, from: data)
+                        data.to([String: Map].self)
                     }
                 }
             let operationName: String? = req.query[String.self, at: "operationName"]
@@ -111,5 +109,3 @@ public struct Pioneer<Resolver, Context> {
         return allowing.contains(operationType)
     }
 }
-
-extension GraphQLResult: Content { }

@@ -10,8 +10,6 @@ import Foundation
 import Vapor
 import Graphiti
 
-public typealias RequestContext = Request
-
 public extension Pioneer where Context == Request {
     init(
         schema: Schema<Resolver, Request>,

@@ -42,19 +42,19 @@ class PioneerStatelessTests: XCTestCase {
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     private let resolver = TestResolver1()
     private let schema = try! Schema<TestResolver1, ()>.init {
-        Type(Message.self) {
-            Field("id", at: \.id)
-            Field("id", at: \.content)
+        Graphiti.Type(Message.self) {
+            Graphiti.Field("id", at: \.id)
+            Graphiti.Field("id", at: \.content)
         }
 
-        Query {
-            Field("sync", at: TestResolver1.sync)
-            Field("syncWithArg", at: TestResolver1.syncWithArg) {
-                Argument("allowed", at: \.allowed)
+        Graphiti.Query {
+            Graphiti.Field("sync", at: TestResolver1.sync)
+            Graphiti.Field("syncWithArg", at: TestResolver1.syncWithArg) {
+                Graphiti.Argument("allowed", at: \.allowed)
             }
 
-            Field("async", at: TestResolver1.async)
-            Field("asyncMessage", at: TestResolver1.asyncMessage)
+            Graphiti.Field("async", at: TestResolver1.async)
+            Graphiti.Field("asyncMessage", at: TestResolver1.asyncMessage)
         }
     }
 
@@ -74,21 +74,17 @@ class PioneerStatelessTests: XCTestCase {
 
     func testHandler() async throws {
         let gql = [
-            GraphQLRequest(query: "query { sync }", operationName: nil, variables: nil),
-            GraphQLRequest(query: "query { syncWithArg(allowed: true) }", operationName: nil, variables: nil),
-            GraphQLRequest(query: "query { async }", operationName: nil, variables: nil),
-        ]
+            "query { sync }",
+            "query { syncWithArg(allowed: true) }",
+            "query { async }"
+        ].map { GraphQLRequest(query: $0, operationName: nil, variables: nil) }
+
         let expectation = [
-            GraphQLResult(data: [
-                "sync": .number(0)
-            ]),
-            GraphQLResult(data: [
-                "syncWithArg": .number(1)
-            ]),
-            GraphQLResult(data: [
-                "async": .number(2)
-            ]),
-        ]
+            Map.dictionary(["sync": Map.number(0)]),
+            ["syncWithArg": .number(1)],
+            ["async": .number(2)]
+        ].map { GraphQLResult.init(data: $0) }
+
         for i in gql.indices {
             let curr = gql[i]
             let expect = expectation[i]
