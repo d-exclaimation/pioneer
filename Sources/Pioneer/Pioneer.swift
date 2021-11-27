@@ -92,7 +92,7 @@ public struct Pioneer<Resolver, Context> {
     }
 
     private func applyGet(on router: RoutesBuilder, at path: PathComponent = "graphql", allowing: [OperationType]) {
-        router.get(path) { req async -> Response in
+        router.get(path) { req async throws -> Response in
             guard let query: String = req.query[String.self, at: "query"] else {
                 throw GraphQLError(ResolveError.unableToParseQuery)
             }
@@ -121,7 +121,7 @@ public struct Pioneer<Resolver, Context> {
     }
 
     private func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
-        router.get(path) { req -> Response in
+        router.get(path) { req throws -> Response in
             // TODO
             guard let _ = req.headers[.secWebSocketProtocol].filter({ $0 == wsProtocol.subProtocol }).first else {
                 throw GraphQLError(ResolveError.unsupportedProtocol)
