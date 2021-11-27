@@ -9,7 +9,7 @@
 import GraphQL
 import Desolate
 
-/// EventStream implementation for AsyncSequence for allowing GraphQL Subscription.
+/// EventStream implementation for AsyncSequence for allowing GraphQL Streaming.
 public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Element> where Sequence.Element == Element {
     /// Inner AsyncSequence
     public let sequence: Sequence

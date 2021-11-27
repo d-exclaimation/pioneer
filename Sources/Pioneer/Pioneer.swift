@@ -11,29 +11,6 @@ import Graphiti
 import GraphQL
 
 public struct Pioneer<Resolver, Context> {
-
-    public enum HTTPStrategy {
-        case onlyPost, onlyGet
-        case queryOnlyGet, mutationOnlyPost
-        case splitQueryAndMutation
-    }
-
-    public enum WebsocketProtocol {
-        case subscriptionsTransportWs
-        case graphqlWs
-        case disable
-        var subProtocol: String {
-            switch self {
-            case .subscriptionsTransportWs:
-                return "graphql-ws"
-            case .graphqlWs:
-                return "graphql-transport-ws"
-            case .disable:
-                return "none"
-            }
-        }
-    }
-
     public var schema: Schema<Resolver, Context>
     public var resolver: Resolver
     public var contextBuilder: (Request) -> Context
@@ -58,10 +35,7 @@ public struct Pioneer<Resolver, Context> {
             applyPost(on: router, at: path, allowing: [.mutation])
         }
         // Websocket portion
-        switch wsProtocol {
-        case .disable:
-            break
-        default:
+        if wsProtocol.isAccepting {
             applyWebSocket(on: router, at: [path, "websocket"])
         }
     }
@@ -72,79 +46,69 @@ public struct Pioneer<Resolver, Context> {
     }
 
     private func applyPost(on router: RoutesBuilder, at path: PathComponent = "graphql", allowing: [OperationType]) {
-        router.post(path) { req async throws -> Response in
-            let request = try req.content.decode(GraphQLRequest.self)
-            guard try allowed(from: request, allowing: allowing) else {
-                throw GraphQLError(ResolveError.unableToParseQuery)
-            }
-            let result = try await schema
-                .execute(
-                    request: request.query,
-                    resolver: resolver,
-                    context: contextBuilder(req),
-                    eventLoopGroup: req.eventLoop,
-                    variables: request.variables ?? [:],
-                    operationName: request.operationName
-                )
-                .get()
-            return try await result.encodeResponse(status: .ok, for: req)
+        func handler(req: Request) async throws -> Response {
+            let gql = try req.content.decode(GraphQLRequest.self)
+            return try await handle(req: req, from: gql, allowing: allowing)
         }
+        router.post(path, use: handler(req:))
     }
 
     private func applyGet(on router: RoutesBuilder, at path: PathComponent = "graphql", allowing: [OperationType]) {
-        router.get(path) { req async throws -> Response in
+        func handler(req: Request) async throws -> Response {
             guard let query: String = req.query[String.self, at: "query"] else {
                 throw GraphQLError(ResolveError.unableToParseQuery)
             }
-            let variables: [String: Map]? = (req.query[String.self, at: "variables"]).flatMap { (str: String) in
-                guard let data = str.data(using: .utf8) else { return nil }
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                return try? decoder.decode([String: Map]?.self, from: data)
-            }
+
+            let variables: [String: Map]? = (req.query[String.self, at: "variables"])
+                .flatMap { (str: String) -> [String: Map]? in
+                    str.data(using: .utf8).flatMap { data -> [String: Map]? in
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .iso8601
+                        return try? decoder.decode([String: Map]?.self, from: data)
+                    }
+                }
             let operationName: String? = req.query[String.self, at: "operationName"]
-            guard try allowed(from: GraphQLRequest(query: query, operationName: operationName, variables: variables), allowing: allowing) else {
-                throw GraphQLError(ResolveError.unableToParseQuery)
-            }
-            let result = try await schema
-                .execute(
-                    request: query,
-                    resolver: resolver,
-                    context: contextBuilder(req),
-                    eventLoopGroup: req.eventLoop,
-                    variables: variables ?? [:],
-                    operationName: operationName
-                )
-                .get()
-            return try await result.encodeResponse(status: .ok, for: req)
+            let gql = GraphQLRequest(query: query, operationName: operationName, variables: variables)
+
+            return try await handle(req: req, from: gql, allowing: allowing)
         }
+        router.get(path, use: handler(req:))
     }
 
     private func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
         router.get(path) { req throws -> Response in
-            // TODO
-            guard let _ = req.headers[.secWebSocketProtocol].filter({ $0 == wsProtocol.subProtocol }).first else {
+            let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
+            guard let _ = protocolHeader.filter(wsProtocol.isValid).first else {
                 throw GraphQLError(ResolveError.unsupportedProtocol)
             }
-            return .init()
+            return req.webSocket { _, ws in
+                // TODO: Handle Websocket
+            }
         }
     }
 
-    private func allowed(from gql: GraphQLRequest, allowing: [OperationType]) throws -> Bool {
-        do {
-            let ast = try parse(source: Source(body: gql.query))
-            return ast
-                .definitions
-                .compactMap {
-                    guard let def = $0 as? OperationDefinition else {
-                        return nil
-                    }
-                    return allowing.contains(def.operation)
-                }
-                .reduce(true) { $0 && $1 }
-        } catch {
-            throw GraphQLError(error)
+    internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
+        guard try allowed(from: gql, allowing: allowing) else {
+            throw GraphQLError(ResolveError.unableToParseQuery)
         }
+        let result = try await schema
+            .execute(
+                request: gql.query,
+                resolver: resolver,
+                context: contextBuilder(req),
+                eventLoopGroup: req.eventLoop,
+                variables: gql.variables ?? [:],
+                operationName: gql.operationName
+            )
+            .get()
+        return try await result.encodeResponse(for: req)
+    }
+
+    internal func allowed(from gql: GraphQLRequest, allowing: [OperationType]) throws -> Bool {
+        guard let operationType = try gql.operationType() else {
+            return false
+        }
+        return allowing.contains(operationType)
     }
 }
 

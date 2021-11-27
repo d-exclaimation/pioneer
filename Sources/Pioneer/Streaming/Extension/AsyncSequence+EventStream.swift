@@ -7,7 +7,7 @@
 //
 
 extension AsyncSequence {
-    /// Convert Any AsyncSequence to an EventStream for GraphQL Subscription.
+    /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
     ///
     /// - Returns: EventStream implementation for AsyncSequence.
     public func toEventStream() -> AsyncEventStream<Element, Self> {

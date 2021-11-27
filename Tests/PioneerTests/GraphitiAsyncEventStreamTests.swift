@@ -18,6 +18,23 @@ import Desolate
 struct Message: Codable, Identifiable {
     var id: String = UUID().uuidString
     var content: String
+
+    struct Arg: Codable {
+        var formatting: String
+    }
+
+    func description(context: TestContext, arguments: Arg) async throws -> String {
+        switch arguments.formatting.lowercased() {
+        case "inline":
+            return "msg(\(id)): \(content)"
+        default:
+            return """
+            Message:
+            id -> \(id)
+            > \(content)
+            """
+        }
+    }
 }
 
 struct TestContext {}
@@ -29,16 +46,14 @@ struct TestResolver {
         "Hello GraphQL!!"
     }
 
-    struct StringArguments: Codable {
+    struct Arg1: Codable {
         var string: String
     }
 
-    func randomMessage(context: TestContext, arguments: StringArguments, group: EventLoopGroup) -> EventLoopFuture<Message> {
-        group.task { () async -> Message in
-            let message = Message(content: arguments.string)
-            engine.tell(with: .next(message))
-            return message
-        }
+    func randomMessage(context: TestContext, arguments: Arg1) async throws -> Message {
+        let message = Message(content: arguments.string)
+        engine.tell(with: .next(message))
+        return message
     }
 
     func onMessage(context: TestContext, arguments: NoArguments) -> GraphQL.EventStream<Message> {
@@ -48,12 +63,13 @@ struct TestResolver {
 
 struct TestAPI: API {
     let resolver: TestResolver = TestResolver()
-    let context: TestContext
-
     let schema = try! Schema<TestResolver, TestContext>.init {
         Type(Message.self) {
             Field("id", at: \.id)
             Field("content", at: \.content)
+            Field("description", at: Message.description) {
+                Argument("formatting", at: \.formatting)
+            }
         }
 
         Query {
@@ -72,20 +88,8 @@ struct TestAPI: API {
     }
 }
 
-extension EventLoopGroup {
-    typealias SendFunction<Value> = () async -> Value
-    func task<Value>(_ body: @escaping SendFunction<Value>) -> EventLoopFuture<Value> {
-        let promise = next().makePromise(of: Value.self)
-        Task.init {
-            let value = await body()
-            promise.succeed(value)
-        }
-        return promise.futureResult
-    }
-}
-
 class GraphitiTests: XCTestCase {
-    private let api: TestAPI = .init(context: .init())
+    private let api: TestAPI = .init()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
     deinit {
@@ -97,7 +101,7 @@ class GraphitiTests: XCTestCase {
         let query = """
         subscription {
             onMessage {
-                id, content
+                id, content       
             }
         }
         """
