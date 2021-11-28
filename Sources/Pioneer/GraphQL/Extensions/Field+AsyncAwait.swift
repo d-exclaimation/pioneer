@@ -8,8 +8,9 @@
 
 import Graphiti
 import NIO
+import GraphQL
 
-public extension Field where FieldType : Encodable {
+public extension Graphiti.Field where FieldType : Encodable {
     /// Async / Await Resolver for Graphiti
     typealias AsyncAwaitResolve<ObjectType, Context, Arguments, ResolveType> = (ObjectType) -> (Context, Arguments) async throws -> ResolveType
 
@@ -38,6 +39,38 @@ public extension Field where FieldType : Encodable {
         }
 
         self.init(name, at: resolve, {})
+    }
+}
+
+public extension SubscriptionField where FieldType : Encodable {
+    /// Async / Await Subsbcription Resolver for Graphiti
+    typealias AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType> = (ObjectType) -> (Context, Arguments) async throws -> EventStream<SourceEventType>
+
+    convenience init(
+        _ name: String,
+        as: FieldType.Type,
+        atSub subFunc: @escaping AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType>,
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+    ) {
+        let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+            { context, arguments, eventLoopGroup in
+                eventLoopGroup.task { try await subFunc(type)(context, arguments) }
+            }
+        }
+        self.init(name, as: `as`, atSub: subscribe, argument)
+    }
+
+    convenience init(
+        _ name: String,
+        as: FieldType.Type,
+        atSub subFunc: @escaping AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType>
+    ) where Arguments == NoArguments {
+        let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+            { context, arguments, eventLoopGroup in
+                eventLoopGroup.task { try await subFunc(type)(context, arguments) }
+            }
+        }
+        self.init(name, as: `as`, atSub: subscribe)
     }
 }
 

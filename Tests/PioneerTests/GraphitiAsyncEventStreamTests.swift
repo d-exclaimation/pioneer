@@ -56,7 +56,7 @@ struct TestResolver {
         return message
     }
 
-    func onMessage(context: TestContext, arguments: NoArguments) -> GraphQL.EventStream<Message> {
+    func onMessage(context: TestContext, arguments: NoArguments) async throws -> GraphQL.EventStream<Message> {
         jet.eventStream()
     }
 }
