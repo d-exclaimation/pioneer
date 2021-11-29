@@ -55,7 +55,7 @@ extension Pioneer {
 
         case .terminate:
             timer.invalidate()
-            try? await ws.close(code: .policyViolation).get()
+            try? await ws.close(code: .goingAway).get()
 
         case .start(oid: let oid, query: let query, op: let op, vars: let vars):
             // TODO: Start long running operation
@@ -80,7 +80,7 @@ extension Pioneer {
             let error = Map.dictionary(["message": .string(message)])
             let errorMessage = GraphQLMessage.Variance(id: nil, type: wsProtocol.error, payload: .array([error]))
             ws.send(errorMessage.jsonString)
-            try? await ws.close(code: .unacceptableData).get()
+            try? await ws.close(code: .policyViolation).get()
 
         case .ignore:
             break
