@@ -14,7 +14,6 @@ import NIO
 import Desolate
 @testable import Pioneer
 
-
 struct Message: Codable, Identifiable {
     var id: String = UUID().uuidString
     var content: String
@@ -61,42 +60,39 @@ struct TestResolver {
     }
 }
 
-struct TestAPI: API {
-    let resolver: TestResolver = TestResolver()
-    let schema = try! Schema<TestResolver, TestContext>.init {
-        Type(Message.self) {
-            Field("id", at: \.id)
-            Field("content", at: \.content)
-            Field("description", at: Message.description) {
-                Argument("formatting", at: \.formatting)
-            }
-        }
-
-        Query {
-            Field("hello", at: TestResolver.hello)
-        }
-
-        Mutation {
-            Field("randomMessage", at: TestResolver.randomMessage) {
-                Argument("content", at: \.string)
-            }
-        }
-
-        Subscription {
-            SubscriptionField("onMessage", as: Message.self, atSub: TestResolver.onMessage)
-        }
-    }
-}
-
 class GraphitiTests: XCTestCase {
-    private let api: TestAPI = .init()
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+    private let resolver: TestResolver = .init()
+    private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
 
     deinit {
         try? group.syncShutdownGracefully()
     }
 
     func testAsyncSequenceSubscription() throws {
+        let schema = try Schema<TestResolver, TestContext>.init {
+            Type(Message.self) {
+                Field("id", at: \.id)
+                Field("content", at: \.content)
+                Field("description", at: Message.description) {
+                    Argument("formatting", at: \.formatting)
+                }
+            }
+
+            Query {
+                Field("hello", at: TestResolver.hello)
+            }
+
+            Mutation {
+                Field("randomMessage", at: TestResolver.randomMessage) {
+                    Argument("content", at: \.string)
+                }
+            }
+
+            Subscription {
+                SubscriptionField("onMessage", as: Message.self, atSub: TestResolver.onMessage)
+            }
+        }
+
         let start = Date()
         let query = """
         subscription {
@@ -106,22 +102,21 @@ class GraphitiTests: XCTestCase {
         }
         """
 
-        let subscriptionResult = try api
-            .subscribe(request: query, context: TestContext(), on: group)
+        let subscriptionResult = try schema
+            .subscribe(request: query, resolver: resolver, context: TestContext(), eventLoopGroup: group)
             .wait()
 
         guard let subscription = subscriptionResult.stream else {
             return XCTFail(subscriptionResult.errors.description)
         }
 
-        guard let stream = subscription as? AsyncGraphQLNozzle else {
+        guard let nozzle = subscription.nozzle() else {
             return XCTFail("Stream failed to be casted into proper types \(subscription))")
         }
 
         let expectation = XCTestExpectation(description: "Received a single message")
         Task.init {
-            let asyncStream = stream.sequence
-            for await future in asyncStream {
+            for await future in nozzle {
                 let message = try await future.get()
                 let expected = GraphQLResult(data: [
                     "onMessage": [
@@ -134,12 +129,12 @@ class GraphitiTests: XCTestCase {
                 }
                 break
             }
-            asyncStream.shutdown()
+            nozzle.shutdown()
         }
 
         Task.init {
-            await api.resolver.engine.task(with: .next(.init(id: "bob", content: "Bob")))
-            await api.resolver.engine.task(with: .next(.init(id: "bob2", content: "Bob2")))
+            await resolver.engine.task(with: .next(.init(id: "bob", content: "Bob")))
+            await resolver.engine.task(with: .next(.init(id: "bob2", content: "Bob2")))
         }
 
         wait(for: [expectation], timeout: 10)

@@ -23,15 +23,23 @@ public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Ele
     /// - Parameter closure: Transformation closure.
     /// - Returns: A new EventStream with the new type.
     override open func map<To>(_ closure: @escaping (Element) throws -> To) -> EventStream<To> {
-        let (stream, engine) = Nozzle<To>.desolate()
-        Task.init {
-            for try await each in self.sequence {
-                let res = try closure(each)
-                await engine.task(with: res)
+        /// Use AsyncStream as bridging instead of the built-in map function to allow for type casting
+        /// as using `map` will make the type too complicated to be casted to any meaningful value
+        /// Performance and efficiency has been tested to mostly not affected but do keep in mind to try to find a better solution.
+        let stream = AsyncStream(To.self) { continuation in
+            Task.init {
+                do {
+                    for try await each in self.sequence {
+                        let res = try closure(each)
+                        continuation.yield(res)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish()
+                }
             }
-            await engine.task(with: .none)
         }
-        return AsyncEventStream<To, Nozzle<To>>.init(from: stream)
+        return AsyncEventStream<To, AsyncStream<To>>.init(from: stream)
     }
 }
 

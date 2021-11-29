@@ -39,7 +39,7 @@ struct TestResolver1 {
 }
 
 class PioneerStatelessTests: XCTestCase {
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+    private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
     private let resolver = TestResolver1()
     private let schema = try! Schema<TestResolver1, ()>.init {
         Graphiti.Type(Message.self) {

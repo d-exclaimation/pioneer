@@ -37,11 +37,30 @@ extension Pioneer {
     }
 
     func onMessage(ctx: Context, pid: UUID, ws: WebSocket, timer: Timer, txt: String) -> Void {
-        guard let _ = txt.data(using: .utf8) else {
+        guard let data = txt.data(using: .utf8) else {
             Task.init { try await ws.close(code: .unacceptableData).get() }
             return
         }
-        // TODO: Parse for SubProtocol
+        switch wsProtocol.parse(data) {
+        case .initial:
+            break
+        case .ping:
+            break
+        case .terminate:
+            break
+        case .ignore:
+            break
+        case .start(oid: let oid, query: let query, op: let op, vars: let vars):
+            break
+        case .once(oid: let oid, query: let query, op: let op, vars: let vars):
+            break
+        case .stop(oid: let oid):
+            break
+        case .error(oid: let oid, message: let message):
+            break
+        case .fatal(message: let message):
+            break
+        }
     }
 
     func onEnd(pid: UUID, timer: Timer) -> Void {

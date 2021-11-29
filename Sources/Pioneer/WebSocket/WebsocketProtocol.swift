@@ -8,8 +8,8 @@
 
 import Foundation
 
-extension Pioneer {
-    public enum WebsocketProtocol {
+public extension Pioneer {
+    enum WebsocketProtocol {
         case subscriptionsTransportWs
         case graphqlWs
         case disable
@@ -21,21 +21,22 @@ extension Pioneer {
             case .graphqlWs:
                 return "graphql-transport-ws"
             case .disable:
-                return "none"
+                return ""
             }
         }
-
-        public var isAccepting: Bool {
-            switch self {
-            case .subscriptionsTransportWs, .graphqlWs:
-                return true
-            case .disable:
+        var isAccepting: Bool {
+            if case .disable = self {
                 return false
             }
+            return true
         }
 
-        public func isValid(_ header: String) -> Bool {
+        func isValid(_ header: String) -> Bool {
             header.lowercased() == subprotocol.lowercased()
+        }
+
+        func parse(_ data: Data) -> Intent {
+            .ignore
         }
     }
 }
