@@ -17,6 +17,33 @@ public struct Pioneer<Resolver, Context> {
     public var httpStrategy: HTTPStrategy = .queryOnlyGet
     public var wsProtocol: WebsocketProtocol = .subscriptionsTransportWs
 
+    var probe: Desolate<Probe>
+
+    public init(
+        schema: Schema<Resolver, Context>,
+        resolver: Resolver,
+        contextBuilder: @escaping (Request) -> Context,
+        httpStrategy: HTTPStrategy = .queryOnlyGet,
+        wsProtocol: WebsocketProtocol = .subscriptionsTransportWs
+    ) {
+        self.schema = schema
+        self.resolver = resolver
+        self.contextBuilder = contextBuilder
+        self.httpStrategy = httpStrategy
+        self.wsProtocol = wsProtocol
+
+        let proto: SubProtocol.Type = returns {
+            switch wsProtocol {
+            case .graphqlWs:
+                return GraphQLWs.self
+            default:
+                return SubscriptionTransportWs.self
+            }
+        }
+        let probe = Desolate(of: Probe(schema: schema, resolver: resolver, proto: proto))
+        self.probe = probe
+    }
+
     public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql") {
         // HTTP Portion
         switch httpStrategy {
