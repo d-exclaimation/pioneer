@@ -14,8 +14,9 @@ public struct Pioneer<Resolver, Context> {
     public var schema: Schema<Resolver, Context>
     public var resolver: Resolver
     public var contextBuilder: (Request) -> Context
-    public var httpStrategy: HTTPStrategy = .queryOnlyGet
-    public var wsProtocol: WebsocketProtocol = .subscriptionsTransportWs
+    public var httpStrategy: HTTPStrategy
+    public var websocketProtocol: WebsocketProtocol
+    public var introspection: Bool
 
     var probe: Desolate<Probe>
 
@@ -24,23 +25,30 @@ public struct Pioneer<Resolver, Context> {
         resolver: Resolver,
         contextBuilder: @escaping (Request) -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        wsProtocol: WebsocketProtocol = .subscriptionsTransportWs
+        websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
+        introspection: Bool = true
     ) {
         self.schema = schema
         self.resolver = resolver
         self.contextBuilder = contextBuilder
         self.httpStrategy = httpStrategy
-        self.wsProtocol = wsProtocol
+        self.websocketProtocol = websocketProtocol
+        self.introspection = introspection
 
         let proto: SubProtocol.Type = returns {
-            switch wsProtocol {
+            switch websocketProtocol {
             case .graphqlWs:
                 return GraphQLWs.self
             default:
                 return SubscriptionTransportWs.self
             }
         }
-        let probe = Desolate(of: Probe(schema: schema, resolver: resolver, proto: proto))
+
+        let probe = Desolate(of: Probe(
+            schema: schema,
+            resolver: resolver,
+            proto: proto
+        ))
         self.probe = probe
     }
 
@@ -66,7 +74,7 @@ public struct Pioneer<Resolver, Context> {
             applyPost(on: router, at: path, allowing: [.mutation])
         }
         // Websocket portion
-        if wsProtocol.isAccepting {
+        if websocketProtocol.isAccepting {
             applyWebSocket(on: router, at: [path, "websocket"])
         }
     }
@@ -93,7 +101,10 @@ public struct Pioneer<Resolver, Context> {
         return try await result.encodeResponse(for: req)
     }
 
-    internal func allowed(from gql: GraphQLRequest, allowing: [OperationType]) throws -> Bool {
+    internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) throws -> Bool {
+        guard introspection || !gql.isIntrospection else {
+            return false
+        }
         guard let operationType = try gql.operationType() else {
             return false
         }

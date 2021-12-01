@@ -38,17 +38,7 @@ public extension Pioneer {
         }
 
         func parse(_ data: Data) -> Intent {
-            let proto = returns { () -> SubProtocol.Type? in
-                switch self {
-                case .subscriptionsTransportWs:
-                    return SubscriptionTransportWs.self
-                case .graphqlWs:
-                    return GraphQLWs.self
-                default:
-                    return nil
-                }
-            }
-            return proto?.decode(data) ?? Intent.terminate
+            innerProtocol.decode(data)
         }
 
         func initialize(ws: WebSocket) {
@@ -59,8 +49,26 @@ public extension Pioneer {
             switch self {
             case .graphqlWs:
                 return GraphQLWs.self
-            default:
+            case .subscriptionsTransportWs:
                 return SubscriptionTransportWs.self
+            case .disable:
+                preconditionFailure(
+                    """
+                    Pioneer's websocket functionality is disabled.
+                    There shouldn't be a need for parsing websocket messages and this line of code should never be ran.
+
+                    If you are seeing this failure, try enabling Pioneer Websocket feature or using a guard to make sure it is not disabled
+                    ```
+                    // Enabling Websocket 
+                    Pioneer(..., websocketProtocol: .subscriptionTransportWs)
+
+                    // or use guards
+                    if case .disable = pioneer.wsProtocol { return }
+                    // or
+                    guard wsProtocol.isAccepting else { return }
+                    ```
+                    """
+                )
             }
         }
 

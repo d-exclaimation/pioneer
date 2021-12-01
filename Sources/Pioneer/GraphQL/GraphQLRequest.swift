@@ -26,4 +26,8 @@ public struct GraphQLRequest: Codable {
             }
             .first
     }
+
+    public var isIntrospection: Bool {
+        query.contains("__schema") || query.contains("__type")
+    }
 }

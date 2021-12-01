@@ -35,18 +35,14 @@ extension Pioneer {
             case .disconnect(pid: let pid):
                 clients.delete(pid)
 
-            case .start(pid: let pid, oid: let oid, query: let query, ctx: let ctx, vars: let vars, op: let op):
+            case .start(pid: let pid, oid: let oid, gql: let gql, ctx: let ctx):
                 // TODO: Start long running process
                 break
 
-            case .once(pid: let pid, oid: let oid, query: let query, ctx: let ctx, vars: let vars, op: let op):
+            case .once(pid: let pid, oid: let oid, gql: let gql, ctx: let ctx):
                 guard let process = clients[pid] else { break }
 
-                let future = execute(
-                    .init(query: query, operationName: op, variables: vars),
-                    ctx: ctx,
-                    req: process.req
-                )
+                let future = execute(gql, ctx: ctx, req: process.req)
 
                 pipeToSelf(future: future) { res in
                     switch res {
@@ -87,8 +83,8 @@ extension Pioneer {
         enum Act {
             case connect(process: Process)
             case disconnect(pid: UUID)
-            case start(pid: UUID, oid: String, query: String, ctx: Context, vars: [String:Map], op: String?)
-            case once(pid: UUID, oid: String, query: String, ctx: Context, vars: [String:Map], op: String?)
+            case start(pid: UUID, oid: String, gql: GraphQLRequest, ctx: Context)
+            case once(pid: UUID, oid: String, gql: GraphQLRequest, ctx: Context)
             case stop(pid: UUID, oid: String)
             case outgoing(oid: String, process: Process, res: GraphQLMessage)
         }

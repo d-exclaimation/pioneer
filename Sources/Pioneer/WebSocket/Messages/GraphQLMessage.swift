@@ -44,6 +44,17 @@ public struct GraphQLMessage: Codable {
         public var type: String
         public var payload: Map?
     }
+
+    static func errors(id: String? = nil, type: String, _ error: [GraphQLError]) -> Variance {
+        let err = error
+            .map { $0.message }
+            .map { msg -> Map in ["message": Map.string(msg)] }
+        return GraphQLMessage.Variance(
+            id: id,
+            type: type,
+            payload: .array(err)
+        )
+    }
 }
 
 extension Encodable {
