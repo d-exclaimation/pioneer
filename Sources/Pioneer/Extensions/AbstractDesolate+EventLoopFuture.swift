@@ -10,7 +10,12 @@ import Foundation
 import NIO
 
 extension AbstractDesolate {
-    func pipeToSelf<U>(future: EventLoopFuture<U>, to transform: @escaping (Result<U, Error>) -> MessageType) {
+    /// Method for handling NIO EventLoopFuture with a Behavior `onMessage` using the pipe pattern
+    ///
+    /// - Parameters:
+    ///   - future: EventLoopFuture value being awaited
+    ///   - transform: Transforming callback to turn future value into a Behavior message.
+    public func pipeToSelf<U>(future: EventLoopFuture<U>, to transform: @escaping (Result<U, Error>) -> MessageType) {
         let task = Task.init { () async throws -> U in
             try await future.get()
         }

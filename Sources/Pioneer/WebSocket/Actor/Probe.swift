@@ -13,6 +13,7 @@ import GraphQL
 import Graphiti
 
 extension Pioneer {
+    /// Actor for handling Websocket distribution and dispatching of client specific actor
     actor Probe: AbstractDesolate, NonStop {
         private let schema: Schema<Resolver, Context>
         private let resolver: Resolver
@@ -24,21 +25,25 @@ extension Pioneer {
             self.proto = proto
         }
 
-        // States
+        // Mark: -- States --
         private var clients: [UUID: Process] = [:]
 
         func onMessage(msg: Act) async -> Signal {
             switch msg {
+            // Allocate space and save any verified process
             case .connect(process: let process):
                 clients.update(process.id, with: process)
 
+            // Deallocate the space from a closing process
             case .disconnect(pid: let pid):
                 clients.delete(pid)
 
+            // Long running operation require its own actor, thus initialing one if there were none prior
             case .start(pid: let pid, oid: let oid, gql: let gql, ctx: let ctx):
                 // TODO: Start long running process
                 break
 
+            // Short lived operation is processed immediately and pipe back later
             case .once(pid: let pid, oid: let oid, gql: let gql, ctx: let ctx):
                 guard let process = clients[pid] else { break }
 
@@ -58,17 +63,21 @@ extension Pioneer {
                     }
                 }
 
+            // Stopping any operation to client specific actor
             case .stop(pid: let pid, oid: let oid):
                 // TODO: Stop running process for pid and oid
                 break
 
+            // Message from pipe to self result after processing short lived operation
             case .outgoing(oid: let oid, process: let process, res: let res):
                 process.send(res.jsonString)
                 process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
             }
+
             return same
         }
 
+        /// Execute short-lived GraphQL Operation
         private func execute(_ gql: GraphQLRequest, ctx: Context, req: Request) -> Future<GraphQLResult> {
             schema.execute(
                 request: gql.query,

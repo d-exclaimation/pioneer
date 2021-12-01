@@ -13,19 +13,24 @@ import GraphQL
 typealias SwiftTimer = Foundation.Timer
 
 extension Pioneer {
+    /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
         router.get(path) { req throws -> Response in
+            /// Explicitly handle Websocket upgrade with sub-protocol
             let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
             guard let _ = protocolHeader.filter(websocketProtocol.isValid).first else {
                 throw GraphQLError(ResolveError.unsupportedProtocol)
             }
             return req.webSocket { req, ws in
-                let ctx = contextBuilder(req)
+                let res = Response()
+                let ctx = contextBuilder(req, res)
                 let process = Process(ws: ws, ctx: ctx, req: req)
 
+                /// Scheduled keep alive message interval
                 let timer = SwiftTimer.scheduledTimer(withTimeInterval: 12, repeats: true) { timer in
                     ws.send(websocketProtocol.keepAliveMessage)
                 }
+
 
                 ws.onText { _, txt in
                     Task.init {
@@ -40,6 +45,7 @@ extension Pioneer {
         }
     }
 
+    /// On Websocket message callback
     func onMessage(process: Process, timer: SwiftTimer, txt: String) async  -> Void {
         guard let data = txt.data(using: .utf8) else {
             // Shouldn't accept any message that aren't utf8 string
@@ -128,6 +134,7 @@ extension Pioneer {
         }
     }
 
+    /// On closing connection callback
     func onEnd(pid: UUID, timer: SwiftTimer) -> Void {
         probe.tell(with: .disconnect(pid: pid))
         timer.invalidate()

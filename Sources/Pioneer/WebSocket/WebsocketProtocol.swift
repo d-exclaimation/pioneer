@@ -11,12 +11,17 @@ import Vapor
 import Desolate
 
 public extension Pioneer {
+    /// Websocket sub-protocol
     enum WebsocketProtocol {
+        /// `subscriptions-transport-ws/graphql-ws`
         case subscriptionsTransportWs
+        /// `graphql-ws/graphql-transport-ws`
         case graphqlWs
+        /// Disabled
         case disable
 
-        public var subprotocol: String {
+        /// Name of the sub-protocol
+        public var name: String {
             switch self {
             case .subscriptionsTransportWs:
                 return "graphql-ws"
@@ -26,6 +31,8 @@ public extension Pioneer {
                 return ""
             }
         }
+
+        /// Whether sub-protocol is accepting any websocket message
         var isAccepting: Bool {
             if case .disable = self {
                 return false
@@ -33,10 +40,12 @@ public extension Pioneer {
             return true
         }
 
+        /// Method for checking is header is using the appropriate websocket protocol
         func isValid(_ header: String) -> Bool {
-            header.lowercased() == subprotocol.lowercased()
+            header.lowercased() == name.lowercased()
         }
 
+        /// Parse message into intent with protocol specific specification
         func parse(_ data: Data) -> Intent {
             innerProtocol.decode(data)
         }
@@ -45,6 +54,7 @@ public extension Pioneer {
             innerProtocol.initialize(ws: ws)
         }
 
+        /// Inner protocol namespace
         private var innerProtocol: SubProtocol.Type {
             switch self {
             case .graphqlWs:

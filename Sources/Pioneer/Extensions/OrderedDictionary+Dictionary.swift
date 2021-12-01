@@ -10,7 +10,8 @@ import Foundation
 import OrderedCollections
 
 extension OrderedDictionary {
-    func unordered() -> [Key: Value] {
+    /// Turning OrderedDictionary into a regular one as both aren't API compatible.
+    public func unordered() -> [Key: Value] {
         var res = [Key:Value]()
         forEach { (key, val) in
             res[key] = val

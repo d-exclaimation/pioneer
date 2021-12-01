@@ -10,20 +10,35 @@ import Vapor
 import Graphiti
 import GraphQL
 
+/// Pioneer GraphQL Vapor Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
+    /// Graphiti schema used to execute operations
     public var schema: Schema<Resolver, Context>
+    /// Resolver used by the GraphQL schema
     public var resolver: Resolver
-    public var contextBuilder: (Request) -> Context
+    /// Context builder from request
+    public var contextBuilder: (Request, Response) -> Context
+    /// HTTP strategy
     public var httpStrategy: HTTPStrategy
+    /// Websocket sub-protocol
     public var websocketProtocol: WebsocketProtocol
+    /// Allowing introspection
     public var introspection: Bool
 
-    var probe: Desolate<Probe>
+    /// Internal running desolated actor for Pioneer
+    internal var probe: Desolate<Probe>
 
+    /// - Parameters:
+    ///   - schema: Graphiti schema used to execute operations
+    ///   - resolver: Resolver used by the GraphQL schema
+    ///   - contextBuilder: Context builder from request
+    ///   - httpStrategy: HTTP strategy
+    ///   - websocketProtocol: Websocket sub-protocol
+    ///   - introspection: Allowing introspection
     public init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @escaping (Request) -> Context,
+        contextBuilder: @escaping (Request, Response) -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
         introspection: Bool = true
@@ -52,6 +67,7 @@ public struct Pioneer<Resolver, Context> {
         self.probe = probe
     }
 
+    /// Apply Pioneer GraphQL handlers to a Vapor route
     public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql") {
         // HTTP Portion
         switch httpStrategy {
@@ -84,23 +100,27 @@ public struct Pioneer<Resolver, Context> {
         case unsupportedProtocol
     }
 
+    /// Handle execution for GraphQL operation
     internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
         guard try allowed(from: gql, allowing: allowing) else {
             throw GraphQLError(ResolveError.unableToParseQuery)
         }
+        let res = Response()
         let result = try await schema
             .execute(
                 request: gql.query,
                 resolver: resolver,
-                context: contextBuilder(req),
+                context: contextBuilder(req, res),
                 eventLoopGroup: req.eventLoop,
                 variables: gql.variables ?? [:],
                 operationName: gql.operationName
             )
             .get()
-        return try await result.encodeResponse(for: req)
+        try res.content.encode(result)
+        return res
     }
 
+    /// Guard for operation allowed
     internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) throws -> Bool {
         guard introspection || !gql.isIntrospection else {
             return false

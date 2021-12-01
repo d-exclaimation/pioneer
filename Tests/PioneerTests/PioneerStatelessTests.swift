@@ -41,7 +41,7 @@ struct TestResolver1 {
 class PioneerStatelessTests: XCTestCase {
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
     private let resolver = TestResolver1()
-    private let schema = try! Schema<TestResolver1, ()>.init {
+    private let schema = try! Schema<TestResolver1, Void>.init {
         Graphiti.Type(Message.self) {
             Graphiti.Field("id", at: \.id)
             Graphiti.Field("id", at: \.content)
@@ -58,7 +58,7 @@ class PioneerStatelessTests: XCTestCase {
         }
     }
 
-    private lazy var pioneer = Pioneer(schema: schema, resolver: resolver, contextBuilder: { _ in ()})
+    private lazy var pioneer = Pioneer.init(schema: schema, resolver: resolver)
 
     func testOperationBlocking() throws {
         let gql = GraphQLRequest(
@@ -95,5 +95,16 @@ class PioneerStatelessTests: XCTestCase {
 
             XCTAssertEqual(res, expect)
         }
+    }
+
+    func testGraphQLRequest() {
+        let introspection = GraphQLRequest(query: "{ __schema { queryType { name } } }", operationName: nil, variables: nil)
+        XCTAssert(introspection.isIntrospection)
+
+        let introspection2 = GraphQLRequest(query: "{ __type(name: \"Droid\") { name } }", operationName: nil, variables: nil)
+        XCTAssert(introspection2.isIntrospection)
+
+        let query = GraphQLRequest(query: "{ someField(arg0: \"No __schema allowed\") { __typename } }", operationName: nil, variables: nil)
+        XCTAssert(!query.isIntrospection)
     }
 }

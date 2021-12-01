@@ -9,6 +9,7 @@
 import Foundation
 
 extension Data {
+    /// Parse data into any Decodable type if possible, otherwise return nil
     func to<T: Decodable>(_ type: T.Type) -> T? {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601

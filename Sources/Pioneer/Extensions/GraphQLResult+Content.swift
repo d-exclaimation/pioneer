@@ -10,4 +10,4 @@ import Foundation
 import GraphQL
 import Vapor
 
-extension GraphQLResult: Content { }
+extension GraphQLResult: Content {}

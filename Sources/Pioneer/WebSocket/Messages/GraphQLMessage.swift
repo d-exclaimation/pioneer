@@ -9,9 +9,13 @@
 import Foundation
 import GraphQL
 
+/// GraphQL Websocket Message according to all sub-protocol
 public struct GraphQLMessage: Codable {
+    /// Operation based ID if any
     public var id: String?
+    /// Message type specified to allow differentiation
     public var type: String
+    /// Any payload in terms of object form
     public var payload: [String: Map]?
 
     init(id: String? = nil, type: String, payload: [String: Map]? = nil) {
@@ -20,6 +24,7 @@ public struct GraphQLMessage: Codable {
         self.payload = payload
     }
 
+    /// Turn GraphQLResult into working GraphQLMessage
     static func from(type: String, id: String? = nil, _ gql: GraphQLResult) -> GraphQLMessage {
         let errors = parseError(gql.errors)
         switch (gql.data, errors) {
@@ -36,9 +41,10 @@ public struct GraphQLMessage: Codable {
 
     private static func parseError(_ err: [GraphQLError]) -> Map? {
         guard let data = try? JSONEncoder().encode(err) else { return .none }
-        return try? JSONDecoder().decode(Map.self, from: data)
+        return data.to(Map.self)
     }
 
+    /// Variant type to escape constraint on payload, use only for cases where certain payload break the object spec
     public struct Variance: Codable {
         public var id: String?
         public var type: String
@@ -58,11 +64,13 @@ public struct GraphQLMessage: Codable {
 }
 
 extension Encodable {
+    /// Any encodable into Data if possible
     var json: Data? {
         try? JSONEncoder().encode(self)
     }
 
+    /// Any encodable into JSON String otherwise null is returned
     var jsonString: String {
-        json.flatMap { String(data: $0, encoding: .utf8)} ?? "{}"
+        json.flatMap { String(data: $0, encoding: .utf8)} ?? "null"
     }
 }

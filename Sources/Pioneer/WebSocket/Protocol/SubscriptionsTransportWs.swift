@@ -10,6 +10,7 @@ import Foundation
 import GraphQL
 import Vapor
 
+/// GraphQL Over Websocket Protocol namespace for `subscriptions-transport-ws/graphql-ws`
 enum SubscriptionTransportWs: SubProtocol {
     static var next: String { GQL_DATA }
 

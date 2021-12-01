@@ -9,6 +9,7 @@
 import Foundation
 import Vapor
 
+/// GraphQL Over Websocket Protocol namespace for `graphql-ws/graphql-transport-ws`
 enum GraphQLWs: SubProtocol {
     static let name: String = "graphql-transport-ws"
     
