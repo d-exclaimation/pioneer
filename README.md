@@ -21,7 +21,7 @@ import Graphiti
 import Pioneer
 
 struct Resolver {
-    func hello() -> String { 
+    func hello() async throws -> String { 
         "Hello World!" 
     }
 }
