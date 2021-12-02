@@ -38,7 +38,7 @@ struct TestResolver1 {
     }
 }
 
-class PioneerStatelessTests: XCTestCase {
+final class PioneerStatelessTests: XCTestCase {
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
     private let resolver = TestResolver1()
     private let schema = try! Schema<TestResolver1, Void>.init {
@@ -97,14 +97,4 @@ class PioneerStatelessTests: XCTestCase {
         }
     }
 
-    func testGraphQLRequest() {
-        let introspection = GraphQLRequest(query: "{ __schema { queryType { name } } }", operationName: nil, variables: nil)
-        XCTAssert(introspection.isIntrospection)
-
-        let introspection2 = GraphQLRequest(query: "{ __type(name: \"Droid\") { name } }", operationName: nil, variables: nil)
-        XCTAssert(introspection2.isIntrospection)
-
-        let query = GraphQLRequest(query: "{ someField(arg0: \"No __schema allowed\") { __typename } }", operationName: nil, variables: nil)
-        XCTAssert(!query.isIntrospection)
-    }
 }

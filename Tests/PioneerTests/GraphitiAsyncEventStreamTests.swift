@@ -60,7 +60,7 @@ struct TestResolver {
     }
 }
 
-class GraphitiTests: XCTestCase {
+final class GraphitiTests: XCTestCase {
     private let resolver: TestResolver = .init()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
 
