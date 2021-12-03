@@ -8,6 +8,8 @@
 
 import Foundation
 import Vapor
+import NIO
+import NIOHTTP1
 import GraphQL
 
 typealias SwiftTimer = Foundation.Timer
@@ -22,11 +24,17 @@ extension Pioneer {
                 throw GraphQLError(ResolveError.unsupportedProtocol)
             }
 
+            let header: HTTPHeaders = ["Sec-WebSocket-Protocol": websocketProtocol.name]
+            func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
+                req.eventLoop.next().makeSucceededFuture(.some(header))
+            }
 
-            return req.webSocket { req, ws in
+            return req.webSocket(shouldUpgrade: shouldUpgrade) { req, ws in
                 let res = Response()
                 let ctx = contextBuilder(req, res)
                 let process = Process(ws: ws, ctx: ctx, req: req)
+
+                ws.sendPing()
 
                 /// Scheduled keep alive message interval
                 let timer = SwiftTimer.scheduledTimer(withTimeInterval: 12, repeats: true) { timer in
