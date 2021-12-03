@@ -20,7 +20,12 @@ extension Dictionary {
     }
 
     /// Method for mutating value of a Dictionary instead of using a assignment.
-    mutating func getOrElse(_ key: Key, or fallback: () -> Value) -> Value {
+    func getOrElse(_ key: Key, or fallback: () -> Value) -> Value {
         self[key] ?? fallback()
+    }
+
+    func has(_ key: Key) -> Bool {
+        guard let _ = self[key] else { return false }
+        return true
     }
 }

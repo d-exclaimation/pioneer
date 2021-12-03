@@ -50,7 +50,7 @@ public extension Pioneer {
             innerProtocol.decode(data)
         }
 
-        func initialize(ws: WebSocket) {
+        func initialize(ws: ProcessingConsumer) {
             innerProtocol.initialize(ws: ws)
         }
 

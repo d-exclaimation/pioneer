@@ -27,6 +27,7 @@ extension Pioneer {
 
         // Mark: -- States --
         private var clients: [UUID: Process] = [:]
+        private var drones: [UUID: Desolate<Drone>] = [:]
 
         func onMessage(msg: Act) async -> Signal {
             switch msg {
@@ -36,18 +37,28 @@ extension Pioneer {
 
             // Deallocate the space from a closing process
             case .disconnect(pid: let pid):
+                await drones[pid]?.task(with: .acid)
                 clients.delete(pid)
+                drones.delete(pid)
 
             // Long running operation require its own actor, thus initialing one if there were none prior
-            case .start(pid: let pid, oid: let oid, gql: let gql, ctx: let ctx):
-                // TODO: Start long running process
-                break
+            case .start(pid: let pid, oid: let oid, gql: let gql):
+                guard let process = clients[pid] else { break }
+                let drone = drones.getOrElse(pid) {
+                    spawn(.init(process,
+                        schema: schema,
+                        resolver: resolver,
+                        proto: proto
+                    ))
+                }
+                await drone.task(with: .start(oid: oid, gql: gql))
+                drones.update(pid, with: drone)
 
             // Short lived operation is processed immediately and pipe back later
-            case .once(pid: let pid, oid: let oid, gql: let gql, ctx: let ctx):
+            case .once(pid: let pid, oid: let oid, gql: let gql):
                 guard let process = clients[pid] else { break }
 
-                let future = execute(gql, ctx: ctx, req: process.req)
+                let future = execute(gql, ctx: process.ctx, req: process.req)
 
                 pipeToSelf(future: future) { res in
                     switch res {
@@ -65,8 +76,7 @@ extension Pioneer {
 
             // Stopping any operation to client specific actor
             case .stop(pid: let pid, oid: let oid):
-                // TODO: Stop running process for pid and oid
-                break
+                await drones[pid]?.task(with: .stop(oid: oid))
 
             // Message from pipe to self result after processing short lived operation
             case .outgoing(oid: let oid, process: let process, res: let res):
@@ -92,8 +102,8 @@ extension Pioneer {
         enum Act {
             case connect(process: Process)
             case disconnect(pid: UUID)
-            case start(pid: UUID, oid: String, gql: GraphQLRequest, ctx: Context)
-            case once(pid: UUID, oid: String, gql: GraphQLRequest, ctx: Context)
+            case start(pid: UUID, oid: String, gql: GraphQLRequest)
+            case once(pid: UUID, oid: String, gql: GraphQLRequest)
             case stop(pid: UUID, oid: String)
             case outgoing(oid: String, process: Process, res: GraphQLMessage)
         }

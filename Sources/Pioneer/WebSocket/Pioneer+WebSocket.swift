@@ -21,6 +21,8 @@ extension Pioneer {
             guard let _ = protocolHeader.filter(websocketProtocol.isValid).first else {
                 throw GraphQLError(ResolveError.unsupportedProtocol)
             }
+
+
             return req.webSocket { req, ws in
                 let res = Response()
                 let ctx = contextBuilder(req, res)
@@ -86,8 +88,7 @@ extension Pioneer {
             await probe.task(with: .start(
                 pid: process.id,
                 oid: oid,
-                gql: gql,
-                ctx: process.ctx
+                gql: gql
             ))
 
         // Once -> Short lived operation
@@ -102,8 +103,7 @@ extension Pioneer {
             await probe.task(with: .once(
                 pid: process.id,
                 oid: oid,
-                gql: gql,
-                ctx: process.ctx
+                gql: gql
             ))
 
         // Stop -> End any running operation

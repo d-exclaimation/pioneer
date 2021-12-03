@@ -58,10 +58,10 @@ enum SubscriptionTransportWs: SubProtocol {
         }
     }
 
-    static func initialize(ws: WebSocket) {
+    static func initialize(ws: ProcessingConsumer) {
         let ack = GraphQLMessage(type: GQL_CONNECTION_ACK)
         let ka = GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)
-        ws.send(ack.jsonString)
-        ws.send(ka.jsonString)
+        ws.send(msg: ack.jsonString)
+        ws.send(msg: ka.jsonString)
     }
 }
