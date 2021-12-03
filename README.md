@@ -6,7 +6,9 @@
     <h1>Pioneer</h1>
 </p>
 
-Feature rich, easy to use, spec-compliant Swift GraphQL server.
+Feature rich, easy to use, spec-compliant Swift GraphQL server for Vapor. A server that handles all the routing, parsing, async executions, and subscriptions.
+
+**Currently this package require Swift 5.5 and as of now its only available for macOS version 12 and Linux distribution**
 
 ## Resources
 
@@ -21,7 +23,7 @@ import Graphiti
 import Pioneer
 
 struct Resolver {
-    func hello() async throws -> String { 
+    func hello(_: Context, _: NoArguments) async throws -> String { 
         "Hello World!" 
     }
 }
