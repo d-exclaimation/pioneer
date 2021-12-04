@@ -134,7 +134,7 @@ struct Resolver {
     }
     
     func wave(_: Void, args: Arg) -> String {
-        actorRef.tell(with: args.message)
+        actorRef.tell(with: .next(args.message))
         return args.message
     }
     
