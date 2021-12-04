@@ -13,14 +13,7 @@ extension Jet {
     /// Convenient method for creating an EventStream.
     ///
     /// - Returns: EventStream from the produced Nozzle consumer.
-    public func eventStream() -> AsyncEventStream<Element, Nozzle<Element>> {
-        nozzle().toEventStream()
-    }
-
-    /// Detach the AsyncEventStream from the Jet.
-    ///
-    /// - Parameter eventStream: AsyncEventStream that is using a Nozzle as it's source.
-    public func erase(eventStream: AsyncEventStream<Element, Nozzle<Element>>) {
-        erase(nozzle: eventStream.sequence)
+    public func eventStream() -> EventStream<Element> {
+        nozzle().eventStream()
     }
 }

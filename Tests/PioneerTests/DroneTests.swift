@@ -25,7 +25,11 @@ final class DroneTests: XCTestCase {
                 continuation.yield("Hello")
                 continuation.finish()
             }
-            return stream.toEventStream()
+            return stream.toEventStream(
+                onTermination: {
+                    print("Done")
+                }
+            )
         }
 
         func delayed(_: Void, _: NoArguments) -> EventStream<String> {
@@ -36,7 +40,11 @@ final class DroneTests: XCTestCase {
                     continuation.finish()
                 }
             }
-            return stream.toEventStream()
+            return stream.toEventStream(
+                onTermination: {
+                    print("Done")
+                }
+            )
         }
     }
 

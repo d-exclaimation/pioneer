@@ -18,11 +18,17 @@ public typealias AsyncGraphQLSequence<Sequence: AsyncSequence> = AsyncEventStrea
 public typealias AsyncGraphQLNozzle = AsyncGraphQLSequence<Nozzle<Future<GraphQLResult>>>
 
 /// AsyncStream for GraphQL Result
+public typealias GraphQLNozzle = EventNozzle<Future<GraphQLResult>>
+
+/// AsyncStream for GraphQL Result
 public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncStream<Future<GraphQLResult>>>
 
 extension SubscriptionEventStream {
     /// Get the nozzle from this event stream regardless of its sequence
     public func nozzle() -> Nozzle<Future<GraphQLResult>>? {
+        if let eventNozzle = self as? GraphQLNozzle {
+            return eventNozzle.nozzle
+        }
         if let asyncStream = self as? AsyncGraphQLStream {
             return asyncStream.nozzle
         }
