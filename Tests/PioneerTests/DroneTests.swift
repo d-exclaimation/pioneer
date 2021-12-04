@@ -18,6 +18,9 @@ import Graphiti
 final class DroneTests: XCTestCase {
     private let app = Application(.testing)
 
+    deinit {
+        app.shutdown()
+    }
     class Resolver {
         func hello(_: Void, _: NoArguments) -> String { "Hello World!" }
         func simple(_: Void, _: NoArguments) -> EventStream<String> {
@@ -48,56 +51,6 @@ final class DroneTests: XCTestCase {
         }
     }
 
-    struct TestConsumer: ProcessingConsumer {
-        var buffer: Buffer = .init()
-        var group: EventLoopGroup
-        actor Buffer {
-            var store: [String] = []
-
-            func set(_ s: String) {
-                store.append(s)
-            }
-
-            func pop() -> String? {
-                guard !store.isEmpty else { return nil }
-                return store.removeFirst()
-            }
-        }
-        func send<S>(msg: S) where S: Collection, S.Element == Character {
-            guard let str = msg as? String else { return }
-            Task.init {
-                await buffer.set(str)
-            }
-        }
-
-        func close(code: WebSocketErrorCode) -> EventLoopFuture<Void> {
-            group.next().makeSucceededVoidFuture()
-        }
-
-        func wait() async -> String {
-            await withCheckedContinuation { continuation in
-                Task.init {
-                    while true {
-                        if let res = await buffer.pop() {
-                            continuation.resume(returning: res)
-                            return
-                        }
-                        await Task.requeue()
-                    }
-                }
-            }
-        }
-
-        func waitThrowing(time: TimeInterval) async -> String? {
-            let start = Date()
-            var res = Optional<String>.none
-            while abs(start.timeIntervalSinceNow) < time {
-                res = await buffer.pop()
-            }
-            return res
-        }
-    }
-
     func setup() throws -> (TestConsumer, Desolate<Pioneer<Resolver, Void>.Drone>) {
         let schema = try Schema<Resolver, Void>.init {
             Query {
@@ -115,6 +68,9 @@ final class DroneTests: XCTestCase {
         return (consumer, drone)
     }
 
+    /// Best case subscription:
+    /// 1. working subscription
+    /// 2. get two message: data and completion
     func testBestCaseSubscription() async throws {
         let (consumer, drone) = try setup()
 
@@ -126,6 +82,10 @@ final class DroneTests: XCTestCase {
         XCTAssert(completion.contains("1"))
     }
 
+    /// Outside stopping subscription
+    /// 1. working subscription
+    /// 2. stopped before messages were received
+    /// 3. should not give anything even completion
     func testOutsideStopSubscription() async throws {
         let (consumer, drone) = try setup()
         await drone.task(with: .start(oid: "2", gql: .init(query: "subscription { delayed }", operationName: nil, variables: nil)))
@@ -134,6 +94,10 @@ final class DroneTests: XCTestCase {
         XCTAssert(result == nil)
     }
 
+    /// Killable Drone
+    /// 1. working subscription
+    /// 2. droned kill before messages were received
+    /// 3. should not give anything even completion
     func testKillableSubscription() async throws {
         let (consumer, drone) = try setup()
         await drone.task(with: .start(oid: "2", gql: .init(query: "subscription { delayed }", operationName: nil, variables: nil)))

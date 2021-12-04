@@ -38,3 +38,5 @@ public class EventNozzle<Element>: EventStream<Element> {
         return EventNozzle<To>.init(from: new)
     }
 }
+
+public typealias EventSource<Element> = EventStream<Element>

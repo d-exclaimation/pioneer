@@ -23,7 +23,9 @@ final class GraphitiExtensionTests: XCTestCase {
     func testGraphQLRequestSource() throws {
         let req = GraphQLRequest(query: "query { someField }", operationName: nil, variables: nil)
         let ast = try parse(source: req.source)
-        guard !ast.definitions.isEmpty else { return XCTFail("Definition is empty") }
+        guard !ast.definitions.isEmpty else {
+            return XCTFail("Definition is empty")
+        }
         guard let def = ast.definitions[0] as? OperationDefinition else {
             return XCTFail("Definition isn't valid")
         }
@@ -35,7 +37,7 @@ final class GraphitiExtensionTests: XCTestCase {
         XCTAssert(field.name.value == "someField")
     }
 
-    func testGraphQLRequest() {
+    func testGraphQLRequestIntrospection() {
         let introspection = GraphQLRequest(query: "{ __schema { queryType { name } } }", operationName: nil, variables: nil)
         XCTAssert(introspection.isIntrospection)
 
