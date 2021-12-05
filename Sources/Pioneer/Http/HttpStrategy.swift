@@ -21,5 +21,7 @@ extension Pioneer {
         case mutationOnlyPost
         /// Query must go through `GET` while any mutations through `POST`, follow and utilize HTTP conventions
         case splitQueryAndMutation
+        /// Allow all operation through `GET` and `POST`.
+        case both
     }
 }

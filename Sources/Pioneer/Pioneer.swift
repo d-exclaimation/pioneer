@@ -88,6 +88,10 @@ public struct Pioneer<Resolver, Context> {
         case .splitQueryAndMutation:
             applyGet(on: router, at: path, allowing: [.query])
             applyPost(on: router, at: path, allowing: [.mutation])
+
+        case .both:
+            applyGet(on: router, at: path, allowing: [.query, .mutation])
+            applyPost(on: router, at: path, allowing: [.query, .mutation])
         }
         // Websocket portion
         if websocketProtocol.isAccepting {

@@ -24,11 +24,15 @@ public class EventNozzle<Element>: EventStream<Element> {
     override open func map<To>(_ closure: @escaping (Element) throws -> To) -> EventStream<To> {
         let (new, desolate) = Nozzle<To>.desolate()
         Task.init {
-            for await each in nozzle {
-                let res = try closure(each)
-                await desolate.task(with: res)
+            do {
+                for await each in nozzle {
+                    let res = try closure(each)
+                    await desolate.task(with: res)
+                }
+                await desolate.task(with: .none)
+            } catch {
+                await desolate.task(with: .none)
             }
-            await desolate.task(with: .none)
         }
         defer {
             new.onTermination { [weak self] in
@@ -38,5 +42,3 @@ public class EventNozzle<Element>: EventStream<Element> {
         return EventNozzle<To>.init(from: new)
     }
 }
-
-public typealias EventSource<Element> = EventStream<Element>

@@ -46,9 +46,20 @@ extension Pioneer {
             // Start subscriptions, setup pipe pattern, and callbacks
             case .start(oid: let oid, gql: let gql):
                 // Guards for getting all the required subscriptions stream
-                guard let subscriptionResult = await subscription(gql: gql) else { break }
-                guard let subscription = subscriptionResult.stream else { break }
-                guard let nozzle = subscription.nozzle() else { break }
+                guard let subscriptionResult = await subscription(gql: gql) else {
+                    process.send(GraphQLMessage.errors(id: oid, type: proto.next, [.init(message: "Internal server error")]).jsonString)
+                    break
+                }
+                guard let subscription = subscriptionResult.stream else {
+                    let res = GraphQLResult(errors: subscriptionResult.errors)
+                    process.send(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
+                    process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
+                    break
+                }
+                guard let nozzle = subscription.nozzle() else {
+                    print("Cannot get nozzle")
+                    break
+                }
 
                 let next = proto.next
                 nozzles.update(oid, with: nozzle)
