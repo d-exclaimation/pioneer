@@ -20,8 +20,10 @@ Spec-compliant Swift GraphQL server for Vapor.
 ### Limitations
 
 - Require Swift 5.5, precisely the new `Concurrency`.
-- Can only handle subscription `EventStream` built with `AsyncSequence`.
-- `AsyncSequence` converted into `EventStream` that does not provide a `onTermination` callback will have no way of deallocating resources.
+- `EventStream` require type casting to be used properly which creates a few limitations: 
+	- Can only handle subscription `EventStream` built with `AsyncSequence`.
+	- `EventStream` aren't built with `.map` and `.compactMap` as the result type is too complicated to be casted.
+	- `AsyncSequence` converted into `EventStream` that does not provide a `onTermination` callback will have no way of deallocating resources.
 
 ## Resources
 
@@ -41,16 +43,20 @@ Spec-compliant Swift GraphQL server for Vapor.
 import Vapor
 import Pioneer
 
+// Create a new Vapor application
 let app = try Application(.detect())
 
-let server = Pioneer(
+	
+// Create a Pioneer server with the schema, resolver, and other configurations
+let server = try Pioneer(
     schema: schema(), 
     resolver: Resolver(),
-    httpStrategy: .onlyPost,
-    websocketProtocol: .graphqlWs,
-    introspection: true
+    httpStrategy: .onlyPost, 	   // <- Only run operation through `POST`.
+    websocketProtocol: .graphqlWs, // <- Use `graphql-ws/graphql-transport-ws` websocket subprotocol.
+    introspection: true		   // <- Allow introspection queries.
 )
 
+// Apply Pioneer routing and middlewares to a Vapor app.				 
 server.applyMiddleware(on: app)
 
 defer { 
@@ -77,32 +83,44 @@ try app.run()
 import Graphiti
 import Pioneer
 
+// Function to create the Schema	
 func schema() throws -> Schema<Resolver, Request> {
     try .init {
         Scalar(ID.self, as: "ID")
         
         Type(Message.self) {
             Field("id", at: \.id)
+		.description("Message identifier")
             Field("content", at: \.content)
+		.description("Content of the message")
         }
+	    .description("Identifiable Message with a content")
 
         Query {
             Field("hello", at: Resolver.hello)
+		.description("Query a generic hello message")
         }
 
         Mutation {
             Field("wave", at: Resolver.wave) {
                 Argument("message", at: \.message)
+		    .description("Message content for the new message")
             }
+		.description("Send a message to all active listener")
         }
 
         Subscription {
             SubscriptionField("listen", as: Message.self, atSub: Resolver.listen)
+		.description("Be an active listener to all messages")	
+	
             SubscriptionField("tick", as: Message.self, atSub: Resolver.tick) {
                 Argument("repeats", at: \.repeats)
+		    .description("Amount of repetitions")
                 Argument("second", at: \.second)
+		    .description("Interval in second(s)")
             }
-        }        
+		.description("Query for ticking messages with given repetitions and interval in second(s)")	
+        }
     }
 }
 ```
@@ -121,28 +139,54 @@ func schema() throws -> Schema<Resolver, Request> {
 ---
 
 ```graphql
+"""
+Identifiable Message with a content
+"""	
 type Message {
-    id: ID!
-    content: String!
+  "Message identifier"		
+  id: ID!
+  "Content of the message"	
+  content: String!
 }
 
+
 type Query {
-    hello: Message!
+  """
+  Query a generic hello message
+  """	
+  hello: Message!
 }
 
 type Mutation {
-    wave(message: String!): Message!
+  """
+  Send a message to all active listener
+  """
+  wave(
+    "Message content for the new message"
+    message: String!
+  ): Message!
 }
 
 type Subscription {
-    listen: Message!
-    tick(repeats: Int!, second: Int!): Message!
+  """
+  Be an active listener to all messages
+  """	
+  listen: Message!
+  """
+  Query for ticking messages with given repetitions and interval in second(s)
+  """		
+  tick(
+    "Amount of repetitions"	
+    repeats: Int!, 
+    "Interval in second(s)"	
+    second: Int!
+  ): Message!
 }
 
 schema {
-    query: Query
-    mutation: Mutation
-    subscription: Subscription
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
 }
 ```
 
@@ -208,8 +252,9 @@ struct Resolver {
             }
             await flow.task(with: nil)
         }
-        // Explicit termination callback for EventStream, important to provide for `AsyncSequence` (expect `Nozzle`, since it have built in implicit termination).
-        // Pioneer implemention of `EventStream` aren't using the built-in `.map` and `.compactMap`.
+	
+	// `Nozzle` have built-in termination callback with `EventStream`.
+	// However in cases where converting any `AsyncSequence`, it's best to provide a termination callback.
         return nozzle.map { Message(content: "Message for iteration #\($0)") }.toEventStream(
             onTermination: {
                 nozzle.shutdown()
