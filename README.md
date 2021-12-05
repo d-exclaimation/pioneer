@@ -21,6 +21,7 @@ Spec-compliant Swift GraphQL server for Vapor.
 
 - Require Swift 5.5, precisely the new `Concurrency`.
 - Can only handle subscription `EventStream` built with `AsyncSequence`.
+- `AsyncSequence` converted into `EventStream` that does not provide a `onTermination` callback will have no way of deallocating resources.
 
 ## Resources
 
@@ -97,6 +98,10 @@ func schema() throws -> Schema<Resolver, Request> {
 
         Subscription {
             SubscriptionField("listen", as: Message.self, atSub: Resolver.listen)
+            SubscriptionField("tick", as: Message.self, atSub: Resolver.tick) {
+                Argument("repeats", at: \.repeats)
+                Argument("second", at: \.second)
+            }
         }        
     }
 }
@@ -131,6 +136,7 @@ type Mutation {
 
 type Subscription {
     listen: Message!
+    tick(repeats: Int!, second: Int!): Message!
 }
 
 schema {
@@ -166,37 +172,49 @@ struct Message: Codable {
 
 struct Resolver {
     // Desolate package brings a Hot reactive stream similar to Rx's Publisher but use `AsyncSequence` so it can be processed by Pioneer.
-    let (jet, actorRef) = Jet<Message>.desolate()
+    let (jetStream, pipeline) = Jet<Message>.desolate()
     
     // Using Swift 5.5 async / await in resolver. 
     func hello(_: Void, _: NoArguments) async -> Message { 
         Message(content: "Hello World!")
     }
     
-    struct Arg { 
+    struct Arg: Decodable { 
         var message: String 
     }
     
     func wave(_: Void, args: Arg) -> Message {
         let message = Message(content: args.message)
-        actorRef.tell(with: .next(message)) // <- Passing a message to an Actor in synchronous code block using Desolate
+        pipeline.tell(with: .next(message)) // <- Passing a message to an Actor in synchronous code block using Desolate
         return message
     }
 
     func listen(_: Void, _: NoArgs) -> EventStream<Message> {
         // Pioneer added extension to turn any AsyncSequence into EventStream
-        jet.nozzle().toEventStream()
-        /// Note:
-        ///   Converting Nozzles into EventStream does not need a explicit termination callback,
-        ///   but for any other AsyncSequence, provide a termination callback if possible.
-        ///
-        /// ```swift
-        /// MyAsyncSequence(...).toEventStream(
-        ///     onTermination: {
-        ///         // deallocate resources / stop stream
-        ///     }
-        /// )
-        /// ```
+        jetStream.nozzle().toEventStream()
+    }
+
+    struct Arg1: Decodable {
+        var repeats: Int
+        var second: Int
+    }
+
+    func ticks(_: Void, args: Arg1) -> EventStream<Message> {
+        let (nozzle, flow) = Nozzle<Int>.desolate()
+        Task {
+            for i in 1...args.repeats {
+                await flow.task(with: i)
+                await Task.sleep(args.second * 1000 * 1000 * 1000)
+            }
+            await flow.task(with: nil)
+        }
+        // Explicit termination callback for EventStream, important to provide for `AsyncSequence` beside `Nozzle`.
+        // Pioneer implemention of `EventStream` aren't using the built-in `.map` and `.compactMap`.
+        return nozzle.map { Message(content: "Message for iteration #\($0)") }.toEventStream(
+            onTermination: {
+                nozzle.shutdown()
+            }
+        )
     }
 }
 ```
