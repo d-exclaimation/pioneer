@@ -208,7 +208,7 @@ struct Resolver {
             }
             await flow.task(with: nil)
         }
-        // Explicit termination callback for EventStream, important to provide for `AsyncSequence` beside `Nozzle`.
+        // Explicit termination callback for EventStream, important to provide for `AsyncSequence` (expect `Nozzle`, since it have built in implicit termination).
         // Pioneer implemention of `EventStream` aren't using the built-in `.map` and `.compactMap`.
         return nozzle.map { Message(content: "Message for iteration #\($0)") }.toEventStream(
             onTermination: {
