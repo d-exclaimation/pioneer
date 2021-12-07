@@ -86,6 +86,7 @@ struct Resolver {
             throw GraphQLErrors(message: "Not authorized")
         }
         let message = Message(content: args.message)
+        await supply.task(with: .next(message))
         return message
     }
 
@@ -200,19 +201,21 @@ import Pioneer
 // Create a new Vapor application
 let app = try Application(.detect())
 
+func buildContext(req: Request, _: Response) -> Context {
+    let token: String? = req.headers["Authorization"]
+        .first { $0.contains("Bearer") }
+        ?.split(seperator: " ")
+        ?.last
+        ?.description
+    return Context(token: token)
+}
+
 // Create a Pioneer server with the schema, resolver, and other configurations
 let server = try Pioneer(
     schema: schema(), 
     resolver: Resolver(),
     // Context builder function with Request and Response parameters
-    contextBuilder: { req, _ in 
-        let token: String? = req.headers["Authorization"]
-            .first { $0.contains("Bearer") }
-            ?.split(seperator: " ")
-            ?.last
-            ?.description
-        return Context(token: token)
-    },
+    contextBuilder: buildContext,
     websocketProtocol: .subscriptionsTransportWs, 
     introspection: true	
 )
