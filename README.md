@@ -201,21 +201,19 @@ import Pioneer
 // Create a new Vapor application
 let app = try Application(.detect())
 
-func buildContext(req: Request, _: Response) -> Context {
-    let token: String? = req.headers["Authorization"]
-        .first { $0.contains("Bearer") }
-        ?.split(seperator: " ")
-        ?.last
-        ?.description
-    return Context(token: token)
-}
-
 // Create a Pioneer server with the schema, resolver, and other configurations
 let server = try Pioneer(
     schema: schema(), 
     resolver: Resolver(),
     // Context builder function with Request and Response parameters
-    contextBuilder: buildContext,
+    contextBuilder: { req, _ in 
+        let token: String? = req.headers["Authorization"]
+            .first { $0.contains("Bearer") }
+            ?.split(seperator: " ")
+            ?.last
+            ?.description
+        return Context(token: token)
+    },
     websocketProtocol: .subscriptionsTransportWs, 
     introspection: true	
 )
