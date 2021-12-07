@@ -31,7 +31,7 @@ let package = Package(
 
 Pioneer provides all the boilerplate and implemention required to run a GraphQL server on top of Vapor that can handle both over HTTP and over Websocket.
 
-### Declaring entities
+#### Declaring entities
 
 Graphiti was designed not to pollute your entity declarations, so declare one should be straight forward.
 
@@ -47,7 +47,7 @@ struct Message: Codable {
 
 💡  _Here we are using, the `ID` type from Pioneer which is just `String` but unique and not meant to be human readable. The `.uuid()` function will create a new `ID` from an `UUID`. You could have just used the regular initializers_
 
-### Custom Context type
+#### Custom Context type
 
 Graphiti allow usage of custom Context type (with no type pollution) which will pass down to all resolvers. In this case, we will have a authorization token.
 
@@ -61,7 +61,7 @@ struct Context {
 
 ✍️ _Do note that that this context will be compute for each request as it require values that are request specific. If you want to have a shared value, make sure you initialize it outside the builder function_
 
-### Defining the GraphQL resolver
+#### Defining the GraphQL resolver
 
 Resolver are just custom struct used to provide resolver functions to all type of GraphQL operation. Pioneer add features to allow use of `async/await` queries, mutations, and subscriptions on top of Graphiti and Vapor.
 
@@ -95,6 +95,8 @@ struct Resolver {
 ```
 
 💡 _Pioneer will automatically handle all subscription as long as the `EventStream` (or aliased as `EventSource` by Pioneer) built from `AsyncSequence`._
+
+---
 
 📚 _Turning any generic `AsyncSequence` into an `EventStream` is as easy as calling `.toEventStream()`; however just like `AsyncStream`, it's good to provide a termination callback to prevent memory leaks when converting_
 
@@ -144,7 +146,9 @@ let eventStream1: EventStream<Message> = reservoir.eventStream(for: "some-key")
 
 </details>
 
-### Describing the schema
+---
+
+#### Describing the schema
 
 It's time to describe the GraphQL schema
 
