@@ -44,11 +44,9 @@ struct Message: Codable {
 }
 
 ```
----
 
-💡  _Here we are using, the `ID` type from Pioneer which is just `String` but unique and not meant to be human readable. The `.uuid()` function will create a new `ID` from an `UUID`. You could have just used the regular initializers_
+> 💡  _Here we are using, the `ID` type from Pioneer which is just `String` but unique and not meant to be human readable. The `.uuid()` function will create a new `ID` from an `UUID`. You could have just used the regular initializers_
 
----
 
 #### Custom Context type
 
@@ -59,15 +57,10 @@ struct Context {
     var token: String?
 }
 ```
----
 
-💡  _Pioneer will ask for a builder function to compute the context from the Vapor `Request` and `Response`. This allow you grab certain value from the request or set new ones to the response_
+> 💡  _Pioneer will ask for a builder function to compute the context from the Vapor `Request` and `Response`. This allow you grab certain value from the request or set new ones to the response_
 
----
-
-✍️ _Do note that that this context will be compute for each request as it require values that are request specific. If you want to have a shared value, make sure you initialize it outside the builder function_
-
----
+> ✍️ _Do note that that this context will be compute for each request as it require values that are request specific. If you want to have a shared value, make sure you initialize it outside the builder function_
 
 #### Defining the GraphQL resolver
 
@@ -102,15 +95,11 @@ struct Resolver {
 }
 ```
 
----
+> 💡 _Pioneer will automatically handle all subscription as long as the `EventStream` (or aliased as `EventSource` by Pioneer) built from `AsyncSequence`._
 
-💡 _Pioneer will automatically handle all subscription as long as the `EventStream` (or aliased as `EventSource` by Pioneer) built from `AsyncSequence`._
-
----
+<blockquote>
 
 📚 _Turning any generic `AsyncSequence` into an `EventStream` is as easy as calling `.toEventStream()`; however just like `AsyncStream`, it's good to provide a termination callback to prevent memory leaks when converting_
-
----
 
 <details>
 <summary><i>Termination callback example</i></summary>
@@ -135,12 +124,11 @@ func ticks(_: Void, _: NoArguments) -> EventSource<Message> {
 ```
 
 </details>
+</blockquote>
 
----
+<blockquote>
 
 💡 _Desolate (exported by Pioneer) provide a handful `AsyncSequence` implemention, which has intergration with Pioneer. Due to that, these `AsyncSequence` does not need to explicit termination callback when converted to `EventStream`_
-
----
 
 <details>
 <summary>Integration example</summary>
@@ -161,7 +149,7 @@ let eventStream1: EventStream<Message> = reservoir.eventStream(for: "some-key")
 
 </details>
 
----
+</blockquote>
 
 #### Describing the schema
 
@@ -199,11 +187,7 @@ func schema() throws -> Schema<Resolver, Context> {
 }
 ```
 
----
-
-💡 _Graphiti takes advantage of Swift's `@resultBuilder` to write GraphQL elegantly in Swift code_
-
----
+> 💡 _Graphiti takes advantage of Swift's `@resultBuilder` to write GraphQL elegantly in Swift code_
 
 ### Integrating Pioneer, Graphiti, and Vapor
 
