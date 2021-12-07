@@ -27,7 +27,7 @@ public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Ele
         /// as using `map` will make the type too complicated to be casted to any meaningful value
         /// Performance and efficiency has been tested to mostly not affected but do keep in mind to try to find a better solution.
         let stream = AsyncStream(To.self) { continuation in
-            Task.init {
+            let task = Task.init {
                 do {
                     for try await each in self.sequence {
                         let res = try closure(each)
@@ -38,6 +38,13 @@ public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Ele
                     continuation.finish()
                 }
             }
+
+            @Sendable
+            func onTermination(_: AsyncStream<To>.Continuation.Termination) {
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
         }
         return AsyncEventStream<To, AsyncStream<To>>.init(from: stream)
     }

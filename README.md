@@ -105,22 +105,14 @@ struct Resolver {
 <summary><i>Termination callback example</i></summary>
 
 ```swift
-func ticks(_: Void, _: NoArguments) -> EventSource<Message> {
-    let stream = AsyncStream<Message> { continuation in 
-        // .. do something with continuation
+let stream = MyAsyncSequence<Message>(...)
 
-        continuation.onTermination = { @Sendable _ in 
-            // deallocate resources
-        }
+stream.toEventStream(
+    // Require here as it cannot access `AsyncStream.Continuation.onTermination`
+    onTermination: {
+        // deallocate resources
     }
-
-    stream.toEventStream(
-        // Require here as it cannot access `AsyncStream.Continuation.onTermination`
-        onTermination: {
-            // deallocate resources
-        }
-    )
-}
+)
 ```
 
 </details>
@@ -128,7 +120,7 @@ func ticks(_: Void, _: NoArguments) -> EventSource<Message> {
 
 <blockquote>
 
-💡 _Desolate (exported by Pioneer) provide a handful `AsyncSequence` implemention, which has intergration with Pioneer. Due to that, these `AsyncSequence` does not need to explicit termination callback when converted to `EventStream`_
+💡 _Desolate (exported by Pioneer) provide a handful `AsyncSequence` implementation, which has integration with Pioneer. Due to that, these `AsyncSequence` does not need to explicit termination callback when converted to `EventStream`. `AsyncStream` also have its integration built in._
 
 <details>
 <summary>Integration example</summary>
@@ -136,7 +128,7 @@ func ticks(_: Void, _: NoArguments) -> EventSource<Message> {
 ```swift
 let nozzle = Nozzle<Message>.single(.init(content: "Hello"))
 
-let eventStream1: EventStream<Message> = nozzle.eventStream() 
+let eventStream0: EventStream<Message> = nozzle.toEventStream() 
 
 let source = Source<Message>()
 
@@ -144,7 +136,16 @@ let eventStream1: EventStream<Message> = source.eventStream()
 
 let reservoir = Reservoir<String, Message>()
 
-let eventStream1: EventStream<Message> = reservoir.eventStream(for: "some-key")
+let eventStream2: EventStream<Message> = reservoir.eventStream(for: "some-key")
+
+let stream = AsyncStream<Message> { continuation in 
+    // Will use this termination callback, if not specified otherwise
+    continuation.onTermination = { @Sendable _ in
+        // .. do something
+    }
+}
+
+let eventStream2: EventStream<Message> = stream.toEventStream()
 ```
 
 </details>

@@ -43,12 +43,14 @@ extension AsyncEventStream where Element == Future<GraphQLResult> {
     /// Get the nozzle from this event stream regardless of its sequence
     public var nozzle: Nozzle<Future<GraphQLResult>> {
         let (nozzle, engine) = Nozzle<Future<GraphQLResult>>.desolate()
-        Task.init {
+        let task = Task.init {
             for try await each in sequence {
                 await engine.task(with: .some(each))
             }
             await engine.task(with: nil)
         }
+
+        nozzle.onTermination(task.cancel)
         return nozzle
     }
 }
