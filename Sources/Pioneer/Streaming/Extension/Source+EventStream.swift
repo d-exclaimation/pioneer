@@ -7,13 +7,12 @@
 //
 
 import Desolate
-import GraphQL
 
-extension Jet {
+extension Source {
     /// Convenient method for creating an EventStream.
     ///
     /// - Returns: EventStream from the produced Nozzle consumer.
-    public func eventStream() -> EventStream<Element> {
+    public func eventStream() -> EventSource<Element> {
         nozzle().eventStream()
     }
 }

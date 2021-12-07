@@ -123,5 +123,13 @@ extension Pioneer {
                 )
                 .get()
         }
+
+        deinit {
+            nozzles.forEach { (oid, nozzle) in
+                let message = GraphQLMessage(id: oid, type: proto.complete)
+                process.send(message.jsonString)
+                nozzle.shutdown()
+            }
+        }
     }
 }

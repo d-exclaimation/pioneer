@@ -6,13 +6,11 @@
 //  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
-import GraphQL
-
 extension AsyncSequence {
     /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
     ///
     /// - Returns: EventStream implementation for AsyncSequence.
-    public func toEventStream() -> EventStream<Element> {
+    public func toEventStream() -> EventSource<Element> {
         if let nozzle = self as? Nozzle<Element> {
             return nozzle.eventStream()
         }
@@ -25,7 +23,7 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         onTermination: @escaping @Sendable () -> Void
-    ) -> EventStream<Element> {
+    ) -> EventSource<Element> {
         let (new, desolate) = Nozzle<Element>.desolate()
         Task.init {
             for try await each in self {
@@ -48,7 +46,7 @@ extension AsyncSequence {
     public func toEventStream(
         endValue: @escaping () -> Element,
         onTermination: @escaping @Sendable () -> Void
-    ) -> EventStream<Element> {
+    ) -> EventSource<Element> {
         let (new, desolate) = Nozzle<Element>.desolate()
         Task.init {
             for try await each in self {
@@ -72,7 +70,7 @@ extension AsyncSequence {
     public func toEventStream(
         initialValue: Element,
         onTermination: @escaping @Sendable () -> Void
-    ) -> EventStream<Element> {
+    ) -> EventSource<Element> {
         let (new, desolate) = Nozzle<Element>.desolate()
         Task.init {
             await desolate.task(with: initialValue)
@@ -97,7 +95,7 @@ extension AsyncSequence {
         initialValue: Element,
         endValue: @escaping () -> Element,
         onTermination: @escaping @Sendable () -> Void
-    ) -> EventStream<Element> {
+    ) -> EventSource<Element> {
         let (new, desolate) = Nozzle<Element>.desolate()
         Task.init {
             await desolate.task(with: initialValue)

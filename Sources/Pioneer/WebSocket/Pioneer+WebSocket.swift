@@ -20,7 +20,7 @@ extension Pioneer {
         router.get(path) { req throws -> Response in
             /// Explicitly handle Websocket upgrade with sub-protocol
             let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
-            guard let _ = protocolHeader.filter(websocketProtocol.isValid).first else {
+            guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
                 throw GraphQLError(ResolveError.unsupportedProtocol)
             }
 

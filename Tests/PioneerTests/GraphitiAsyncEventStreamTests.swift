@@ -8,7 +8,6 @@
 
 import Foundation
 import XCTest
-import GraphQL
 import Graphiti
 import NIO
 import Desolate
@@ -39,7 +38,7 @@ struct Message: Codable, Identifiable {
 struct TestContext {}
 
 struct TestResolver {
-    let (jet, engine) = Jet<Message>.desolate()
+    let (jet, engine) = Source<Message>.desolate()
 
     func hello(context: TestContext, arguments: NoArguments) -> String {
         "Hello GraphQL!!"
@@ -55,7 +54,7 @@ struct TestResolver {
         return message
     }
 
-    func onMessage(context: TestContext, arguments: NoArguments) async throws -> GraphQL.EventStream<Message> {
+    func onMessage(context: TestContext, arguments: NoArguments) async throws -> EventSource<Message> {
         jet.eventStream()
     }
 }

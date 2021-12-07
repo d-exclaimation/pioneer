@@ -10,6 +10,15 @@ import Foundation
 import GraphQL
 import Graphiti
 
+/// GraphQLResult
+public typealias GraphQLResult = GraphQL.GraphQLResult
+
+// GraphQL Errors type
+public typealias GraphQLErrors = GraphQL.GraphQLError
+
+/// GraphQL Source Type
+public typealias GraphQLSource = GraphQL.Source
+
 /// An alias of EventStream and data type use for GraphQL subscriptions.
 public typealias EventSource<Element> = EventStream<Element>
 
@@ -52,5 +61,17 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     /// Create a new ID from UUID
     public static func uuid() -> Self {
         .init(UUID().uuidString.lowercased())
+    }
+
+    /// Create a new ID from random letter
+    public static func random(length: Int = 10) -> Self {
+        let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let random = (0..<length).compactMap { _ in letters.randomElement() }
+        return .init(.init(random))
+    }
+
+    /// Length of ID
+    public var count: Int {
+        id.count
     }
 }

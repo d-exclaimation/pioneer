@@ -147,7 +147,7 @@ public extension SubscriptionField where FieldType : Encodable {
         _ name: String,
         as: FieldType.Type,
         atSub subFunc: @escaping AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType>,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
         let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
             { context, arguments, eventLoopGroup in
@@ -177,7 +177,7 @@ public extension SubscriptionField where FieldType : Encodable {
         _ name: String,
         as: FieldType.Type,
         atSub subFunc: @escaping AsyncAwaitThrowingSubscription<ObjectType, Context, Arguments, SourceEventType>,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
         let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
             { context, arguments, eventLoopGroup in
