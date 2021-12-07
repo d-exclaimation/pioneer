@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/d-exclaimation/desolate.git",
         "state": {
           "branch": null,
-          "revision": "521004ec4e1a7e6d3f9b98281ce3c16b3f9b4091",
-          "version": "1.3.0"
+          "revision": "e88ab159d7c1a56d3937cf30a7cccc476654c310",
+          "version": "1.3.1"
         }
       },
       {
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "6a5a3b5244d39e2614382c77ddf62e63b712ad06",
-          "version": "4.53.0"
+          "revision": "34bf1b303623de04801d2b9bef5b2ed48b3e9319",
+          "version": "4.54.0"
         }
       },
       {
