@@ -24,7 +24,6 @@ let package = Package(
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.53.0"),
         .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.1.0")
-
     ]
 )
 ```
@@ -259,6 +258,8 @@ defer {
 
 try app.run()
 ```
+
+> 💡 Pioneer is built for Vapor and it doesn't require complicated setup to add it a Vapor application
 
 Finally, just ran the server with `swift run` and you should be able to make request to the server.
 
