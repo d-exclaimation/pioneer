@@ -190,6 +190,38 @@ func schema() throws -> Schema<Resolver, Context> {
 
 > 💡 _Graphiti takes advantage of Swift's `@resultBuilder` to write GraphQL elegantly in Swift code_
 
+<blockquote>
+<details>
+<summary>🍇 <i>GraphQL SDL Version</i></summary>
+
+```graphql
+type Messsage {
+    id: ID!
+    content: String!
+}
+
+type Query {
+    hello: String!
+}
+
+type Mutation {
+    wave(message: String!): Message!
+}
+
+type Subscription {
+    listen: Message!
+}
+
+schema {
+    query: Query,
+    mutation: Mutation,
+    subscription: Subscription
+}
+```
+
+</details>
+</blockquote>
+
 ### Integrating Pioneer, Graphiti, and Vapor
 
 Setting up the server would be fairly straight forward
