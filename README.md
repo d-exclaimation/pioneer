@@ -102,7 +102,7 @@ struct Resolver {
 
 <blockquote>
 
-📚 _Turning any generic `AsyncSequence` into an `EventStream` is as easy as calling `.toEventStream()`; however, it's good to provide a termination callback to prevent memory leaks when terminated. `AsyncStream` and `Nozzle` will use its built-in termination callback when not provide otherwise.
+📚 _Turning any generic `AsyncSequence` into an `EventStream` is as easy as calling `.toEventStream()`; however, it's good to provide a termination callback to prevent memory leaks when terminated. `AsyncStream` and `Nozzle` will use its built-in termination callback when not provide otherwise._
 
 <details>
 <summary><i>Termination callback example</i></summary>
@@ -123,6 +123,8 @@ let stream = AsyncStream<Message> { continuation in
         // deallocate resource
     }
 }
+    
+stream.toEventStream()  
 
 let nozzle = Nozzle<Int>(...)
 
@@ -130,6 +132,8 @@ let nozzle = Nozzle<Int>(...)
 nozzle.onTermination { 
     // deallocate resource
 }
+    
+nozzle.toEventStream()    
 ```
 
 </details>
@@ -172,11 +176,12 @@ func schema() throws -> Schema<Resolver, Context> {
 }
 ```
 
-> 💡 _Graphiti takes advantage of Swift's `@resultBuilder` to write GraphQL elegantly in Swift code_
-
 <blockquote>
+    
+💡 _Graphiti takes advantage of Swift's `@resultBuilder` to write GraphQL elegantly in Swift code, almost similarly to writing a schema with GraphQL SDL_
+    
 <details>
-<summary>🍇 <i>GraphQL SDL Version</i></summary>
+<summary><i>Comparing to GraphQL SDL Version</i></summary>
 
 ```graphql
 type Messsage {
@@ -223,11 +228,10 @@ let server = try Pioneer(
     resolver: Resolver(),
     // Context builder function with Request and Response parameters
     contextBuilder: { req, _ in 
-        let token: String? = req.headers["Authorization"]
-            .first { $0.contains("Bearer") }
-            ?.split(seperator: " ")
-            ?.last
-            ?.description
+        guard let header: String? = req.headers["Authorization"].first(where: { $0.contains("Bearer") }) else {
+            return Context(token: nil)
+        }
+        let token = header.split(seperator: " ").last?.description
         return Context(token: token)
     },
     websocketProtocol: .subscriptionsTransportWs, 
