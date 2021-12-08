@@ -14,13 +14,19 @@ import Graphiti
 public typealias GraphQLResult = GraphQL.GraphQLResult
 
 // GraphQL Errors type
+public typealias GraphQLError = GraphQL.GraphQLError
+
+// GraphQL Errors type
 public typealias GraphQLErrors = GraphQL.GraphQLError
 
 /// GraphQL Source Type
 public typealias GraphQLSource = GraphQL.Source
 
 /// An alias of EventStream and data type use for GraphQL subscriptions.
-public typealias EventSource<Element> = EventStream<Element>
+public typealias EventStream<Element> = GraphQL.EventStream<Element>
+
+/// An alias of EventStream and data type use for GraphQL subscriptions.
+public typealias EventSource<Element> = GraphQL.EventStream<Element>
 
 /// No GraphQL Argument required
 public typealias NoArgs = NoArguments
