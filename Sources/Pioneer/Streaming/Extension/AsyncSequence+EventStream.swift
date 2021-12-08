@@ -22,19 +22,30 @@ extension AsyncSequence {
     /// - Parameters:
     ///   - onTermination: onTermination callback
     public func toEventStream(
-        onTermination: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable () -> Void
     ) -> EventSource<Element> {
-        let (new, desolate) = Nozzle<Element>.desolate()
-        Task.init {
-            for try await each in self {
-                await desolate.task(with: each)
+        let stream = AsyncStream<Element> { continuation in
+            let task = Task.init {
+                do {
+                    for try await each in self {
+                        let element: Element = each
+                        continuation.yield(element)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish()
+                }
             }
-            await desolate.task(with: .none)
+
+            @Sendable
+            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
+                callback()
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
         }
-        defer {
-            new.onTermination(onTermination)
-        }
-        return EventNozzle<Element>(from: new)
+        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
     }
 
 
@@ -45,20 +56,31 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         endValue: @escaping () -> Element,
-        onTermination: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable () -> Void
     ) -> EventSource<Element> {
-        let (new, desolate) = Nozzle<Element>.desolate()
-        Task.init {
-            for try await each in self {
-                await desolate.task(with: each)
+        let stream = AsyncStream<Element> { continuation in
+            let task = Task.init {
+                do {
+                    for try await each in self {
+                        let element: Element = each
+                        continuation.yield(element)
+                    }
+                    continuation.yield(endValue())
+                    continuation.finish()
+                } catch {
+                    continuation.finish()
+                }
             }
-            await desolate.task(with: endValue())
-            await desolate.task(with: .none)
+
+            @Sendable
+            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
+                callback()
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
         }
-        defer {
-            new.onTermination(onTermination)
-        }
-        return EventNozzle<Element>(from: new)
+        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
     }
 
 
@@ -69,20 +91,31 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         initialValue: Element,
-        onTermination: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable () -> Void
     ) -> EventSource<Element> {
-        let (new, desolate) = Nozzle<Element>.desolate()
-        Task.init {
-            await desolate.task(with: initialValue)
-            for try await each in self {
-                await desolate.task(with: each)
+        let stream = AsyncStream<Element> { continuation in
+            let task = Task.init {
+                do {
+                    continuation.yield(initialValue)
+                    for try await each in self {
+                        let element: Element = each
+                        continuation.yield(element)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish()
+                }
             }
-            await desolate.task(with: .none)
+
+            @Sendable
+            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
+                callback()
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
         }
-        defer {
-            new.onTermination(onTermination)
-        }
-        return EventNozzle<Element>(from: new)
+        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
     }
 
     /// Convert any AsyncSequence to an EventStream
@@ -94,29 +127,63 @@ extension AsyncSequence {
     public func toEventStream(
         initialValue: Element,
         endValue: @escaping () -> Element,
-        onTermination: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable () -> Void
     ) -> EventSource<Element> {
-        let (new, desolate) = Nozzle<Element>.desolate()
-        Task.init {
-            await desolate.task(with: initialValue)
-            for try await each in self {
-                await desolate.task(with: each)
+        let stream = AsyncStream<Element> { continuation in
+            let task = Task.init {
+                do {
+                    continuation.yield(initialValue)
+                    for try await each in self {
+                        let element: Element = each
+                        continuation.yield(element)
+                    }
+                    continuation.yield(endValue())
+                    continuation.finish()
+                } catch {
+                    continuation.finish()
+                }
             }
-            await desolate.task(with: endValue())
-            await desolate.task(with: .none)
+
+            @Sendable
+            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
+                callback()
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
         }
-        defer {
-            new.onTermination(onTermination)
-        }
-        return EventNozzle<Element>(from: new)
+        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
     }
 }
 
 extension Nozzle {
+    /// Convert nozzle into async sequence
+    ///
+    /// - Returns: AsyncStream with the same element
+    public func asyncStream() -> AsyncStream<Element> {
+        AsyncStream { continuation in
+            let task = Task.init {
+                for await each in self {
+                    let element: Element = each
+                    continuation.yield(element)
+                }
+                continuation.finish()
+            }
+
+            @Sendable
+            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
+                shutdown()
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
+        }
+    }
+
     /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
     ///
-    /// - Returns: EventStream implementation for Nozzle.
-    public func eventStream() -> EventNozzle<Element> {
-        .init(from: self)
+    /// - Returns: EventStream implementation.
+    public func eventStream() -> EventSource<Element> {
+        AsyncEventStream<Element, AsyncStream<Element>>.init(from: asyncStream())
     }
 }

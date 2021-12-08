@@ -15,8 +15,6 @@ import Graphiti
 extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions
     actor Drone: AbstractDesolate {
-        typealias GraphQLNozzle = Nozzle<Future<GraphQLResult>>
-
         private let process: Process
         private let schema: Schema<Resolver, Context>
         private let resolver: Resolver
@@ -39,7 +37,7 @@ extension Pioneer {
 
         // Mark: -- States --
         var status: Signal = .running
-        var nozzles: [String: GraphQLNozzle] = [:]
+        var tasks: [String: Deferred<Void>] = [:]
 
         func onMessage(msg: Act) async -> Signal {
             switch msg {
@@ -51,47 +49,47 @@ extension Pioneer {
                     break
                 }
                 guard let subscription = subscriptionResult.stream else {
-                    let res = GraphQLResult(errors: subscriptionResult.errors)
+                    let res = GraphQL.GraphQLResult(errors: subscriptionResult.errors)
                     process.send(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
                     process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
                     break
                 }
-                guard let nozzle = subscription.nozzle() else {
-                    print("Cannot get nozzle")
+                guard let asyncStream = subscription.asyncStream() else {
+                    let res = GraphQL.GraphQLResult(errors: [.init(message: "Internal server error, failed to fetch AsyncStream")])
+                    process.send(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
+                    process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
                     break
                 }
 
                 let next = proto.next
-                nozzles.update(oid, with: nozzle)
 
-                // Transform nozzle into flow
-                let flow: AsyncCompactMapSequence<GraphQLNozzle, Act> =
-                    nozzle.compactMap { (future: Future<GraphQLResult>) async -> Act? in
-                        guard let res = try? await future.get() else { return nil }
-                        return .output(oid: oid, .from(type: next, id: oid, res))
-                    }
-
-                // Pipe all messages into the Actor itself
-                flow.pipe(to: oneself,
+                // Transform nozzle into flow and Pipe all messages into the Actor itself
+                let task = asyncStream.pipeBack(to: oneself,
                     onComplete: {
                         .ended(oid: oid)
                     },
                     onFailure: { _ in
                         .ended(oid: oid)
+                    },
+                    transform: { res in
+                        .output(oid: oid, GraphQLMessage.from(type: next, id: oid, res))
                     }
                 )
+
+                tasks.update(oid, with: task)
+
             // Stop subscription, shutdown nozzle and remove it so preventing overflow of any messages
             case .stop(oid: let oid):
-                guard let nozzle = nozzles[oid] else { break }
+                guard let task = tasks[oid] else { break }
 
-                nozzles.delete(oid)
-                nozzle.shutdown()
+                tasks.delete(oid)
+                task.cancel()
 
             // Send an ending message
             // but prevent completion message if nozzle doesn't exist
             // e.g: - Shutdown-ed operation
             case .ended(oid: let oid):
-                guard nozzles.has(oid) else { break }
+                guard tasks.has(oid) else { break }
                 let message = GraphQLMessage(id: oid, type: proto.complete)
                 process.send(message.jsonString)
 
@@ -99,13 +97,13 @@ extension Pioneer {
             // but prevent completion message if nozzle doesn't exist
             // e.g: - Shutdown-ed operation
             case .output(oid: let oid, let message):
-                guard nozzles.has(oid) else { break }
+                guard tasks.has(oid) else { break }
                 process.send(message.jsonString)
 
             // Kill actor
             case .acid:
-                nozzles.values.forEach { $0.shutdown() }
-                nozzles = [:]
+                tasks.values.forEach { $0.cancel() }
+                tasks.removeAll()
                 return .stopped
             }
             return .running
@@ -125,10 +123,10 @@ extension Pioneer {
         }
 
         deinit {
-            nozzles.forEach { (oid, nozzle) in
+            tasks.forEach { (oid, task) in
                 let message = GraphQLMessage(id: oid, type: proto.complete)
                 process.send(message.jsonString)
-                nozzle.shutdown()
+                task.cancel()
             }
         }
     }
