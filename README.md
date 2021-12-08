@@ -23,7 +23,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.53.0"),
-        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.1.2")
+        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.1.3")
     ]
 )
 ```
