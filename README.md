@@ -6,6 +6,9 @@
     <h1>Pioneer</h1>
 </p>
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/d-exclaimation/pioneer)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/d-exclaimation/pioneer)
+
 Pioneer is a open-source Swift GraphQL server, for Vapor. Pioneer works with any GraphQL schema built with [Graphiti](https://github.com/GraphQLSwift/Graphiti).
 
 ## Getting Started
