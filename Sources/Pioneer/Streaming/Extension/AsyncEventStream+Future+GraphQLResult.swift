@@ -10,70 +10,50 @@ import GraphQL
 import Desolate
 
 /// AsyncSequence for GraphQL Result
-public typealias AsyncGraphQLSequence<Sequence: AsyncSequence> = AsyncEventStream<Future<GraphQLResult>, Sequence>
-        where Sequence.Element == Future<GraphQLResult>
-
-
-/// AsyncStream for GraphQL Result
-public typealias AsyncGraphQLNozzle = AsyncGraphQLSequence<Nozzle<Future<GraphQLResult>>>
+public typealias AsyncGraphQLSequence<Sequence: AsyncSequence> = AsyncEventStream<Future<GraphQL.GraphQLResult>, Sequence>
+        where Sequence.Element == Future<GraphQL.GraphQLResult>
 
 /// AsyncStream for GraphQL Result
-public typealias GraphQLNozzle = EventNozzle<Future<GraphQLResult>>
+public typealias AsyncGraphQLNozzle = AsyncGraphQLSequence<Nozzle<Future<GraphQL.GraphQLResult>>>
 
 /// AsyncStream for GraphQL Result
-public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncStream<Future<GraphQLResult>>>
+public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncStream<Future<GraphQL.GraphQLResult>>>
 
 extension SubscriptionEventStream {
-    /// Get the nozzle from this event stream regardless of its sequence
-    public func nozzle() -> Nozzle<Future<GraphQLResult>>? {
-        if let eventNozzle = self as? GraphQLNozzle {
-            return eventNozzle.nozzle
+    /// Get the AsyncStream from this event stream regardless of its sequence
+    public func asyncStream() -> AsyncStream<Future<GraphQL.GraphQLResult>>? {
+        switch self {
+        case let asyncStream as AsyncGraphQLStream:
+            return asyncStream.sequence
+        case let nozzle as AsyncGraphQLNozzle:
+            return nozzle.sequence.asyncStream()
+        default:
+            return nil
         }
-        if let asyncStream = self as? AsyncGraphQLStream {
-            return asyncStream.nozzle
-        }
-        if let nozzle = self as? AsyncGraphQLNozzle {
-            return nozzle.sequence
-        }
-        return nil
     }
 }
 
-extension AsyncEventStream where Element == Future<GraphQLResult> {
-    /// Get the nozzle from this event stream regardless of its sequence
-    public var nozzle: Nozzle<Future<GraphQLResult>> {
-        let (nozzle, engine) = Nozzle<Future<GraphQLResult>>.desolate()
-        let task = Task.init {
-            for try await each in sequence {
-                await engine.task(with: .some(each))
-            }
-            await engine.task(with: nil)
-        }
-
-        nozzle.onTermination(task.cancel)
-        return nozzle
-    }
-}
-
-extension AsyncEventStream where Sequence == Nozzle<Future<GraphQLResult>> {
+extension AsyncStream where Element == Future<GraphQL.GraphQLResult> {
     /// Pipe the GraphQLResult into a DesolatedActor.
     ///
     /// - Parameters:
-    ///   - actorRef: Desolate of an Actor.
+    ///   - to: Desolate of an Actor.
     ///   - onComplete: A message for the actor on completion evaluated lazily.
     ///   - onFailure: A message for the actor given an error occurred.
     ///   - transform: A function to transform the GraphQLResult into a proper message
     /// - Returns:
-    public func pipeTo<ActorType: AbstractDesolate>(
-        actorRef: Desolate<ActorType>,
+    public func pipeBack<ActorType: AbstractDesolate>(
+        to actorRef: Desolate<ActorType>,
         onComplete: @escaping () -> ActorType.MessageType,
         onFailure: @escaping (Error) -> ActorType.MessageType,
-        transform: @escaping (GraphQLResult) -> ActorType.MessageType
+        transform: @escaping (GraphQL.GraphQLResult) -> ActorType.MessageType
     ) -> Deferred<Void> {
         Task.init {
             do {
-                for await elem in sequence {
-                    let result = try await elem.get()
+                for await elem in self {
+                    guard !Task.isCancelled else { return }
+                    let fut: Future<GraphQL.GraphQLResult> = elem
+                    let result = try await fut.get()
                     await actorRef.task(with: transform(result))
                 }
                 await actorRef.task(with: onComplete())

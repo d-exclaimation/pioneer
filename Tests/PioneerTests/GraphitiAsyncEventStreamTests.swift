@@ -109,13 +109,13 @@ final class GraphitiTests: XCTestCase {
             return XCTFail(subscriptionResult.errors.description)
         }
 
-        guard let nozzle = subscription.nozzle() else {
+        guard let asyncStream = subscription.asyncStream() else {
             return XCTFail("Stream failed to be casted into proper types \(subscription))")
         }
 
         let expectation = XCTestExpectation(description: "Received a single message")
-        Task.init {
-            for await future in nozzle {
+        let task = Task.init {
+            for await future in asyncStream {
                 let message = try await future.get()
                 let expected = GraphQLResult(data: [
                     "onMessage": [
@@ -128,7 +128,6 @@ final class GraphitiTests: XCTestCase {
                 }
                 break
             }
-            nozzle.shutdown()
         }
 
         Task.init {
@@ -137,6 +136,7 @@ final class GraphitiTests: XCTestCase {
         }
 
         wait(for: [expectation], timeout: 10)
+        task.cancel()
         print(abs(start.timeIntervalSinceNow) * 1000)
     }
 }

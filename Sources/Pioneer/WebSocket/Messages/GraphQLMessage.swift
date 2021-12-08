@@ -25,7 +25,7 @@ public struct GraphQLMessage: Codable {
     }
 
     /// Turn GraphQLResult into working GraphQLMessage
-    static func from(type: String, id: String? = nil, _ gql: GraphQLResult) -> GraphQLMessage {
+    static func from(type: String, id: String? = nil, _ gql: GraphQL.GraphQLResult) -> GraphQLMessage {
         let errors = parseError(gql.errors)
         switch (gql.data, errors) {
         case (.some(let data), .some(let errors)):
@@ -39,7 +39,7 @@ public struct GraphQLMessage: Codable {
         }
     }
 
-    private static func parseError(_ err: [GraphQLError]) -> Map? {
+    private static func parseError(_ err: [GraphQLErrors]) -> Map? {
         guard let data = try? JSONEncoder().encode(err) else { return .none }
         return data.to(Map.self)
     }
@@ -51,7 +51,7 @@ public struct GraphQLMessage: Codable {
         public var payload: Map?
     }
 
-    static func errors(id: String? = nil, type: String, _ error: [GraphQLError]) -> Variance {
+    static func errors(id: String? = nil, type: String, _ error: [GraphQLErrors]) -> Variance {
         let err = error
             .map { $0.message }
             .map { msg -> Map in ["message": Map.string(msg)] }
