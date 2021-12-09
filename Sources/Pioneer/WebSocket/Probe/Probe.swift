@@ -15,12 +15,18 @@ import Graphiti
 extension Pioneer {
     /// Actor for handling Websocket distribution and dispatching of client specific actor
     actor Probe: AbstractDesolate, NonStop {
-        private let schema: Schema<Resolver, Context>
+        private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
 
-        init(schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type) {
+        init(schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type) {
             self.schema = schema
+            self.resolver = resolver
+            self.proto = proto
+        }
+        
+        init(schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type) {
+            self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
         }
@@ -89,14 +95,19 @@ extension Pioneer {
 
         /// Execute short-lived GraphQL Operation
         private func execute(_ gql: GraphQLRequest, ctx: Context, req: Request) -> Future<GraphQLResult> {
-            schema.execute(
-                request: gql.query,
-                resolver: resolver,
-                context: ctx,
-                eventLoopGroup: req.eventLoop,
-                variables: gql.variables ?? [:],
-                operationName: gql.operationName
-            )
+            do {
+                return try graphql(
+                    schema: schema,
+                    request: gql.query,
+                    rootValue: resolver,
+                    context: ctx,
+                    eventLoopGroup: req.eventLoop,
+                    variableValues: gql.variables ?? [:],
+                    operationName: gql.operationName
+                )
+            } catch {
+                return req.eventLoop.next().makeFailedFuture(error)
+            }
         }
 
         enum Act {

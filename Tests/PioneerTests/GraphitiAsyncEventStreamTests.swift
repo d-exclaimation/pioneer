@@ -13,6 +13,7 @@ import NIO
 import Desolate
 @testable import Pioneer
 
+/// Simple message type with a custom computed properties
 struct Message: Codable, Identifiable {
     var id: String = UUID().uuidString
     var content: String
@@ -21,7 +22,7 @@ struct Message: Codable, Identifiable {
         var formatting: String
     }
 
-    func description(context: TestContext, arguments: Arg) async throws -> String {
+    func description(context: Void, arguments: Arg) async throws -> String {
         switch arguments.formatting.lowercased() {
         case "inline":
             return "msg(\(id)): \(content)"
@@ -35,12 +36,11 @@ struct Message: Codable, Identifiable {
     }
 }
 
-struct TestContext {}
-
+/// Simple Test Resolver with a sync query, async throwing mutation, and async throwing subscriptions
 struct TestResolver {
     let (jet, engine) = Source<Message>.desolate()
 
-    func hello(context: TestContext, arguments: NoArguments) -> String {
+    func hello(context: Void, arguments: NoArguments) -> String {
         "Hello GraphQL!!"
     }
 
@@ -48,13 +48,13 @@ struct TestResolver {
         var string: String
     }
 
-    func randomMessage(context: TestContext, arguments: Arg1) async throws -> Message {
+    func randomMessage(context: Void, arguments: Arg1) async throws -> Message {
         let message = Message(content: arguments.string)
         engine.tell(with: .next(message))
         return message
     }
 
-    func onMessage(context: TestContext, arguments: NoArguments) async throws -> EventSource<Message> {
+    func onMessage(context: Void, arguments: NoArguments) async throws -> EventSource<Message> {
         jet.eventStream()
     }
 }
@@ -67,8 +67,14 @@ final class GraphitiTests: XCTestCase {
         try? group.syncShutdownGracefully()
     }
 
+    /// Subscription through AsyncSequence's AsyncEventStream
+    /// 1. Should properly parse Schema
+    /// 2. Should be able to call subscribe and get the SubscriptionResult
+    /// 3. Should be able to get EventStream and AsyncStream
+    /// 4. Should get all passed messages when consuming
+    /// 5. Should get those messages in the correct order and format
     func testAsyncSequenceSubscription() throws {
-        let schema = try Schema<TestResolver, TestContext>.init {
+        let schema = try Schema<TestResolver, Void>.init {
             Type(Message.self) {
                 Field("id", at: \.id)
                 Field("content", at: \.content)
@@ -93,6 +99,7 @@ final class GraphitiTests: XCTestCase {
         }
 
         let start = Date()
+        
         let query = """
         subscription {
             onMessage {
@@ -101,8 +108,10 @@ final class GraphitiTests: XCTestCase {
         }
         """
 
+        // -- Performing Subscriptions --
+        
         let subscriptionResult = try schema
-            .subscribe(request: query, resolver: resolver, context: TestContext(), eventLoopGroup: group)
+            .subscribe(request: query, resolver: resolver, context: (), eventLoopGroup: group)
             .wait()
 
         guard let subscription = subscriptionResult.stream else {
@@ -112,8 +121,13 @@ final class GraphitiTests: XCTestCase {
         guard let asyncStream = subscription.asyncStream() else {
             return XCTFail("Stream failed to be casted into proper types \(subscription))")
         }
+        
+        // -- End --
 
         let expectation = XCTestExpectation(description: "Received a single message")
+        
+        // -- Consuming stream --
+        
         let task = Task.init {
             for await future in asyncStream {
                 let message = try await future.get()
@@ -130,6 +144,8 @@ final class GraphitiTests: XCTestCase {
             }
         }
 
+        // -- End --
+        
         Task.init {
             await resolver.engine.task(with: .next(.init(id: "bob", content: "Bob")))
             await resolver.engine.task(with: .next(.init(id: "bob2", content: "Bob2")))

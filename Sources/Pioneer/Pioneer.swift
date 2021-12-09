@@ -7,13 +7,13 @@
 //
 
 import Vapor
-import Graphiti
+import Desolate
 import GraphQL
 
 /// Pioneer GraphQL Vapor Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
     /// Graphiti schema used to execute operations
-    public var schema: Schema<Resolver, Context>
+    public var schema: GraphQLSchema
     /// Resolver used by the GraphQL schema
     public var resolver: Resolver
     /// Context builder from request
@@ -29,14 +29,14 @@ public struct Pioneer<Resolver, Context> {
     internal var probe: Desolate<Probe>
 
     /// - Parameters:
-    ///   - schema: Graphiti schema used to execute operations
+    ///   - schema: GraphQL schema used to execute operations
     ///   - resolver: Resolver used by the GraphQL schema
     ///   - contextBuilder: Context builder from request
     ///   - httpStrategy: HTTP strategy
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
     public init(
-        schema: Schema<Resolver, Context>,
+        schema: GraphQLSchema,
         resolver: Resolver,
         contextBuilder: @escaping (Request, Response) -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
@@ -110,16 +110,15 @@ public struct Pioneer<Resolver, Context> {
             throw GraphQLError(ResolveError.unableToParseQuery)
         }
         let res = Response()
-        let result = try await schema
-            .execute(
-                request: gql.query,
-                resolver: resolver,
-                context: contextBuilder(req, res),
-                eventLoopGroup: req.eventLoop,
-                variables: gql.variables ?? [:],
-                operationName: gql.operationName
-            )
-            .get()
+        let result = try await executeGraphQL(
+            schema: schema,
+            request: gql.query,
+            resolver: resolver,
+            context: contextBuilder(req, res),
+            eventLoopGroup: req.eventLoop,
+            variables: gql.variables,
+            operationName: gql.operationName
+        )
         try res.content.encode(result)
         return res
     }

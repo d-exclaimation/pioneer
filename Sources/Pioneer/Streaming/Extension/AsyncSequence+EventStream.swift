@@ -154,6 +154,40 @@ extension AsyncSequence {
         }
         return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
     }
+    
+    /// Convert any AsyncSequence to an EventStream
+    ///
+    /// - Parameters:
+    ///   - initialValue: Initial value from subscriptions
+    ///   - endValue: Ending value
+    public func toEventStream(
+        initialValue: Element,
+        endValue: @escaping () -> Element
+    ) -> EventSource<Element> {
+        let stream = AsyncStream<Element> { continuation in
+            let task = Task.init {
+                do {
+                    continuation.yield(initialValue)
+                    for try await each in self {
+                        let element: Element = each
+                        continuation.yield(element)
+                    }
+                    continuation.yield(endValue())
+                    continuation.finish()
+                } catch {
+                    continuation.finish()
+                }
+            }
+
+            @Sendable
+            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
+        }
+        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
+    }
 }
 
 extension Nozzle {
