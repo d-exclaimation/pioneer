@@ -9,11 +9,11 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dswift-versions&style=for-the-badge)](https://swiftpackageindex.com/d-exclaimation/pioneer)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dplatforms&style=for-the-badge)](https://swiftpackageindex.com/d-exclaimation/pioneer)
 
-Pioneer is a open-source Swift GraphQL server, for Vapor. Pioneer works with any GraphQL schema built with [Graphiti](https://github.com/GraphQLSwift/Graphiti).
+Pioneer is a open-source Swift GraphQL server, for Vapor. Pioneer works with any GraphQL schema built with [GraphQL](https://github.com/GraphQLSwift/GraphQL).
 
 ## Getting Started
 
-An overview of GraphQL in general is available in the [README](https://github.com/facebook/graphql/blob/master/README.md) for the [Specification for GraphQL](https://github.com/facebook/graphql). An overview of Graphiti is also described in the package's [README](https://github.com/GraphQLSwift/Graphiti/blob/master/README.md).
+An overview of GraphQL in general is available in the [README](https://github.com/facebook/graphql/blob/master/README.md) for the [Specification for GraphQL](https://github.com/facebook/graphql). We will be using Graphiti as the GraphQL schema library for this basic implementation. An overview of Graphiti is also described in the package's [README](https://github.com/GraphQLSwift/Graphiti/blob/master/README.md).
 
 ### Using Pioneer
 
@@ -25,8 +25,18 @@ import PackageDescription
 let package = Package(
     dependencies: [
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.0.0"),
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.53.0"),
-        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.1.3")
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.54.0"),
+        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.1.4")
+    ],
+    targets: [
+        .target(
+            name: "MyGraphQLServer",
+            dependencies: [
+                .product(name: "Pioneer", package: "pioneer"),
+                .product(name: "Graphiti", package: "Graphiti"),
+                .product(name: "Vapor", package: "vapor")
+            ]
+        )
     ]
 )
 ```
@@ -213,7 +223,7 @@ schema {
 
 ### Integrating Pioneer, Graphiti, and Vapor
 
-Setting up the server would be fairly straight forward
+Setting up the server would be fairly straight forward. We will be supplying the `contextBuilder` directly, using the websocket sub-protocol `subscriptions-transport-ws`, and allowing introspection.
 
 ```swift
 import Vapor
