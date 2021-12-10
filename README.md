@@ -122,7 +122,7 @@ let stream = MyAsyncSequence<Message>(...)
 
 stream.toEventStream(
     // Require here as it cannot access `AsyncStream.Continuation.onTermination`
-    onTermination: {
+    onTermination: { _ in
         // deallocate resources
     }
 )

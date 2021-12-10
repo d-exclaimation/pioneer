@@ -37,7 +37,7 @@ final class DroneTests: XCTestCase {
                 continuation.finish()
             }
             return stream.toEventStream(
-                onTermination: {
+                onTermination: { _ in
                     print("Done")
                 }
             )
@@ -56,7 +56,7 @@ final class DroneTests: XCTestCase {
                 }
             }
             return stream.toEventStream(
-                onTermination: {
+                onTermination: { _ in
                     print("Done")
                 }
             )
