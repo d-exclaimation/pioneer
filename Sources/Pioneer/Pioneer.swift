@@ -93,6 +93,9 @@ public struct Pioneer<Resolver, Context> {
             applyGet(on: router, at: path, allowing: [.query, .mutation])
             applyPost(on: router, at: path, allowing: [.query, .mutation])
         }
+        
+        applyPlayground(on: router, at: path)
+        
         // Websocket portion
         if websocketProtocol.isAccepting {
             applyWebSocket(on: router, at: [path, "websocket"])
