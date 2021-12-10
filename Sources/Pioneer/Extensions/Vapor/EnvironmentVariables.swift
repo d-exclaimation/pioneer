@@ -1,9 +1,8 @@
 //
 //  EnvironmentVariables.swift
-//  pioneer-integration-test
+//  Pioneer
 //
 //  Created by d-exclaimation on 3:32 PM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 import Foundation

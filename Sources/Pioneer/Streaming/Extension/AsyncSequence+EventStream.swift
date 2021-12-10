@@ -3,10 +3,11 @@
 //  Pioneer
 //
 //  Created by d-exclaimation on 3:38 PM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 extension AsyncSequence {
+    public typealias Termination = AsyncStream<Element>.Continuation.Termination
+    
     /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
     ///
     /// - Returns: EventStream implementation for AsyncSequence.
@@ -22,7 +23,7 @@ extension AsyncSequence {
     /// - Parameters:
     ///   - onTermination: onTermination callback
     public func toEventStream(
-        onTermination callback: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventSource<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
@@ -38,8 +39,8 @@ extension AsyncSequence {
             }
 
             @Sendable
-            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
-                callback()
+            func onTermination(_ termination: Termination) {
+                callback(termination)
                 task.cancel()
             }
 
@@ -56,7 +57,7 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         endValue: @escaping () -> Element,
-        onTermination callback: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventSource<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
@@ -73,8 +74,8 @@ extension AsyncSequence {
             }
 
             @Sendable
-            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
-                callback()
+            func onTermination(_ termination: Termination) {
+                callback(termination)
                 task.cancel()
             }
 
@@ -91,7 +92,7 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         initialValue: Element,
-        onTermination callback: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventSource<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
@@ -108,8 +109,8 @@ extension AsyncSequence {
             }
 
             @Sendable
-            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
-                callback()
+            func onTermination(_ termination: Termination) {
+                callback(termination)
                 task.cancel()
             }
 
@@ -127,7 +128,7 @@ extension AsyncSequence {
     public func toEventStream(
         initialValue: Element,
         endValue: @escaping () -> Element,
-        onTermination callback: @escaping @Sendable () -> Void
+        onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventSource<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
@@ -145,8 +146,42 @@ extension AsyncSequence {
             }
 
             @Sendable
-            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
-                callback()
+            func onTermination(_ termination: Termination) {
+                callback(termination)
+                task.cancel()
+            }
+
+            continuation.onTermination = onTermination
+        }
+        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
+    }
+    
+    /// Convert any AsyncSequence to an EventStream
+    ///
+    /// - Parameters:
+    ///   - initialValue: Initial value from subscriptions
+    ///   - endValue: Ending value
+    public func toEventStream(
+        initialValue: Element,
+        endValue: @escaping () -> Element
+    ) -> EventSource<Element> {
+        let stream = AsyncStream<Element> { continuation in
+            let task = Task.init {
+                do {
+                    continuation.yield(initialValue)
+                    for try await each in self {
+                        let element: Element = each
+                        continuation.yield(element)
+                    }
+                    continuation.yield(endValue())
+                    continuation.finish()
+                } catch {
+                    continuation.finish()
+                }
+            }
+
+            @Sendable
+            func onTermination(_: Termination) {
                 task.cancel()
             }
 
@@ -171,8 +206,10 @@ extension Nozzle {
             }
 
             @Sendable
-            func onTermination(_: AsyncStream<Element>.Continuation.Termination) {
-                shutdown()
+            func onTermination(_ termination: Termination) {
+                if case .cancelled = termination {
+                    shutdown()
+                }
                 task.cancel()
             }
 

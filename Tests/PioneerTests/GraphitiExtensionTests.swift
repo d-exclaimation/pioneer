@@ -15,11 +15,17 @@ import Desolate
 @testable import Pioneer
 
 final class GraphitiExtensionTests: XCTestCase {
+    
+    /// GraphQL Request Object
+    /// 1. Should omit nil values
     func testDecodingGraphQLRequest() {
         let req = GraphQLRequest(query: "query { someField }", operationName: nil, variables: nil)
         XCTAssertEqual(req.jsonString, "{\"query\":\"query { someField }\"}")
     }
 
+    /// GraphQL Request Object
+    /// 1. Should have an accesible source property
+    /// 2. Should be parsed properly into the correct GraphQL AST
     func testGraphQLRequestSource() throws {
         let req = GraphQLRequest(query: "query { someField }", operationName: nil, variables: nil)
         let ast = try parse(source: req.source)
@@ -37,6 +43,11 @@ final class GraphitiExtensionTests: XCTestCase {
         XCTAssert(field.name.value == "someField")
     }
 
+    /// GraphQL Request Object
+    /// 1. Should be able to identify Introspection query 100% of the time
+    ///     - Introspection includes `__schema` and `__type` queries
+    /// 2. Should not take account keyword given inside a string qoutes
+    /// 3. Should not mistaken `__type` with `__typename`
     func testGraphQLRequestIntrospection() {
         let introspection = GraphQLRequest(query: "{ __schema { queryType { name } } }", operationName: nil, variables: nil)
         XCTAssert(introspection.isIntrospection)

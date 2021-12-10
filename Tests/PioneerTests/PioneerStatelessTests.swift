@@ -15,17 +15,11 @@ import Desolate
 @testable import Pioneer
 
 struct TestResolver1 {
-    func sync(context: (), arguments: NoArguments) -> Int {
-        0
-    }
+    func sync(context: (), arguments: NoArguments) -> Int { 0 }
 
-    struct Arg0: Codable {
-        var allowed: Bool
-    }
+    struct Arg0: Codable { var allowed: Bool }
 
-    func syncWithArg(context: (), arguments: Arg0) -> Int {
-        arguments.allowed ? 1 : 0
-    }
+    func syncWithArg(context: (), arguments: Arg0) -> Int { arguments.allowed ? 1 : 0 }
 
     func async(context: (), arguments: NoArguments) async throws -> Int {
         await Task.sleep(1000 * 1000 * 300)
@@ -60,6 +54,9 @@ final class PioneerStatelessTests: XCTestCase {
 
     private lazy var pioneer = Pioneer.init(schema: schema, resolver: resolver)
 
+    /// Pioneer
+    /// 1. Should be able to block certain operations
+    /// 2. Should allow only operations defined in the `allowing` array
     func testOperationBlocking() throws {
         let gql = GraphQLRequest(
             query: "query { sync }",
@@ -72,6 +69,9 @@ final class PioneerStatelessTests: XCTestCase {
         XCTAssert(res1)
     }
 
+    /// Pioneer
+    /// 1. Shpuld have all the required variables to execute an operation
+    /// 2. Should be able to execute and resolve operations
     func testHandler() async throws {
         let gql = [
             "query { sync }",
@@ -88,10 +88,7 @@ final class PioneerStatelessTests: XCTestCase {
         for i in gql.indices {
             let curr = gql[i]
             let expect = expectation[i]
-            let res = try await pioneer
-                .schema
-                .execute(request: curr.query, resolver: pioneer.resolver, context: (), eventLoopGroup: group)
-                .get()
+            let res = try await executeGraphQL(schema: pioneer.schema, request: curr.query, resolver: pioneer.resolver, context: (), eventLoopGroup: group)
 
             XCTAssertEqual(res, expect)
         }

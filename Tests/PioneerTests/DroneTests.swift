@@ -21,20 +21,32 @@ final class DroneTests: XCTestCase {
     deinit {
         app.shutdown()
     }
+    
+    /// Simple Test Resolver
     class Resolver {
+        /// Unused Query resolver, only here to satisfy Schema
         func hello(_: Void, _: NoArguments) -> String { "Hello World!" }
+        
+        /// Simple 1 messaage subscriptions
+        /// Should:
+        ///     - Send Hello and finish the stream
+        ///     - Print done when finished
         func simple(_: Void, _: NoArguments) -> EventStream<String> {
             let stream = AsyncStream(String.self) { continuation in
                 continuation.yield("Hello")
                 continuation.finish()
             }
             return stream.toEventStream(
-                onTermination: {
+                onTermination: { _ in
                     print("Done")
                 }
             )
         }
 
+        /// Simple 1 message subscriptions with a delay
+        /// Should:
+        ///     - Send hello after a delay and finish the stream
+        ///     - Print done when finished
         func delayed(_: Void, _: NoArguments) -> EventStream<String> {
             let stream = AsyncStream(String.self) { continuation in
                 Task.init {
@@ -44,13 +56,15 @@ final class DroneTests: XCTestCase {
                 }
             }
             return stream.toEventStream(
-                onTermination: {
+                onTermination: { _ in
                     print("Done")
                 }
             )
         }
     }
-
+    
+    /// Setup a GraphQLSchema, Pioneer drone, and a TestConsumer
+    /// - Returns: The configured consumer and drone itself
     func setup() throws -> (TestConsumer, Desolate<Pioneer<Resolver, Void>.Drone>) {
         let schema = try Schema<Resolver, Void>.init {
             Query {
@@ -60,11 +74,11 @@ final class DroneTests: XCTestCase {
                 SubscriptionField("simple", as: String.self, atSub: Resolver.simple)
                 SubscriptionField("delayed", as: String.self, atSub: Resolver.delayed)
             }
-        }
+        }.schema
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
         let process = Pioneer<Resolver, Void>.Process(ws: consumer, ctx: (), req: req)
-        let drone = Desolate(of: Pioneer.Drone(process, schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self))
+        let drone: Desolate<Pioneer<Resolver, Void>.Drone> = Desolate(of: .init(process, schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self))
         return (consumer, drone)
     }
 

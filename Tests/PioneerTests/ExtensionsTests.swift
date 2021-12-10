@@ -16,6 +16,7 @@ import Desolate
 final class ExtensionsTests: XCTestCase {
     let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 4)
 
+    /// Tester Actor
     private actor Tester: AbstractDesolate, NonStop, BaseActor {
         enum Act {
             case call(expect: EventLoopFuture<XCTestExpectation>)
@@ -39,6 +40,9 @@ final class ExtensionsTests: XCTestCase {
         init(){}
     }
 
+    /// Pipe back Future to an abstract desolate actor
+    /// 1. Should not fulfill under 1 second
+    /// 2. Should fulfill by the Actor after the delay
     func testAbstractDesolateAndNIOFuture() async {
         let expectation = XCTestExpectation()
         let tester = Tester.make()
@@ -51,9 +55,14 @@ final class ExtensionsTests: XCTestCase {
         wait(for: [expectation], timeout: 2)
     }
 
+    /// Test Structure
     struct A: Decodable {
         var id: String?
     }
+    
+    /// JSON String to Structure
+    /// 1. Should be able to parse all fields if given
+    /// 2. Should be able to infer Optional if not given
     func testDataJSONDecoder() {
         let json = "{ \"id\": null }"
         guard let res = json.data(using: .utf8)?.to(A.self) else {
@@ -68,6 +77,9 @@ final class ExtensionsTests: XCTestCase {
         XCTAssert(res2.id == nil)
     }
 
+    /// Dictionary Mutating method operations
+    /// 1. Should not call callback if found
+    /// 2. Should call callback if not found
     func testDictionaryOperation() {
         var isAllowed = false
         var dict = [String:Int]()
@@ -83,6 +95,8 @@ final class ExtensionsTests: XCTestCase {
         let _ = dict.getOrElse("b", or: produce)
     }
 
+    /// Bridging between two dictionaries
+    /// 1. Should remain all key value pairs when converting
     func testOrderedDictionaryCompat() {
         var ordered = OrderedDictionary<String, Int>()
         ordered["1"] = 1

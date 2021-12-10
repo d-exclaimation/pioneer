@@ -3,7 +3,6 @@
 //  Pioneer
 //
 //  Created by d-exclaimation on 4:55 PM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 import Foundation
@@ -16,17 +15,25 @@ extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions
     actor Drone: AbstractDesolate {
         private let process: Process
-        private let schema: Schema<Resolver, Context>
+        private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
 
-        init(_ process: Process, schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type) {
+        init(_ process: Process, schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
             self.process = process
         }
 
+        init(_ process: Process, schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type) {
+            self.schema = schema.schema
+            self.resolver = resolver
+            self.proto = proto
+            self.process = process
+        }
+
+        
         enum Act {
             case start(oid: String, gql: GraphQLRequest)
             case stop(oid: String)
@@ -110,16 +117,15 @@ extension Pioneer {
         }
 
         private func subscription(gql: GraphQLRequest) async -> SubscriptionResult? {
-            try? await schema
-                .subscribe(
-                    request: gql.query,
-                    resolver: resolver,
-                    context: process.ctx,
-                    eventLoopGroup: process.req.eventLoop,
-                    variables: gql.variables ?? [:],
-                    operationName: gql.operationName
-                )
-                .get()
+            try? await subscribeGraphQL(
+                schema: schema,
+                request: gql.query,
+                resolver: resolver,
+                context: process.ctx,
+                eventLoopGroup: process.req.eventLoop,
+                variables: gql.variables,
+                operationName: gql.operationName
+            )
         }
 
         deinit {

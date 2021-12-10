@@ -3,7 +3,6 @@
 //  Pioneer
 //
 //  Created by d-exclaimation on 3:17 PM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 import GraphQL

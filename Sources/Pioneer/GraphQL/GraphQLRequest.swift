@@ -3,7 +3,6 @@
 //  GraphQLAsyncSequence
 //
 //  Created by d-exclaimation on 12:49 AM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 import Foundation

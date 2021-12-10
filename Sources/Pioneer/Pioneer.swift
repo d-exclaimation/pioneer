@@ -3,17 +3,16 @@
 //  GraphQLAsyncSequence
 //
 //  Created by d-exclaimation on 12:18 AM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 import Vapor
-import Graphiti
+import Desolate
 import GraphQL
 
 /// Pioneer GraphQL Vapor Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
     /// Graphiti schema used to execute operations
-    public var schema: Schema<Resolver, Context>
+    public var schema: GraphQLSchema
     /// Resolver used by the GraphQL schema
     public var resolver: Resolver
     /// Context builder from request
@@ -24,24 +23,28 @@ public struct Pioneer<Resolver, Context> {
     public var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
     public var introspection: Bool
+    /// Allowing playground
+    public var playground: Bool
 
     /// Internal running desolated actor for Pioneer
     internal var probe: Desolate<Probe>
 
     /// - Parameters:
-    ///   - schema: Graphiti schema used to execute operations
+    ///   - schema: GraphQL schema used to execute operations
     ///   - resolver: Resolver used by the GraphQL schema
     ///   - contextBuilder: Context builder from request
     ///   - httpStrategy: HTTP strategy
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
+    ///   - playground: Allowing playground
     public init(
-        schema: Schema<Resolver, Context>,
+        schema: GraphQLSchema,
         resolver: Resolver,
         contextBuilder: @escaping (Request, Response) -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
-        introspection: Bool = true
+        introspection: Bool = true,
+        playground: Bool = true
     ) {
         self.schema = schema
         self.resolver = resolver
@@ -49,6 +52,7 @@ public struct Pioneer<Resolver, Context> {
         self.httpStrategy = httpStrategy
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
+        self.playground = introspection && playground
 
         let proto: SubProtocol.Type = returns {
             switch websocketProtocol {
@@ -93,6 +97,11 @@ public struct Pioneer<Resolver, Context> {
             applyGet(on: router, at: path, allowing: [.query, .mutation])
             applyPost(on: router, at: path, allowing: [.query, .mutation])
         }
+        
+        if playground {
+            applyPlayground(on: router, at: path)
+        }
+        
         // Websocket portion
         if websocketProtocol.isAccepting {
             applyWebSocket(on: router, at: [path, "websocket"])
@@ -110,16 +119,15 @@ public struct Pioneer<Resolver, Context> {
             throw GraphQLError(ResolveError.unableToParseQuery)
         }
         let res = Response()
-        let result = try await schema
-            .execute(
-                request: gql.query,
-                resolver: resolver,
-                context: contextBuilder(req, res),
-                eventLoopGroup: req.eventLoop,
-                variables: gql.variables ?? [:],
-                operationName: gql.operationName
-            )
-            .get()
+        let result = try await executeGraphQL(
+            schema: schema,
+            request: gql.query,
+            resolver: resolver,
+            context: contextBuilder(req, res),
+            eventLoopGroup: req.eventLoop,
+            variables: gql.variables,
+            operationName: gql.operationName
+        )
         try res.content.encode(result)
         return res
     }

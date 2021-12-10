@@ -21,12 +21,15 @@ final class ProbeTests: XCTestCase {
         app.shutdown()
     }
 
+    /// Simple resolver with a single subscriptions
     struct Resolver {
         func test(_: Void, _: NoArguments) -> String { "test" }
         func subscription(_: Void, _: NoArguments) -> EventStream<String> {
             Nozzle.single("hello").toEventStream()
         }
     }
+    
+    /// Setup the GraphQL schema and Probe, then return the Probe
     func setup() throws -> Desolate<Pioneer<Resolver, Void>.Probe> {
         let schema = try Schema<Resolver, Void>.init {
             Query {
@@ -35,17 +38,21 @@ final class ProbeTests: XCTestCase {
             Subscription {
                 SubscriptionField("simple", as: String.self, atSub: Resolver.subscription)
             }
-        }
+        }.schema
 
         return Desolate(of: .init(schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self))
     }
 
+    /// Setup a Process using a custom test consumer
     func consumer() -> (Pioneer<Resolver, Void>.Process, TestConsumer)  {
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
         return (.init(ws: consumer, ctx: (), req: req), consumer)
     }
 
+    /// Probe
+    /// 1. Should be able to dispatch message given a `outgoing` message
+    /// 2. The result should be in a JSON string format
     func testOutgoing() async throws {
         let (process, consumer) = consumer()
         let probe = try setup()
@@ -67,6 +74,11 @@ final class ProbeTests: XCTestCase {
         XCTAssert(res.contains("\"data\":null"))
     }
 
+    /// Probe
+    /// 1. Should accept `once` message
+    /// 2. Should execute operation and pipe back the future
+    /// 3. Should receive the future as `outgoing` message
+    /// 4. Should dispatch result into consumer as JSON string
     func testStatelessRequest() async throws {
         let (process, consumer) = consumer()
         let probe = try setup()
@@ -97,6 +109,11 @@ final class ProbeTests: XCTestCase {
         await probe.task(with: .disconnect(pid: process.id))
     }
 
+    /// Probe
+    /// 1. Should still accept `once` message
+    /// 2. Should execute faulty operation and pipe back the future
+    /// 3. Should still receive the future as `outgoing` message
+    /// 4. Should dispatch result into consumer as JSON string but with no `data` and instead an `errors` array.
     func testInvalidStatelessRequest() async throws {
         let (process, consumer) = consumer()
         let probe = try setup()

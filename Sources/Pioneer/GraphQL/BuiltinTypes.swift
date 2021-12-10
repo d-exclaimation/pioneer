@@ -3,7 +3,6 @@
 //  pioneer-integration-test
 //
 //  Created by d-exclaimation on 3:59 PM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 import Foundation
