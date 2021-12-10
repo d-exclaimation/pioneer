@@ -3,7 +3,6 @@
 //  Pioneer
 //
 //  Created by d-exclaimation on 10:05 PM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 extension AsyncStream {

@@ -3,7 +3,6 @@
 //  Pioneer
 //
 //  Created by d-exclaimation on 11:36 AM.
-//  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
 import Foundation
