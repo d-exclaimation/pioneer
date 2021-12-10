@@ -17,13 +17,15 @@ public extension Pioneer {
     ///   - httpStrategy: HTTP strategy
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
+    ///   - playground: Allowing playground
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
         contextBuilder: @escaping (Request, Response) -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
-        introspection: Bool = true
+        introspection: Bool = true,
+        playground: Bool = true
     ) {
         self.init(
             schema: schema.schema,
@@ -31,7 +33,8 @@ public extension Pioneer {
             contextBuilder: contextBuilder,
             httpStrategy: httpStrategy,
             websocketProtocol: websocketProtocol,
-            introspection: introspection
+            introspection: introspection,
+            playground: playground
         )
     }
 }

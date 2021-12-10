@@ -16,12 +16,14 @@ public extension Pioneer where Context == Void {
     ///   - httpStrategy: HTTP strategy
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
+    ///   - playground: Allowing playground
     init(
         schema: Schema<Resolver, Void>,
         resolver: Resolver,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
-        introspection: Bool = true
+        introspection: Bool = true,
+        playground: Bool = true
     ) {
         self.init(
             schema: schema.schema,
@@ -29,7 +31,8 @@ public extension Pioneer where Context == Void {
             contextBuilder: { _, _ in },
             httpStrategy: httpStrategy,
             websocketProtocol: websocketProtocol,
-            introspection: introspection
+            introspection: introspection,
+            playground: playground
         )
     }
 }

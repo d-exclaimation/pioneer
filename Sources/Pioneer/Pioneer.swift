@@ -24,6 +24,8 @@ public struct Pioneer<Resolver, Context> {
     public var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
     public var introspection: Bool
+    /// Allowing playground
+    public var playground: Bool
 
     /// Internal running desolated actor for Pioneer
     internal var probe: Desolate<Probe>
@@ -35,13 +37,15 @@ public struct Pioneer<Resolver, Context> {
     ///   - httpStrategy: HTTP strategy
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
+    ///   - playground: Allowing playground
     public init(
         schema: GraphQLSchema,
         resolver: Resolver,
         contextBuilder: @escaping (Request, Response) -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
-        introspection: Bool = true
+        introspection: Bool = true,
+        playground: Bool = true
     ) {
         self.schema = schema
         self.resolver = resolver
@@ -49,6 +53,7 @@ public struct Pioneer<Resolver, Context> {
         self.httpStrategy = httpStrategy
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
+        self.playground = introspection && playground
 
         let proto: SubProtocol.Type = returns {
             switch websocketProtocol {
@@ -94,7 +99,9 @@ public struct Pioneer<Resolver, Context> {
             applyPost(on: router, at: path, allowing: [.query, .mutation])
         }
         
-        applyPlayground(on: router, at: path)
+        if playground {
+            applyPlayground(on: router, at: path)
+        }
         
         // Websocket portion
         if websocketProtocol.isAccepting {
