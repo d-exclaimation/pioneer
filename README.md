@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./pioneer.png" width="250" />
+    <img src="./logo.png" width="250" />
 </p>
 
 <p align="center"> 
@@ -102,13 +102,13 @@ struct Resolver {
         return message
     }
 
-    func listen(_: Context, _: NoArguments) async -> EventSource<Message> {
-        source.eventStream()
+    func listen(_: Context, _: NoArguments) async -> EventStream<Message> {
+        source.nozzle().toEventStream()
     }
 }
 ```
 
-> 💡 _Pioneer will automatically handle all subscription as long as the `EventStream` (or aliased as `EventSource` by Pioneer) built from `AsyncSequence`._
+> 💡 _Pioneer will automatically handle all subscription as long as the `EventStream`  built from `AsyncSequence`._
 
 <blockquote>
 
@@ -229,14 +229,13 @@ Setting up the server would be fairly straight forward. We will be supplying the
 import Vapor
 import Pioneer
 
-// Create a new Vapor application
 let app = try Application(.detect())
 
-// Create a Pioneer server with the schema, resolver, and other configurations
+//  Pioneer server with the schema, resolver, and other configurations
 let server = try Pioneer(
     schema: schema(), 
     resolver: Resolver(),
-    // Context builder function with Request and Response parameters
+    // Context builder 
     contextBuilder: { req, _ in 
         guard let header: String? = req.headers["Authorization"].first(where: { $0.contains("Bearer") }) else {
             return Context(token: nil)
@@ -248,7 +247,7 @@ let server = try Pioneer(
     introspection: true	
 )
 
-// Apply Pioneer routing and middlewares to a Vapor application.
+// Apply Pioneer routing.
 server.applyMiddleware(on: app)
 
 defer { 
@@ -264,4 +263,4 @@ Finally, just ran the server with `swift run` and you should be able to make req
 
 ## Feedback
 
-If you have any feedback, please reach out to us at twitter [@d_exclaimation](https://www.twitter.com/d_exclaimation)
+If you have any feedback, please reach out at twitter [@d_exclaimation](https://www.twitter.com/d_exclaimation)
