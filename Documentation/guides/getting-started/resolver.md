@@ -11,7 +11,7 @@ Graphiti require a seperate top level structure acting as the resolver and a con
 
 ## Context
 
-Let's start with the context. Pioneer will built this context on each request and will be provide both the `Request` and `Response` classes to this context builder.
+Let's start with the context. Pioneer will try to build this context on each request by asking for a function that provides both the `Request` and `Response` classes and expects the context instance.
 
 ```swift
 import Vapor
@@ -22,11 +22,11 @@ struct Context {
 }
 ```
 
-The context will be a basic one that just get the `Request` and `Response` so we can get certain values from the request and set some to the response.
+The context here will very simple which only grab the `Request` and `Response` so we can get certain values from the request and set some to the response.
 
 ## Resolver
 
-The resolver will include all the basic CRUD operations. Pioneer comes with extensions to Graphiti to allow the use of `async/await` and `EventStream` built from `AsyncSequence` in resolvers.
+The resolver will include all the basic CRUD operations. Pioneer comes with extensions to Graphiti to allow the use of `async/await` in queries and/or mutations and also `EventStream` built from `AsyncSequence` for subscriptions in the resolvers.
 
 ```swift
 import Pioneer
@@ -72,7 +72,7 @@ struct Resolver {
 
 ## Subscriptions
 
-Pioneer has capabilities to handle subscription through websocket, all you need is provide a resolve that return a `EventStream` that was built with `AsyncSequence`.
+Pioneer has capabilities to handle subscription through websocket, all you need to provide is an `EventStream` that was built with `AsyncSequence`.
 
 ```swift
 struct Resolver {
@@ -112,13 +112,14 @@ struct Resolver {
 !!!warning AsyncSequence and EventStream
 Pioneer can only accept `EventStream` built with `AsyncEventStream`, which is an implementation of `EventStream` for any `AsyncSequence`.
 
-More on this [page](/guides/features/async-event-stream/)
+Learn why on:
 
 [!ref EventStream](/guides/features/async-event-stream)
+
 !!!
 
 !!!success AsyncStream and Nozzle
-Pioneer can with built-in AsyncSequence for different purposes notably `Nozzle` which in an equivalent ot `AsyncStream` and `Source` which is hot observable version of `Nozzle` that can construct multiple nozzles from a single upstream.
+Pioneer brings additional `AsyncSequence` for different purposes notably `Nozzle` which in an equivalent ot `AsyncStream` and `Source` which is hot observable version of `Nozzle` that can construct multiple nozzles from a single upstream.
 
 All of these can be easily converted to `EventStream`, and they both will implicit use their own termination callback when the subscription ends.
 
@@ -164,9 +165,9 @@ func subscription2(...) -> EventStream<Int> {
 
 ## Relationship
 
-In the part where we declare the User type, we have this friend ids properties. This properties were there for the base for building a relationship field resolver.
+In the part where we declare the User type, we have this `friendIDs` property. This property was there for the base for building a relationship.
 
-You can add this resolver by extending the User type with a function that can access the friend id list and fetch from the datastore
+You can add a custom resolver by extending the User type with a function that resembles the resolver functions, only here it can access the parent type.
 
 ```swift
 extension User {

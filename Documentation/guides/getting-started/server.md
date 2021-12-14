@@ -17,14 +17,14 @@ import Vapor
 let app = try Application(.detect())
 
 let server = Pioneer(
-  schema: schema,
-  resolver: Resolver(),
-  contextBuilder: { req, res in
-      Context(req: req, res: req)
-  },
-  websocketProtocol: .subscriptionsTransportWs,
-  introspection: true,
-  playground: true
+    schema: schema,
+    resolver: Resolver(),
+    contextBuilder: { req, res in
+        Context(req: req, res: req)
+    },
+    websocketProtocol: .subscriptionsTransportWs,
+    introspection: true,
+    playground: true
 )
 
 defer {
@@ -36,6 +36,10 @@ server.applyMiddleware(on: app)
 try app.run()
 ```
 
-Here, we will enable introspection and playground as well as use the `subscriptions-transport-ws` sub-protocol for the WebSocker portion.
+Here, we will enable introspection and playground as well as use the `subscriptions-transport-ws` sub-protocol for the WebSocket portion.
 
 Now, just open [http://localhost:8080/playground](http://localhost:8080/playground) to go the GraphQL playground and play with the queries, mutations, and even subscriptions.
+
+!!!success You're set
+You've just created your Swift GraphQL API with Pioneer
+!!!

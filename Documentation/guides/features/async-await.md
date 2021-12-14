@@ -60,7 +60,7 @@ promise.completeWithTask {
 let future: EventLoopFuture<String> = promise.futureResult
 ```
 
-This is a very common logic and you can definitely make an extensions to automatically set this up.
+This is a very common logic and you can definitely make an extension to automatically set this up.
 
 ```swift
 #if compiler(>=5.5.2) && canImport(_Concurrency)
@@ -82,7 +82,7 @@ extension EventLoop {
 
 There are a lot of cases where briding between NIO EventLoopFuture to `async/await` still need access to the `EventLoop` object. There are a couple approached to acquiring the `EventLoop` object.
 
-One of them is accessing from either the Vapor `Application` or `Request`. In this scenario, you can pass them in through the context builder and access them as part of the context in your async resolvers.
+One of them is accessing from either the Vapor `Application` or `Request`. In this scenario, you can pass them in through the context builder and access them as part of the context in your resolvers.
 
 ```swift
 Pioneer(

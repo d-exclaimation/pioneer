@@ -5,9 +5,9 @@ order: 70
 
 # Schema
 
-This section are going to be specific to the GraphQL schema library you are using. In this case, we are using Graphiti and the most part Pioneer has no impact on the schema building process beside adding a few extensions to existing data structures.
+This section is going to be specific to the GraphQL schema library you are using. In this case, we are using Graphiti and for the most part, Pioneer has no impact on the schema building process beside adding a few extensions to existing data structures.
 
-I am going to ignore the error handling portion and assume the schema will be constructed with no errors. Obviously, feel free to customize this and add your error handling logic if necessary
+I am going to ignore the error handling portion and assume the schema will be constructed with no errors. Obviously, feel free to change this and add your error handling logic if necessary.
 
 ## Graphiti
 
@@ -35,7 +35,7 @@ let schema = try? Schema<Resolver, Context> {
         InputField("username", at: \.username)
         InputField("email", at: \.email)
 
-        // Default value from GrapHQL
+        // Default value from GraphQL
         InputField("bio", at: \.bio)
             .defaultValue("")
 

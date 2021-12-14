@@ -5,11 +5,11 @@ order: 100
 
 # Setup
 
-In this guide, we will be using [Graphiti](https://github.com/GraphQLSwift/Graphiti) and setting up Vapor from scratch with using the template.
+In this guide, we will be using [Graphiti](https://github.com/GraphQLSwift/Graphiti) and setting up Vapor from scratch without using any template.
 
 ## Prerequisites
 
-Obviously, Pioneer require Swift installed. Swift can be installed for most operation systems, just follow the official guide from [swift.org](https://www.swift.org/download/)
+Obviously, Pioneer requires Swift installed. Swift can be installed for most operation systems, just follow the official guide from [swift.org](https://www.swift.org/download/)
 
 | Platform | Toolchain                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -27,7 +27,7 @@ swift package init --type executable
 
 ## Dependencies
 
-Next, Add all three main dependencies: Vapor, Graphiti and of course, Pioneer to your `Package.swift`.
+Next, add all three main dependencies: Vapor, Graphiti and of course, Pioneer to your `Package.swift`.
 
 ```swift Package.swift
 import PackageDescription
@@ -60,7 +60,7 @@ let package = Package(
 )
 ```
 
-At least before Xcode 13.2 is out, where these feetures are being brought to older versions as well.
+At least until Xcode 13.2 is fully fleshed out, where these features are being brought to older versions as well.
 
 !!!
 

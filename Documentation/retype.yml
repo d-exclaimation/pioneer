@@ -1,14 +1,22 @@
 input: .
 output: .build
 url: https://pioneer-graphql.netlify.app
-favicon: ./favicon.ico
+favicon: /favicon.ico
 branding:
   title: Pioneer
   label: Docs
 links:
+- text: Home
+  link: /
+  icon: home
 - text: Getting Started
   link: guides/getting-started/setup/
+  icon: zap
 - text: Github
   link: https://github.com/d-exclaimation/pioneer
+  icon: mark-github
+- text: Report a bug
+  link: https://github.com/d-exclaimation/pioneer/issues
+  icon: bug
 footer:
   copyright: "&copy; Copyright {{ year }}. d-exclaimation. All rights reserved."

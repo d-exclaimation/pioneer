@@ -48,9 +48,21 @@ One of the problem occured with requiring a protocol instead of a concrete type,
 
 Due to that, Pioneer will use `AsyncStream` when transforming stream values instead of using the built-in `.compactMap` method to avoid deeply uncastable type.
 
+==- .map and .compactMap type results
+
+```swift
+let asyncStream: AsyncStream<Int>
+
+let asyncStream1: AsyncMapSequence<AsyncStream<Int>, Int> = asyncStream.map { $0 + 1 }
+
+let asyncStream2: AsyncThrowingCompactMapSequence<AsyncMapSequence<AsyncStream<Int>, Data>, String> = asyncStream.compactMap { try JSONEncoder().encode($0) }
+```
+
+===
+
 ### Termination callback
 
-By default, `AsyncEventStream` will cancel the task consuming the provided `AsyncSequence` when converting to an `AsyncStream` of a different type. For something like `AsyncStream`, this cancellation will trigger its termination callback so resources can be deallocated and prevents memory leaaks of any kind.
+By default, `AsyncEventStream` will cancel the task consuming the provided `AsyncSequence` when converting to an `AsyncStream` of a different type. For something like `AsyncStream`, this cancellation will trigger its termination callback so resources can be deallocated and prevent memory leaks of any kind.
 
 However, a custom `AsyncSequence` might have a different trigger and approach in termination. Hence, it's best to explicit provide a termination callback when converting to `EventStream`.
 
@@ -65,17 +77,22 @@ let eventStream = MyAsyncSequence().toEventStream(
 ```
 
 !!!info Termination enum
-In the termination callback, you are provided with `AsyncStream`'s `Continuation.Termination` enum that specify the two cases where termination can occur. This way, you can perform appropriate actions depending on the situation.
+In the termination callback, you are provided with `AsyncStream.Continuation.Termination` enum that specify the two cases where termination can occur.
 !!!
 
-Cases where stream is no longer consumed / stopped:
+Cases where stream is no longer consumed / stopped and termination will require to be triggered:
 
 - Stream ended itself
 - Client send a explicit stop request to end the subscription (might be before stream ended)
 - Client disconnect and implicitly stop any running subscription
 
 !!!success AsyncStream and Nozzle
-Termination callback can be implicitly inferred for `AsyncStream` and `Nozzle`.
+Termination callback can be implicitly inferred for these types of `AsyncSequence`.
+
+- `AsyncStream`
+- `Nozzle`
+- `Source` (_due to `Nozzle`_)
+- `Reservoir`(_due to `Source`_)
 
 ```swift
 let (source, _) = Source<Int>.desolate()

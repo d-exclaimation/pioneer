@@ -5,7 +5,7 @@ order: 70
 
 # GraphQL Over WebSocket
 
-To perform GraphQL over Websockets, there need to be a sub protocol to define operations clearly. No "official" sub protocol nor implementation details on handling subscription given in the GraphQL Spec. However, there are many implementations by the community that have become de facto standards like `subscriptions-transport-ws` and `graphql-ws`.
+To perform GraphQL over WebSocket, there need to be a sub protocol to define operations clearly. No "official" sub-protocol nor implementation details on handling subscription given in the GraphQL Spec. However, there are many implementations by the community that have become de facto standards like `subscriptions-transport-ws` and `graphql-ws`.
 
 ## subscriptions-transport-ws
 
@@ -26,7 +26,7 @@ let server = Pioneer(
 
 Despite being used by most clients and servers, there are problems with this sub-protocol. Notably, the fact that the package wasn't actively maintained with many issues unresolved and pull request un-reviewed and unmerged, the maintainers themselves also recommend most people to opt for a newer sub-protocol if possible.
 
-Most of the problems (mostly the implementation) are described in this [issue](https://github.com/enisdenjo/graphql-ws/issues/3) and [blog post](https://the-guild.dev/blog/graphql-over-websockets).
+Most of the problems (mostly for the implementation) are described in this [issue](https://github.com/enisdenjo/graphql-ws/issues/3) and this [blog post](https://the-guild.dev/blog/graphql-over-websockets).
 
 We also recommend using the newer sub-protocol [graphql-ws](#graphql-ws) when possible. However, [subscriptions-transport-ws](#subscriptions-transport-ws) will stay as the default sub protocol until most clients on all major platforms supported the newer sub protocol.
 

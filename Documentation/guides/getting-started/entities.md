@@ -31,15 +31,17 @@ struct User: Identifiable, Codable {
 Here, we have a couple properties and some computed ones as well. All things should be pretty self-explanatory.
 
 !!!info ID type
-Graphiti cannot diffentiate `String` type from `ID` type by default. Pioneer has a custom `ID` struct built in that can be used as GraphQL's `ID`.
+Graphiti cannot diffentiate `String` type from `ID` type by default. Pioneer brought in a custom `ID` struct to tackle.
 
-You can easy add the custom `ID` which can be constructed from any string and string literals (it is hashable so it can also be used as `id` requirement for `Identifiable`).
+This custom`ID` can be constructed from any string with its regular initializer or from string literal(s)
+
+<sub>It is also hashable so it can also be used as `id` requirement for `Identifiable`</sub>
 
 ```swift
 import Pioneer
 
 struct User: Identifiable, Codable {
-    var id: ID = "..."
+    var id: ID
     var friendIDs: [ID] = []
 }
 
@@ -55,7 +57,7 @@ let schema = try Schema<Void, Resolver> {
 
 ### User inputs
 
-We also want a entity for the input that the API client will give to create and/or update a User profile.
+We also want an entity for the input that the API client will give to create and/or update a User profile.
 
 ```swift
 import Pioneer
@@ -80,11 +82,11 @@ extension User {
 }
 ```
 
-## In memory datastore
+## Datastore
 
-In a real application, you want this `User` to be stored in a persistent database like PostgreSQL or something similar. For this example, we will be simplying the workflow by just building one in code that's also not persistent.
+In a real application, you want these `User`(s) to be stored in a persistent database like PostgreSQL or something similar. For this example, we will be simplying the workflow by just building one in memory.
 
-We will be taking advantange of Swift 5.5 `actor` which a database suitable for handling state management in a concurrent application.
+We will be taking advantange of Swift 5.5 `actor` which a structure suitable for cocurrent state management.
 
 ```swift
 import Pioneer
