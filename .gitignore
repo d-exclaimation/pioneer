@@ -8,3 +8,5 @@ DerivedData/
 /.swiftpm
 /.idea
 /.build-docs
+/Documentation/.build/
+/Documentation/.netlify/
