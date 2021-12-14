@@ -1,0 +1,12 @@
+input: .
+output: .build
+url: https://pioneer-graphql.netlify.app
+favicon: favicon.ico
+branding:
+  title: Pioneer
+  label: Docs
+links:
+- text: Getting Started
+  link: guides/getting-started/setup/
+footer:
+  copyright: "&copy; Copyright {{ year }}. d-exclaimation. All rights reserved."
