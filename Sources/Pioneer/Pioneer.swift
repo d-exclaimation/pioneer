@@ -23,8 +23,8 @@ public struct Pioneer<Resolver, Context> {
     public var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
     public var introspection: Bool
-    /// Allowing playground
-    public var playground: Bool
+    /// Allowing GraphQL IDE
+    public var playground: IDE
     /// Keep alive period
     public var keepAlive: UInt64?
 
@@ -47,7 +47,7 @@ public struct Pioneer<Resolver, Context> {
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
         introspection: Bool = true,
-        playground: Bool = false,
+        playground: IDE = .graphiql,
         keepAlive: UInt64? = 12_500_000_000
     ) {
         self.schema = schema
@@ -56,7 +56,7 @@ public struct Pioneer<Resolver, Context> {
         self.httpStrategy = httpStrategy
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
-        self.playground = introspection && playground
+        self.playground = !introspection ? .disable : playground
         self.keepAlive = keepAlive
 
 
@@ -104,8 +104,17 @@ public struct Pioneer<Resolver, Context> {
             applyPost(on: router, at: path, allowing: [.query, .mutation])
         }
         
-        if playground {
+        switch playground {
+        case .playground:
             applyPlayground(on: router, at: path)
+        case .graphiql:
+            applyGraphiQL(on: router, at: path)
+        case .apolloSandbox:
+            applySandboxRedirect(on: router, with: "https://studio.apollographql.com/sandbox/explorer")
+        case .bananaCakePop:
+            applySandboxRedirect(on: router, with: "https://eat.bananacakepop.com")
+        case .disable:
+            break
         }
         
         // Websocket portion

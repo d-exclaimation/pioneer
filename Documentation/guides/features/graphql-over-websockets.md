@@ -11,6 +11,10 @@ To perform GraphQL over WebSocket, there need to be a sub protocol to define ope
 
 The current standard is [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws). This is a sub-protocol from the team at Apollo GraphQL, that was created along side [apollo-server](https://github.com/apollographql/apollo-server) and [apollo-client](https://github.com/apollographql/apollo-client). Most clients and servers still use this to perform operations through websocket especially subscriptions.
 
+!!!warning Legacy
+In the GraphQL ecosystem, subscriptions-transport-ws is somewhat considered a legacy protocol. More explaination [here](#consideration).
+!!!
+
 ### Usage
 
 By default, Pioneer will already use this sub-protocol to perform GraphQL operations through websocket.
@@ -34,8 +38,12 @@ We also recommend using the newer sub-protocol [graphql-ws](#graphql-ws) when po
 
 The newer sub-protocol is [graphql-ws](https://github.com/enisdenjo/graphql-ws). Aimed mostly on solving most of the problem with the [subscriptions-transport-ws](#subscriptions-transport-ws).
 
-!!!warning GraphQL IDE Incompatibilty
-Currently, most GraphQL IDE like [graphql-playground](https://github.com/graphql/graphql-playground) and something like [Apollo Sandbox](https://studio.apollographql.com/sandbox) doesn't not support this protocol.
+!!!success GraphiQL :heart: graphql-ws
+GraphiQL has full support for `graphql-ws` and Pioneer (since `0.3.0`) can now host GraphiQL with this support (and `subscriptions-transport-ws` support).
+!!!
+
+!!!warning Incompatibilty
+The retired [graphql-playground](https://github.com/graphql/graphql-playground), cloud based IDE such as [Apollo Sandbox](https://studio.apollographql.com/sandbox), some clients, and many servers has yet to support this protocol. More explaination [here](#consideration-1).
 !!!
 
 ### Usage
