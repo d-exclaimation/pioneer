@@ -38,7 +38,7 @@ struct Message: Codable, Identifiable {
 
 /// Simple Test Resolver with a sync query, async throwing mutation, and async throwing subscriptions
 struct TestResolver {
-    let (jet, engine) = Source<Message>.desolate()
+    let (source, engine) = Source<Message>.desolate()
 
     func hello(context: Void, arguments: NoArguments) -> String {
         "Hello GraphQL!!"
@@ -55,7 +55,7 @@ struct TestResolver {
     }
 
     func onMessage(context: Void, arguments: NoArguments) async throws -> EventSource<Message> {
-        jet.eventStream()
+        source.toEventStream()
     }
 }
 

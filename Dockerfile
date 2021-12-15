@@ -1,8 +1,13 @@
-# 1
+# Get the latest tag for Swift on Linux (non-slim one)
 FROM swift:5.5
-# 2
+
 WORKDIR /package
-# 3
+
+# Get source and test code
 COPY . ./
-# 4
-CMD ["swift", "build"]
+
+# Build package
+RUN swift build
+
+# Run all test on Linux machine
+CMD ["swift", "test"]

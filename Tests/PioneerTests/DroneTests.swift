@@ -50,7 +50,7 @@ final class DroneTests: XCTestCase {
         func delayed(_: Void, _: NoArguments) -> EventStream<String> {
             let stream = AsyncStream(String.self) { continuation in
                 Task.init {
-                    await Task.sleep(1000 * 1000 * 250)
+                    try await Task.sleep(nanoseconds: 1000 * 1000 * 250)
                     continuation.yield("Hello")
                     continuation.finish()
                 }

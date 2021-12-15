@@ -47,7 +47,7 @@ final class ExtensionsTests: XCTestCase {
         let expectation = XCTestExpectation()
         let tester = Tester.make()
         let future = eventLoopGroup.task { () async -> XCTestExpectation in
-            await Task.sleep(1000 * 1000 * 1000)
+            try? await Task.sleep(nanoseconds: 1000 * 1000 * 1000)
             return expectation
         }
         tester.tell(with: .call(expect: future))

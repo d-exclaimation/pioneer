@@ -22,12 +22,12 @@ struct TestResolver1 {
     func syncWithArg(context: (), arguments: Arg0) -> Int { arguments.allowed ? 1 : 0 }
 
     func async(context: (), arguments: NoArguments) async throws -> Int {
-        await Task.sleep(1000 * 1000 * 300)
+        try await Task.sleep(nanoseconds: 1000 * 1000 * 300)
         return 2
     }
 
     func asyncMessage(context: (), arguments: NoArguments) async throws -> Message {
-        await Task.sleep(1000 * 1000 * 300)
+        try await Task.sleep(nanoseconds: 1000 * 1000 * 300)
         return Message(content: "Hello")
     }
 }
