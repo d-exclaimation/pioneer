@@ -25,7 +25,7 @@ public extension Pioneer {
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
         introspection: Bool = true,
-        playground: Bool = false,
+        playground: IDE = .graphiql,
         keepAlive: UInt64? = 12_500_000_000
     ) {
         self.init(
