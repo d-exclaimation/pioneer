@@ -13,8 +13,8 @@ No complicated setup required to use Pioneer. It is as easy as plugging it into 
 
 Pioneer will configure all the necessary things to build a GraphQL API such as:
 
-- Handling operations through HTTP :incoming_envelope: (**GET** and **POST**)
-- Adding GraphQL IDE like [graphql-playground](https://github.com/graphql/graphql-playground)
+- Handling operations through HTTP :incoming_envelope: (**GET** and **POST**).
+- Adding GraphQL IDE like [GraphiQL](https://github.com/graphql/graphiql) with subscriptions support.
 - Handling subscriptions through WebSocket :dove_of_peace:.
 
 ## Quick Start

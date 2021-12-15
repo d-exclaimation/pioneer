@@ -22,9 +22,9 @@ let server = Pioneer(
     contextBuilder: { req, res in
         Context(req: req, res: req)
     },
-    websocketProtocol: .subscriptionsTransportWs,
+    websocketProtocol: .graphqlWs,
     introspection: true,
-    playground: true
+    playground: .graphiql
 )
 
 defer {
@@ -36,9 +36,9 @@ server.applyMiddleware(on: app)
 try app.run()
 ```
 
-Here, we will enable introspection and playground as well as use the `subscriptions-transport-ws` sub-protocol for the WebSocket portion.
+Here, we will enable introspection and GraphiQL for the playground as well as use the `graphql-ws` sub-protocol for the WebSocket portion.
 
-Now, just open [http://localhost:8080/playground](http://localhost:8080/playground) to go the GraphQL playground and play with the queries, mutations, and even subscriptions.
+Now, just open [http://localhost:8080/playground](http://localhost:8080/playground) to go the GraphiQL and play with the queries, mutations, and even subscriptions.
 
 !!!success You're set
 You've just created your Swift GraphQL API with Pioneer
