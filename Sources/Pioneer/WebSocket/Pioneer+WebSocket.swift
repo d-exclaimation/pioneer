@@ -11,9 +11,10 @@ import NIO
 import NIOHTTP1
 import GraphQL
 
-typealias SwiftTimer = Foundation.Timer
-
 extension Pioneer {
+    /// KeepAlive Task
+    typealias KeepAlive = Task<Void, Error>?
+    
     /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
         router.get(path) { req throws -> Response in
@@ -36,26 +37,28 @@ extension Pioneer {
                 ws.sendPing()
 
                 /// Scheduled keep alive message interval
-                let timer = SwiftTimer.scheduledTimer(withTimeInterval: 12, repeats: true) { timer in
-                    ws.send(websocketProtocol.keepAliveMessage)
+                let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
+                    if ws.isClosed {
+                        throw GraphQLError(message: "WebSocket closed before any termination")
+                    }
+                    process.send(websocketProtocol.keepAliveMessage)
                 }
-
 
                 ws.onText { _, txt in
                     Task.init {
-                        await onMessage(process: process, timer: timer, txt: txt)
+                        await onMessage(process: process, keepAlive: keepAlive, txt: txt)
                     }
                 }
 
                 ws.onClose.whenComplete { _ in
-                    onEnd(pid: process.id, timer: timer)
+                    onEnd(pid: process.id, keepAlive: keepAlive)
                 }
             }
         }
     }
 
     /// On Websocket message callback
-    func onMessage(process: Process, timer: SwiftTimer, txt: String) async  -> Void {
+    func onMessage(process: Process, keepAlive: KeepAlive, txt: String) async  -> Void {
         guard let data = txt.data(using: .utf8) else {
             // Shouldn't accept any message that aren't utf8 string
             // -> Close with 1003 code
@@ -70,7 +73,6 @@ extension Pioneer {
         // Timer fired here to keep connection alive by sub-protocol standard
         case .initial:
             await probe.task(with: .connect(process: process))
-            timer.fire()
             websocketProtocol.initialize(ws: process.ws)
 
         // Ping is for requesting server to send a keep alive message
@@ -80,7 +82,7 @@ extension Pioneer {
         // Explicit message to terminate connection to deallocate resources, stop timer, and close connection
         case .terminate:
             await probe.task(with: .disconnect(pid: process.id))
-            timer.invalidate()
+            keepAlive?.cancel()
             await process.close(code: .goingAway)
 
         // Start -> Long running operation
@@ -133,7 +135,7 @@ extension Pioneer {
 
             // Deallocation of resources
             await probe.task(with: .disconnect(pid: process.id))
-            timer.invalidate()
+            keepAlive?.cancel()
             await process.close(code: .policyViolation)
 
         case .ignore:
@@ -142,8 +144,21 @@ extension Pioneer {
     }
 
     /// On closing connection callback
-    func onEnd(pid: UUID, timer: SwiftTimer) -> Void {
+    func onEnd(pid: UUID, keepAlive: KeepAlive) -> Void {
         probe.tell(with: .disconnect(pid: pid))
-        timer.invalidate()
+        keepAlive?.cancel()
+    }
+}
+
+
+@discardableResult func setInterval(delay: UInt64?, _ block: @escaping @Sendable () throws -> Void) -> Task<Void, Error>? {
+    guard let delay = delay else {
+        return nil
+    }
+    return Task {
+        while !Task.isCancelled {
+            try await Task.sleep(nanoseconds: delay)
+            try block()
+        }
     }
 }
