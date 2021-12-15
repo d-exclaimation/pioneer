@@ -13,7 +13,7 @@ import GraphQL
 
 extension Pioneer {
     /// KeepAlive Task
-    typealias KeepAlive = Task<Void, Error>
+    typealias KeepAlive = Task<Void, Error>?
     
     /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
@@ -82,7 +82,7 @@ extension Pioneer {
         // Explicit message to terminate connection to deallocate resources, stop timer, and close connection
         case .terminate:
             await probe.task(with: .disconnect(pid: process.id))
-            keepAlive.cancel()
+            keepAlive?.cancel()
             await process.close(code: .goingAway)
 
         // Start -> Long running operation
@@ -135,7 +135,7 @@ extension Pioneer {
 
             // Deallocation of resources
             await probe.task(with: .disconnect(pid: process.id))
-            keepAlive.cancel()
+            keepAlive?.cancel()
             await process.close(code: .policyViolation)
 
         case .ignore:
@@ -146,13 +146,16 @@ extension Pioneer {
     /// On closing connection callback
     func onEnd(pid: UUID, keepAlive: KeepAlive) -> Void {
         probe.tell(with: .disconnect(pid: pid))
-        keepAlive.cancel()
+        keepAlive?.cancel()
     }
 }
 
 
-@discardableResult func setInterval(delay: UInt64, _ block: @escaping @Sendable () throws -> Void) -> Task<Void, Error> {
-    Task {
+@discardableResult func setInterval(delay: UInt64?, _ block: @escaping @Sendable () throws -> Void) -> Task<Void, Error>? {
+    guard let delay = delay else {
+        return nil
+    }
+    return Task {
         while !Task.isCancelled {
             try await Task.sleep(nanoseconds: delay)
             try block()

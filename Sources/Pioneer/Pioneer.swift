@@ -25,6 +25,8 @@ public struct Pioneer<Resolver, Context> {
     public var introspection: Bool
     /// Allowing playground
     public var playground: Bool
+    /// Keep alive period
+    public var keepAlive: UInt64?
 
     /// Internal running desolated actor for Pioneer
     internal var probe: Desolate<Probe>
@@ -37,6 +39,7 @@ public struct Pioneer<Resolver, Context> {
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
     ///   - playground: Allowing playground
+    ///   - keepAlive: Keep alive internal in nanosecond, default to 12.5 sec, nil for disable
     public init(
         schema: GraphQLSchema,
         resolver: Resolver,
@@ -44,7 +47,8 @@ public struct Pioneer<Resolver, Context> {
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
         introspection: Bool = true,
-        playground: Bool = true
+        playground: Bool = false,
+        keepAlive: UInt64? = 12_500_000_000
     ) {
         self.schema = schema
         self.resolver = resolver
@@ -53,6 +57,8 @@ public struct Pioneer<Resolver, Context> {
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
         self.playground = introspection && playground
+        self.keepAlive = keepAlive
+
 
         let proto: SubProtocol.Type = returns {
             switch websocketProtocol {
