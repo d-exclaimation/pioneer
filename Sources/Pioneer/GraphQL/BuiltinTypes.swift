@@ -33,7 +33,7 @@ public typealias NoArgs = NoArguments
 /// The ID scalar type represents a unique identifier, often used to refetch an object or as the key for a cache.
 ///
 /// The ID type is serialized in the same way as a String; however, defining it as an ID signifies that it is not intended to be human‐readable.
-public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible, Hashable {
+public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible, Hashable, Sendable {
     /// Inner string properties
     public var id: String
 
@@ -78,5 +78,18 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     /// Length of ID
     public var count: Int {
         id.count
+    }
+    
+    /// String value of this ID type
+    public var string: String {
+        id
+    }
+}
+
+
+public extension String {
+    /// ID from this string
+    var id: ID {
+        .init(self)
     }
 }

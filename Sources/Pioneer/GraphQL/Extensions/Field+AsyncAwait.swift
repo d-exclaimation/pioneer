@@ -9,11 +9,21 @@ import Graphiti
 import NIO
 import GraphQL
 
+/// Async-await non-throwing GraphQL resolver function
+public typealias AsyncAwaitResolve<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments) async -> FieldType
+
+/// Async-await throwing GraphQL resolver function
+public typealias AsyncAwaitThrowingResolve<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments) async throws -> FieldType
+
+/// Async-await non-throwing  GraphQL resolver function
+public typealias AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments, EventLoopGroup) async -> FieldType
+
+/// Async-await throwing  GraphQL resolver function
+public typealias AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments, EventLoopGroup) async throws -> FieldType
+
 public extension Graphiti.Field where FieldType : Encodable {
-
-    /// Async-await non-throwing GraphQL resolver function
-    typealias AsyncAwaitResolve<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments) async -> FieldType
-
+    // -- (context, args) async -> result
+    
     convenience init(
         _ name: String,
         at function: @escaping AsyncAwaitResolve<ObjectType, Context, Arguments, FieldType>,
@@ -41,9 +51,7 @@ public extension Graphiti.Field where FieldType : Encodable {
         self.init(name, at: resolve, {})
     }
 
-
-    /// Async-await throwing GraphQL resolver function
-    typealias AsyncAwaitThrowingResolve<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments) async throws -> FieldType
+    // -- (context, args) async throws -> result
 
     convenience init(
         _ name: String,
@@ -72,8 +80,7 @@ public extension Graphiti.Field where FieldType : Encodable {
         self.init(name, at: resolve, {})
     }
 
-    /// Async-await non-throwing  GraphQL resolver function
-    typealias AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments, EventLoopGroup) async -> FieldType
+    // -- (context, args, eventLoop) async -> result
 
     convenience init(
         _ name: String,
@@ -104,8 +111,7 @@ public extension Graphiti.Field where FieldType : Encodable {
         self.init(name, at: resolve, {})
     }
 
-    /// Async-await throwing  GraphQL resolver function
-    typealias AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments, EventLoopGroup) async throws -> FieldType
+    // -- (context, args, eventLoop) async throws -> result
 
     convenience init(
         _ name: String,
@@ -138,83 +144,134 @@ public extension Graphiti.Field where FieldType : Encodable {
 
 }
 
-public extension SubscriptionField where FieldType : Encodable {
-    /// Async-await non-throwing GraphQL subscription resolver function
-    typealias AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType> = (ObjectType) -> (Context, Arguments) async -> EventStream<SourceEventType>
 
-    convenience init(
+public extension Graphiti.Field {
+    // -- (context, args) async -> result
+    
+    convenience init<ResolveType>(
         _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType>,
+        at function: @escaping AsyncAwaitResolve<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
-        let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task { await subFunc(type)(context, arguments) }
+                eventLoopGroup.task { await function(type)(context, arguments) }
             }
         }
-        self.init(name, as: `as`, atSub: subscribe, argument)
+
+        self.init(name, at: resolve, as: type, argument)
     }
 
-    convenience init(
+    convenience init<ResolveType>(
         _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType>
+        at function: @escaping AsyncAwaitResolve<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type
     ) where Arguments == NoArguments {
-        let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task { await subFunc(type)(context, arguments) }
+                eventLoopGroup.task { await function(type)(context, arguments) }
             }
         }
-        self.init(name, as: `as`, atSub: subscribe)
+        
+        self.init(name, at: resolve, as: type, {})
     }
 
-    /// Async-await throwing GraphQL subscription resolver function
-    typealias AsyncAwaitThrowingSubscription<ObjectType, Context, Arguments, SourceEventType> = (ObjectType) -> (Context, Arguments) async throws -> EventStream<SourceEventType>
+    // -- (context, args) async throws -> result
 
-    convenience init(
+    convenience init<ResolveType>(
         _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping AsyncAwaitThrowingSubscription<ObjectType, Context, Arguments, SourceEventType>,
+        at function: @escaping AsyncAwaitThrowingResolve<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
-        let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task { try await subFunc(type)(context, arguments) }
+                eventLoopGroup.task { try await function(type)(context, arguments) }
             }
         }
-        self.init(name, as: `as`, atSub: subscribe, argument)
+
+        self.init(name, at: resolve, as: type, argument)
     }
 
-    convenience init(
+    convenience init<ResolveType>(
         _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping AsyncAwaitThrowingSubscription<ObjectType, Context, Arguments, SourceEventType>
+        at function: @escaping AsyncAwaitThrowingResolve<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type
     ) where Arguments == NoArguments {
-        let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task { try await subFunc(type)(context, arguments) }
+                eventLoopGroup.task { try await function(type)(context, arguments) }
             }
         }
-        self.init(name, as: `as`, atSub: subscribe)
+
+        self.init(name, at: resolve, as: type, {})
     }
-}
 
-extension EventLoopGroup {
-    /// Async Closure
-    typealias SendFunction<Value> = () async throws -> Value
+    // -- (context, args, eventLoop) async -> result
 
-    /// Create a promise that solve-able by an async function
-    func task<Value>(_ body: @escaping SendFunction<Value>) -> EventLoopFuture<Value> {
-        let promise = next().makePromise(of: Value.self)
-        Task.init {
-            do {
-                let value = try await body()
-                promise.succeed(value)
-            } catch {
-                promise.fail(error)
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type,
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
+    ) {
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, eventLoopGroup in
+                eventLoopGroup.task {
+                    await function(type)(context, arguments, eventLoopGroup)
+                }
             }
         }
-        return promise.futureResult
+        self.init(name, at: resolve, as: type, argument)
     }
+
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type
+    ) where Arguments == NoArguments {
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, eventLoopGroup in
+                eventLoopGroup.task {
+                    await function(type)(context, arguments, eventLoopGroup)
+                }
+            }
+        }
+        self.init(name, at: resolve, as: type, {})
+    }
+
+    // -- (context, args, eventLoop) async throws -> result
+
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type,
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
+    ) {
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, eventLoopGroup in
+                eventLoopGroup.task {
+                    try await function(type)(context, arguments, eventLoopGroup)
+                }
+            }
+        }
+        self.init(name, at: resolve, as: type, argument)
+    }
+    
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
+        as type: FieldType.Type
+    ) where Arguments == NoArguments {
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, eventLoopGroup in
+                eventLoopGroup.task {
+                    try await function(type)(context, arguments, eventLoopGroup)
+                }
+            }
+        }
+        self.init(name, at: resolve, as: type, {})
+    }
+
 }
