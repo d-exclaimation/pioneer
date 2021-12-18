@@ -11,14 +11,6 @@ import Vapor
 
 /// GraphQL Over Websocket Protocol namespace for `subscriptions-transport-ws/graphql-ws`
 enum SubscriptionTransportWs: SubProtocol {
-    static var next: String { GQL_DATA }
-
-    static var complete: String { GQL_COMPLETE }
-
-    static var error: String { GQL_ERROR }
-
-    static var keepAliveMessage: String { GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE).jsonString }
-
     static let name: String = "graphql-ws"
 
     private static let GQL_START = "start"
@@ -62,5 +54,16 @@ enum SubscriptionTransportWs: SubProtocol {
         let ka = GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)
         ws.send(msg: ack.jsonString)
         ws.send(msg: ka.jsonString)
+    }
+    
+    static var next: String { GQL_DATA }
+
+    static var complete: String { GQL_COMPLETE }
+
+    static var error: String { GQL_ERROR }
+
+    static var keepAliveMessage: String {
+        GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)
+            .jsonString
     }
 }
