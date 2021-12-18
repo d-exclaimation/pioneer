@@ -63,6 +63,8 @@ enum GraphQLWs: SubProtocol {
 
     static var error: String { Error }
 
-    static var keepAliveMessage: String { GraphQLMessage(type: ConnectionAck).jsonString }
-
+    static var keepAliveMessage: String {
+        GraphQLMessage(type: Ping)
+            .jsonString
+    }
 }

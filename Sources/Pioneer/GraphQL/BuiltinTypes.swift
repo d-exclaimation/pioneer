@@ -92,4 +92,9 @@ public extension String {
     var id: ID {
         .init(self)
     }
+    
+    /// ID from this string
+    func toID() -> ID {
+        .init(self)
+    }
 }
