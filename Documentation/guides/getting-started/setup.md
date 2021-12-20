@@ -13,9 +13,9 @@ Obviously, Pioneer requires Swift installed. Swift can be installed for most ope
 
 | Platform | Toolchain                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MacOS    | [!badge target="blank" text="Xcode 13.1"](https://download.swift.org/swift-5.5.1-release/xcode/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-osx.pkg)                                                                                                                                                                                                                                                                                                                                                                      |
-| Ubuntu   | [!badge target="blank" variant="warning" text="16.04"](https://download.swift.org/swift-5.5.1-release/ubuntu1604/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-ubuntu16.04.tar.gz) [!badge target="blank" variant="success" text="18.04"](https://download.swift.org/swift-5.5.1-release/ubuntu1804/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-ubuntu18.04.tar.gz) [!badge target="blank" text="20.04"](https://download.swift.org/swift-5.5.1-release/ubuntu2004/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-ubuntu20.04.tar.gz) |
-| Windows  | [!badge target="blank" text="Windows 10"](https://download.swift.org/swift-5.5.1-release/windows10/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-windows10.exe)                                                                                                                                                                                                                                                                                                                                                            |
+| MacOS    | [!badge target="blank" text="Xcode 13.2"](https://download.swift.org/swift-5.5.2-release/xcode/swift-5.5.2-RELEASE/swift-5.5.2-RELEASE-osx.pkg)                                                                                                                                                                                                                                                                                                                                                                      |
+| Ubuntu   | [!badge target="blank" variant="warning" text="16.04"](https://download.swift.org/swift-5.5.2-release/ubuntu1604/swift-5.5.2-RELEASE/swift-5.5.2-RELEASE-ubuntu16.04.tar.gz) [!badge target="blank" variant="success" text="18.04"](https://download.swift.org/swift-5.5.2-release/ubuntu1804/swift-5.5.2-RELEASE/swift-5.5.2-RELEASE-ubuntu18.04.tar.gz) [!badge target="blank" text="20.04"](https://download.swift.org/swift-5.5.2-release/ubuntu2004/swift-5.5.2-RELEASE/swift-5.5.2-RELEASE-ubuntu20.04.tar.gz) |
+| Windows  | [!badge target="blank" text="Windows 10"](https://download.swift.org/swift-5.5.2-release/windows10/swift-5.5.2-RELEASE/swift-5.5.2-RELEASE-windows10.exe)                                                                                                                                                                                                                                                                                                                                                            |
 
 ## Application
 
@@ -36,7 +36,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.54.0"),
-        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.3.0")
+        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.3.2")
     ],
     targets: [
         .target(
@@ -56,7 +56,9 @@ Pioneer require Swift 5.5 or up due to the `_Concurrency` package and features i
 
 ```swift Specifying requirement for Swift 5.5
 let package = Package(
-    platforms: [.macOS(.v12)],
+    platforms: [
+        .macOS(.v12)
+    ],
 )
 ```
 

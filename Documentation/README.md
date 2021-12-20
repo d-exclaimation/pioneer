@@ -5,7 +5,7 @@ title: Welcome
 
 # Welcome to Pioneer
 
-[Pioneer](https://github.com/d-exclaimation/pioneer) is an easy to use Swift GraphQL :unicorn_face: server built for Vapor that works with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) or using libraries that uses that package.
+[Pioneer](https://github.com/d-exclaimation/pioneer) is an easy to use Swift GraphQL :unicorn_face: server built for Vapor that works with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
 
 ![Pioneer](pioneer-banner.png)
 
@@ -21,11 +21,13 @@ Pioneer will configure all the necessary things to build a GraphQL API such as:
 
 You can add Pioneer into any existing Vapor application with any GraphQL schema library made from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) like [Graphiti](https://github.com/GraphQLSwift/Graphiti).
 
-!!! :zap: [Getting Started](./guides/getting-started/setup.md) :zap:
-Get up to speed with Pioneer with a full example by checking out the guide.
-
 [!ref Getting Started](./guides/getting-started/setup.md)
-!!!
+
+Add this line to add Pioneer as one of your dependencies.
+
+```swift
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.3.2")
+```
 
 Go to the `main.swift` or any Swift file where you apply your Vapor routing like your `routes.swift` file.
 

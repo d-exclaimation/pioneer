@@ -87,17 +87,66 @@ Cases where stream is no longer consumed / stopped and termination will require 
 - Client disconnect and implicitly stop any running subscription
 
 !!!success AsyncStream and Nozzle
-Termination callback can be implicitly inferred for these types of `AsyncSequence`.
+Termination callback can be implicitly inferred for these types of `AsyncSequence`:
 
 - `AsyncStream`
 - `Nozzle`
 - `Source` (_due to `Nozzle`_)
 - `Reservoir`(_due to `Source`_)
+- `AsyncPubSub` (_due to `AsyncStream`_)
+
++++ AsyncPubSub
 
 ```swift
-let (source, _) = Source<Int>.desolate()
+let pubsub = AsyncPubSub()
 
-source.nozzle().toEventStream() // <- Use Nozzle termination callback
+// Using the PubSub's termination without specifying
+let eventStream: EventStream<Message> = pubsub
+    .asyncStream(Message.self, for: "some-topic") // AsyncStream<Message>
+    .toEventStream()                          // AsyncEventStream<Message, AsyncStream<Message>>
 ```
+
++++ AsyncStream
+
+```swift
+let stream = AsyncStream<Quake> { con in
+    let monitor = QuakeMonitor()
+    monitor.quakeHandler = { quake in
+        continuation.yield(quake)
+    }
+    continuation.onTermination = { @Sendable _ in
+        monitor.stopMonitoring()
+    }
+    monitor.startMonitoring()
+}
+
+// Using the AsyncStream's termination without specifying
+let eventStream: EventStream<Quake> = stream
+    .toEventStream() // AsyncEventStream<Quake, AsyncStream<Quake>>
+```
+
++++ Reservoir
+
+```swift
+
+let reservoir = Reservoir<String, Message>()
+
+// Using the Reservoir's termination without specifying
+let eventStream: EventStream<Message> = reservoir
+    .source(for: "some-topic") // Source<Message>
+    .toEventStream()           // AsyncEventStream<Message, Nozzle<Message>>
+```
+
++++ Source
+
+```swift
+let source = Source<Message>()
+
+// Using the Source's termination without specifying
+let eventStream: EventStream<Message> = source
+    .toEventStream()
+```
+
++++
 
 !!!

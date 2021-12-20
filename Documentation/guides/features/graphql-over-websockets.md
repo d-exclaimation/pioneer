@@ -40,10 +40,10 @@ The newer sub-protocol is [graphql-ws](https://github.com/enisdenjo/graphql-ws).
 
 !!!success GraphiQL :heart: graphql-ws
 GraphiQL has full support for `graphql-ws` and Pioneer (since `0.3.0`) can now host GraphiQL with this support (and `subscriptions-transport-ws` support).
-!!!
 
 !!!warning Incompatibilty
 The retired [graphql-playground](https://github.com/graphql/graphql-playground), cloud based IDE such as [Apollo Sandbox](https://studio.apollographql.com/sandbox), some clients, and many servers has yet to support this protocol. More explaination [here](#consideration-1).
+
 !!!
 
 ### Usage
