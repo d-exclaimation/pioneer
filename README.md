@@ -6,72 +6,32 @@
     <h1>Pioneer</h1>
 </p>
 
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dswift-versions&style=for-the-badge)](https://swiftpackageindex.com/d-exclaimation/pioneer)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dplatforms&style=for-the-badge)](https://swiftpackageindex.com/d-exclaimation/pioneer)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dswift-versions&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dplatforms&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
 
-Pioneer is a open-source Swift GraphQL server, for Vapor. Pioneer works with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) or by libraries that use that package.
+Pioneer is a open-source Swift GraphQL server, for [Vapor](https://github.com/vapor/vapor). 
 
-## Documentation
-
-- [Documentation Site](https://pioneer-graphql.netlify.app)
-
-## Quick Start
-
-Add Graphiti, Vapor and Pioneer to your `Package.swift`:
+## Setup
 
 ```swift
-import PackageDescription
-
-let package = Package(
-    dependencies: [
-        .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.0.0"),
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.54.0"),
-        .package(url: "https://github.com/d-exclaimation/pioneer", from: "<latest-version>")
-    ],
-    targets: [
-        .target(
-            name: "MyGraphQLServer",
-            dependencies: [
-                .product(name: "Pioneer", package: "pioneer"),
-                .product(name: "Graphiti", package: "Graphiti"),
-                .product(name: "Vapor", package: "vapor")
-            ]
-        )
-    ]
-)
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.3.2")
 ```
 
-```swift
-import Vapor
-import Pioneer
-import Graphiti
+## Swift for GraphQL
 
-let app = try Application(.detect())
+Pioneer is a layer on top of [Vapor](https://github.com/vapor/vapor) for handling all GraphQL operations through HTTP and WebSocket utilising the new concurrency features in Swift 5.5.
 
-let schema: Schema<Void, Resolver> = ...
+It can work with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) and work with any GraphQL client even with WebSocket.
 
-let resolver: Resolver = ...
+## Usage/Examples
 
-let server = Pioneer(
-    schema: schema,
-    resolver: resolver,
-    websocketProtocol: .graphqlWs
-)
+- [Documentation](https://pioneer-graphql.netlify.app)
+- [Getting started](https://pioneer-graphql.netlify.app/guides/getting-started/setup/)
 
-server.applyMiddleware(on: app)
+### Protocols (WebSocket)
 
-defer {
-    app.shutdown()
-}
-
-try app.run()
-```
-
-Pioneer provides all the boilerplate and implemention required to run a GraphQL server on top of Vapor that can handle both over HTTP and over Websocket.
-
-> 💡 Pioneer is built for Vapor, and it doesn't require complicated setup to add it a Vapor application
-
-Finally, just ran the server with `swift run` and you should be able to make request to the server.
+- [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
+- [graphql-ws](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md)
 
 ## Feedback
 
