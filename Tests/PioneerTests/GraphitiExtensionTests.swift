@@ -11,7 +11,6 @@ import XCTest
 import GraphQL
 import Graphiti
 import NIO
-import Desolate
 @testable import Pioneer
 
 final class GraphitiExtensionTests: XCTestCase {

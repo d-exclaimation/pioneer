@@ -38,7 +38,7 @@ struct Message: Codable, Identifiable {
 
 /// Simple Test Resolver with a sync query, async throwing mutation, and async throwing subscriptions
 struct TestResolver {
-    let (source, engine) = Source<Message>.desolate()
+    let pubsub = AsyncPubSub()
 
     func hello(context: Void, arguments: NoArguments) -> String {
         "Hello GraphQL!!"
@@ -50,12 +50,13 @@ struct TestResolver {
 
     func randomMessage(context: Void, arguments: Arg1) async throws -> Message {
         let message = Message(content: arguments.string)
-        engine.tell(with: .next(message))
+        await pubsub.publish(for: "*", payload: message)
         return message
     }
 
-    func onMessage(context: Void, arguments: NoArguments) async throws -> EventSource<Message> {
-        source.toEventStream()
+    func onMessage(context: Void, arguments: NoArguments) async -> EventSource<Message> {
+        let stream: AsyncStream<Message> = await pubsub.asyncStream(for: "*")
+        return stream.toEventStream()
     }
 }
 
@@ -147,8 +148,8 @@ final class GraphitiTests: XCTestCase {
         // -- End --
         
         Task.init {
-            await resolver.engine.task(with: .next(.init(id: "bob", content: "Bob")))
-            await resolver.engine.task(with: .next(.init(id: "bob2", content: "Bob2")))
+            await resolver.pubsub.publish(for: "*", payload: Message(id: "bob", content: "Bob"))
+            await resolver.pubsub.publish(for: "*", payload: Message(id: "bob2", content: "Bob2"))
         }
 
         wait(for: [expectation], timeout: 10)

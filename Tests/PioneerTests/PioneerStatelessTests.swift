@@ -11,7 +11,6 @@ import XCTest
 import GraphQL
 import Graphiti
 import NIO
-import Desolate
 @testable import Pioneer
 
 struct TestResolver1 {
@@ -52,7 +51,7 @@ final class PioneerStatelessTests: XCTestCase {
         }
     }
 
-    private lazy var pioneer = Pioneer.init(schema: schema, resolver: resolver)
+    private lazy var pioneer = Pioneer(schema: schema, resolver: resolver)
 
     /// Pioneer
     /// 1. Should be able to block certain operations
