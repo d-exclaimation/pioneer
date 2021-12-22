@@ -86,14 +86,14 @@ Cases where stream is no longer consumed / stopped and termination will require 
 - Client send a explicit stop request to end the subscription (might be before stream ended)
 - Client disconnect and implicitly stop any running subscription
 
-!!!success AsyncStream and Nozzle
+!!!success AsyncStream, AsyncPubSub, Nozzle, Source, and Reservoir
 Termination callback can be implicitly inferred for these types of `AsyncSequence`:
 
 - `AsyncStream`
+- `AsyncPubSub` (_due to `AsyncStream`_)
 - `Nozzle`
 - `Source` (_due to `Nozzle`_)
 - `Reservoir`(_due to `Source`_)
-- `AsyncPubSub` (_due to `AsyncStream`_)
 
 +++ AsyncPubSub
 
@@ -101,7 +101,7 @@ Termination callback can be implicitly inferred for these types of `AsyncSequenc
 let pubsub = AsyncPubSub()
 
 // Using the PubSub's termination without specifying
-let eventStream: EventStream<Message> = pubsub
+let eventStream: EventStream<Message> = await pubsub
     .asyncStream(Message.self, for: "some-topic") // AsyncStream<Message>
     .toEventStream()                          // AsyncEventStream<Message, AsyncStream<Message>>
 ```

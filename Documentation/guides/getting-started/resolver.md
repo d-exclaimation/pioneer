@@ -76,9 +76,7 @@ Pioneer has capabilities to handle subscription through websocket, all you need 
 
 ```swift
 struct Resolver {
-    ...
-
-    let (source, supply) = Source<User>.desolate()
+    let pubsub = AsyncPubSub()
 
     ...
 
@@ -103,7 +101,8 @@ struct Resolver {
     ...
 
     func onChange(_: Context, _: NoArgs) async -> EventStream<User> {
-        source.nozzle()
+        await pubsub
+            .asyncStream(User.self, for: "user-on-change")
             .toEventStream()
     }
 }
@@ -118,45 +117,20 @@ Learn why on:
 
 !!!
 
-!!!success AsyncStream and Nozzle
-Pioneer brings additional `AsyncSequence` for different purposes notably `Nozzle` which in an equivalent ot `AsyncStream` and `Source` which is hot observable version of `Nozzle` that can construct multiple nozzles from a single upstream.
+!!!success AsyncPubSub
+Pioneer brings a data structure that acts like a in memory PubSub for managing topic/trigger based `AsyncSequence` using Swift `actors` and `AsyncStream`.
 
-All of these can be easily converted to `EventStream`, and they both will implicit use their own termination callback when the subscription ends.
+The `AsyncPubSub` can generate a new consumer `AsyncStream` of a certain type from a single Source stream differentiated through the trigger string.
 
 ==- Example code
 
 ```swift
-// -- Source example --
+let pubsub = AsyncPubSub()
 
-let (source, supply) = Source<Int>.desolate()
+let asyncStream: AsyncStream<Int> = await pubsub
+    .asyncStream(for: "my-trigger")
 
-func mutation(...) -> Int {
-    let res = ...
-    supply.tell(with: .next(res)) // publishing to Source
-    return res
-}
-
-func subscription(...) -> EventStream<Int> {
-    source.nozzle().toEventStream() // easy convertion, automatically use Source deallocating callback when subscription ended
-}
-
-// -- AsyncStream example --
-
-func subscription2(...) -> EventStream<Int> {
-    let stream = AsyncStream<Int> { con in
-        let task = Task {
-            for i in 0...100 {
-                con.yield(i)
-            }
-            con.finish()
-        }
-
-        con.onTermination = { @Sendable _ in
-            task.cancel()
-        }
-    }
-    stream.toEventStream() // use the onTermination callback when subscription ended
-}
+await pubsub.publish(for: "my-trigger", payload: 10)
 ```
 
 ===

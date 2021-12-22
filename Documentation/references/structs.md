@@ -29,19 +29,21 @@ The ID type is serialized in the same way as a String; however, defining it as a
 
 Returns a new [ID](#id) from a string.
 
-+++ Example
+=== Example
 
 ```swift
 let id = ID("any-string")
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name | Type                                     | Description                              |
 | ---- | ---------------------------------------- | ---------------------------------------- |
 | \_   | [!badge variant="primary" text="String"] | String value to which the ID is built on |
 
-+++
+===
 
 ### `description`
 
@@ -59,13 +61,13 @@ A getter for the string value.
 
 A static initializer function to create a new [ID](#id) from a newly generated UUID.
 
-+++ Example
+=== Example
 
 ```swift
 let uuid: ID = .uuid()
 ```
 
-+++
+===
 
 ### `random` (static)
 
@@ -77,19 +79,21 @@ Random ID does not guarantee uniqueness, for that recommended to use [`.uuid()`]
 
 !!!
 
-+++ Example
+=== Example
 
 ```swift
 let randoID: ID = .random(length: 25)
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name     | Type                                  | Description                  |
 | -------- | ------------------------------------- | ---------------------------- |
 | `length` | [!badge variant="primary" text="Int"] | Length for the randomized ID |
 
-+++
+===
 
 ## GraphQLMessage
 
@@ -101,7 +105,7 @@ _\*Generic means most of the messages, there are some exceptions_
 
 Returns a new instance by specifying all the parameters of using default if not given one.
 
-+++ Example
+=== Example
 
 ```swift
 let message = GraphQLMessage(
@@ -113,7 +117,9 @@ let message = GraphQLMessage(
 )
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name      | Type                                             | Description                                     |
 | --------- | ------------------------------------------------ | ----------------------------------------------- |
@@ -121,13 +127,13 @@ let message = GraphQLMessage(
 | `id`      | [!badge variant="warning" text="String?"]        | Operation based ID if any                       |
 | `payload` | [!badge variant="warning" text="[String: Map]?"] | Any payload in terms of object form             |
 
-+++
+===
 
 ### `from`
 
 Returns an instance using [GraphQLRequest](#graphqlrequest).
 
-+++ Example
+=== Example
 
 ```swift
 let message = GraphQLMessage.from(
@@ -137,7 +143,9 @@ let message = GraphQLMessage.from(
 )
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name   | Type                                             | Description                                     |
 | ------ | ------------------------------------------------ | ----------------------------------------------- |
@@ -145,7 +153,7 @@ let message = GraphQLMessage.from(
 | `id`   | [!badge variant="warning" text="String?"]        | Operation based ID if any                       |
 | \_     | [!badge variant="warning" text="GraphQLRequest"] | GraphQLRequest used                             |
 
-+++
+===
 
 ## GraphQLRequest
 
@@ -159,7 +167,7 @@ This struct is useful when parsing your own GraphQL request, it can also easily 
 
 Returns a new instance by specifying all the parameters of using default if not given one.
 
-+++ Example
+=== Example
 
 ```swift
 let message = GraphQLRequest(
@@ -169,7 +177,9 @@ let message = GraphQLRequest(
 )
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name            | Type                                             | Description                                                   |
 | --------------- | ------------------------------------------------ | ------------------------------------------------------------- |
@@ -177,13 +187,13 @@ let message = GraphQLRequest(
 | `operationName` | [!badge variant="warning" text="String?"]        | Name of operation being request from the query string         |
 | `variables`     | [!badge variant="warning" text="[String: Map]?"] | Any payload brought to fill the variables in the query string |
 
-+++
+===
 
 ### `operationType`
 
 Returning the parsed `operationType` of this request.
 
-+++ Example
+=== Example
 
 ```swift
 let message: GraphQLRequest
@@ -198,13 +208,13 @@ case .mutation:
 }
 ```
 
-+++
+===
 
 ### `isIntrospection`
 
 Return true if the request is valid, is a query operation, is querying the schema information whether the entire schema types or each individual types.
 
-+++ Example
+=== Example
 
 ```swift
 let message: GraphQLRequest
@@ -216,4 +226,4 @@ guard !message.isIntrospection else {
 // Must not be introspection
 ```
 
-+++
+===

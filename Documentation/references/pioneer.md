@@ -13,7 +13,7 @@ order: 100
 
 Returns an initialized [Pioneer](#pioneer) server instance.
 
-+++ Example
+=== Example
 
 ```swift
 let server = Pioneer(
@@ -25,7 +25,9 @@ let server = Pioneer(
 )
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name                | Type                                                         | Description                                                                            |
 | ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
@@ -38,7 +40,7 @@ let server = Pioneer(
 | `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
-+++
+===
 
 ### `init` (No context)
 
@@ -50,7 +52,7 @@ where Context == Void
 
 Returns an initialized [Pioneer](#pioneer) server instance without explicitly specifying `contextBuilder`.
 
-+++ Example
+=== Example
 
 ```swift
 let server = Pioneer(
@@ -59,7 +61,9 @@ let server = Pioneer(
 )
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name                | Type                                                | Description                                                                            |
 | ------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -71,7 +75,7 @@ let server = Pioneer(
 | `playground`        | [!badge variant="primary" text="IDE"]               | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]           | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
-+++
+===
 
 ### `init` (Graphiti)
 
@@ -83,7 +87,7 @@ where Schema == Graphiti.Schema<Resolver, Context>
 
 Returns an initialized [Pioneer](#pioneer) server instance using [Graphiti](https://github.com/GraphQLSwift/Graphiti) schema.
 
-+++ Example
+=== Example
 
 ```swift
 let server = try Pioneer(
@@ -95,7 +99,9 @@ let server = try Pioneer(
 )
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name                | Type                                                         | Description                                                                            |
 | ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
@@ -108,7 +114,7 @@ let server = try Pioneer(
 | `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
-+++
+===
 
 ### `applyMiddleware`
 
@@ -126,7 +132,7 @@ As that will overwrite the applied routing and block certain operations in those
 It's best to group any other routes or apply the routing after all custom routes.
 !!!
 
-+++ Example
+=== Example
 
 ```swift
 server.applyMiddleware(
@@ -135,11 +141,13 @@ server.applyMiddleware(
 )
 ```
 
-+++ Options
+===
+
+==- Options
 
 | Name | Type                                            | Description                                |
 | ---- | ----------------------------------------------- | ------------------------------------------ |
 | `on` | [!badge variant="danger" text="RoutesBuilder"]  | Graphiti schema used to execute operations |
 | `at` | [!badge variant="primary" text="PathComponent"] | Resolver used by the GraphQL schema        |
 
-+++
+===

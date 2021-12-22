@@ -153,6 +153,8 @@ Allow all operation through `GET` and `POST`.
 
 GraphQL over Websocket sub-protocol
 
+[!ref GraphQL over WebSocket Guide](/guides/features/graphql-over-websockets)
+
 ```swift
 let server = Pioneer(
     ...,
