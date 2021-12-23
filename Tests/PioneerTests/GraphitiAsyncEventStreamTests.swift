@@ -10,7 +10,6 @@ import Foundation
 import XCTest
 import Graphiti
 import NIO
-import Desolate
 @testable import Pioneer
 
 /// Simple message type with a custom computed properties

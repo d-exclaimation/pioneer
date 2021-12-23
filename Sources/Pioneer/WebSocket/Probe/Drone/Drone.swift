@@ -6,14 +6,13 @@
 //
 
 import Foundation
-import Desolate
 import Vapor
 import GraphQL
 import Graphiti
 
 extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions
-    actor Drone: AbstractDesolate {
+    actor Drone {
         private let process: Process
         private let schema: GraphQLSchema
         private let resolver: Resolver
@@ -34,34 +33,12 @@ extension Pioneer {
         }
 
         // MARK: - Private mutable states
-        var status: Signal = .running
         var tasks: [String: Deferred<Void>] = [:]
-
-        func onMessage(msg: Act) async -> Signal {
-            switch msg {
-            case .start(oid: let oid, gql: let gql):
-                await onStart(for: oid, given: gql)
-
-            case .stop(oid: let oid):
-                onStop(for: oid)
-
-            case .ended(oid: let oid):
-                onEnd(for: oid)
-
-            case .output(oid: let oid, let message):
-                onOutput(for: oid, given: message)
-                
-            case .acid:
-                onTerminate()
-                return .stopped
-            }
-            return .running
-        }
         
         // MARK: - Event callbacks
         
         /// Start subscriptions, setup pipe pattern, and callbacks
-        private func onStart(for oid: String, given gql: GraphQLRequest) async {
+        func start(for oid: String, given gql: GraphQLRequest) async {
             let nextTypename = proto.next
             let subscriptionResult = await subscription(gql: gql)
             
@@ -88,20 +65,20 @@ extension Pioneer {
             let task = asyncStream.pipe(
                 to: self,
                 complete: { sink in
-                    await sink.onEnd(for: oid)
+                    await sink.end(for: oid)
                 },
                 failure: { sink, _ in
-                    await sink.onEnd(for: oid)
+                    await sink.end(for: oid)
                 },
                 next: { sink, res in
-                    await sink.onOutput(for: oid, given: .from(type: nextTypename, id: oid, res))
+                    await sink.next(for: oid, given: .from(type: nextTypename, id: oid, res))
                 }
             )
             tasks.update(oid, with: task)
         }
         
         /// Stop subscription, shutdown nozzle and remove it so preventing overflow of any messages
-        private func onStop(for oid: String) {
+        func stop(for oid: String) {
             guard let task = tasks[oid] else { return }
 
             tasks.delete(oid)
@@ -111,7 +88,7 @@ extension Pioneer {
         /// Send an ending message
         /// but prevent completion message if nozzle doesn't exist
         /// e.g: - Shutdown-ed operation
-        private func onEnd(for oid: String) {
+        func end(for oid: String) {
             guard tasks.has(oid) else { return }
             tasks.delete(oid)
             let message = GraphQLMessage(id: oid, type: proto.complete)
@@ -121,13 +98,13 @@ extension Pioneer {
         /// Push message to websocket connection
         /// but prevent completion message if nozzle doesn't exist
         /// e.g: - Shutdown-ed operation
-        private func onOutput(for oid: String, given msg: GraphQLMessage) {
+        func next(for oid: String, given msg: GraphQLMessage) {
             guard tasks.has(oid) else { return }
             process.send(msg.jsonString)
         }
         
         /// Kill actor by cancelling and deallocating all stored task
-        private func onTerminate() {
+        func acid() {
             tasks.values.forEach { $0.cancel() }
             tasks.removeAll()
         }
@@ -160,14 +137,6 @@ extension Pioneer {
                 process.send(message.jsonString)
                 task.cancel()
             }
-        }
-        
-        enum Act {
-            case start(oid: String, gql: GraphQLRequest)
-            case stop(oid: String)
-            case ended(oid: String)
-            case output(oid: String, GraphQLMessage)
-            case acid
         }
     }
 }

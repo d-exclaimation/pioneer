@@ -6,14 +6,13 @@
 //
 
 import Foundation
-import Desolate
 import Vapor
 import GraphQL
 import Graphiti
 
 extension Pioneer {
     /// Actor for handling Websocket distribution and dispatching of client specific actor
-    actor Probe: AbstractDesolate, NonStop {
+    actor Probe {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
@@ -32,56 +31,39 @@ extension Pioneer {
 
         // MARK: - Private mutable states
         private var clients: [UUID: Process] = [:]
-        private var drones: [UUID: Desolate<Drone>] = [:]
-
-        func onMessage(msg: Act) async -> Signal {
-            switch msg {
-            case .connect(process: let process):
-                onConnect(with: process)
-            case .disconnect(pid: let pid):
-                onDisconnect(for: pid)
-            case .start(pid: let pid, oid: let oid, gql: let gql):
-                onLongRunning(for: pid, with: oid, given: gql)
-            case .once(pid: let pid, oid: let oid, gql: let gql):
-                onShortLived(for: pid, with: oid, given: gql)
-            case .stop(pid: let pid, oid: let oid):
-                await onStop(for: pid, with: oid)
-            case .outgoing(oid: let oid, process: let process, res: let res):
-                onOutgoing(with: oid, to: process, given: res)
-            }
-            return same
-        }
+        private var drones: [UUID: Drone] = [:]
+        
         
         // MARK: - Event callbacks
         
         /// Allocate space and save any verified process
-        private func onConnect(with process: Process) {
+        func connect(with process: Process) async {
             clients.update(process.id, with: process)
         }
         
         /// Deallocate the space from a closing process
-        private func onDisconnect(for pid: UUID) {
-            drones[pid]?.tell(with: .acid)
+        func disconnect(for pid: UUID) async {
+            await drones[pid]?.acid()
             clients.delete(pid)
             drones.delete(pid)
         }
         
         /// Long running operation require its own actor, thus initialing one if there were none prior
-        private func onLongRunning(for pid: UUID, with oid: String, given gql: GraphQLRequest) {
+        func start(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
             guard let process = clients[pid] else { return }
             let drone = drones.getOrElse(pid) {
-                spawn(.init(process,
+                .init(process,
                     schema: schema,
                     resolver: resolver,
                     proto: proto
-                ))
+                )
             }
-            drone.tell(with: .start(oid: oid, gql: gql))
             drones.update(pid, with: drone)
+            await drone.start(for: oid, given: gql)
         }
         
         /// Short lived operation is processed immediately and pipe back later
-        private func onShortLived(for pid: UUID, with oid: String, given gql: GraphQLRequest) {
+        func once(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
             guard let process = clients[pid] else { return }
 
             let future = execute(gql, ctx: process.ctx, req: process.req)
@@ -89,14 +71,14 @@ extension Pioneer {
             pipeToSelf(future: future) { sink, res in
                 switch res {
                 case .success(let value):
-                    await sink.onOutgoing(
+                    await sink.outgoing(
                         with: oid,
                         to: process,
                         given: .from(type: self.proto.next, id: oid, value)
                     )
                 case .failure(let error):
                     let result: GraphQLResult = .init(data: nil, errors: [.init(message: error.localizedDescription)])
-                    await sink.onOutgoing(
+                    await sink.outgoing(
                         with: oid,
                         to: process,
                         given: .from(type: self.proto.next, id: oid, result)
@@ -106,12 +88,12 @@ extension Pioneer {
         }
 
         /// Stopping any operation to client specific actor
-        private func onStop(for pid: UUID, with oid: String) async {
-            await drones[pid]?.task(with: .stop(oid: oid))
+        func stop(for pid: UUID, with oid: String) async {
+            await drones[pid]?.stop(for: oid)
         }
         
         /// Message for pipe to self result after processing short lived operation
-        private func onOutgoing(with oid: String, to process: Process, given msg: GraphQLMessage) {
+        func outgoing(with oid: String, to process: Process, given msg: GraphQLMessage) async {
             process.send(msg.jsonString)
             process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
         }
@@ -133,15 +115,6 @@ extension Pioneer {
             } catch {
                 return req.eventLoop.next().makeFailedFuture(error)
             }
-        }
-
-        enum Act {
-            case connect(process: Process)
-            case disconnect(pid: UUID)
-            case start(pid: UUID, oid: String, gql: GraphQLRequest)
-            case once(pid: UUID, oid: String, gql: GraphQLRequest)
-            case stop(pid: UUID, oid: String)
-            case outgoing(oid: String, process: Process, res: GraphQLMessage)
         }
     }
 }

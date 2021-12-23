@@ -35,10 +35,10 @@ final class ExtensionsTests: XCTestCase {
         }
     }
 
-    /// Pipe back Future to an abstract desolate actor
+    /// Pipe back Future to an actor
     /// 1. Should not fulfill under 1 second
     /// 2. Should fulfill by the Actor after the delay
-    func testAbstractDesolateAndNIOFuture() async {
+    func testActorAndNIOFuture() async {
         let expectation = XCTestExpectation()
         let tester = Tester()
         let future = eventLoopGroup.task { () async -> XCTestExpectation in
