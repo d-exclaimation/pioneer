@@ -111,4 +111,6 @@ public struct AsyncPubSub: Sendable {
     public func close(for trigger: String) async {
         await engine.close(for: trigger)
     }
+
+    public init() {}
 }
