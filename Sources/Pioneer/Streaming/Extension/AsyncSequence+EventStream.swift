@@ -5,13 +5,15 @@
 //  Created by d-exclaimation on 3:38 PM.
 //
 
+import GraphQL
+
 extension AsyncSequence {
     public typealias Termination = AsyncStream<Element>.Continuation.Termination
     
     /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
     ///
     /// - Returns: EventStream implementation for AsyncSequence.
-    public func toEventStream() -> EventSource<Element> {
+    public func toEventStream() -> EventStream<Element> {
         AsyncEventStream<Element, Self>(from: self)
     }
 
@@ -21,7 +23,7 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         onTermination callback: @escaping @Sendable (Termination) -> Void
-    ) -> EventSource<Element> {
+    ) -> EventStream<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
                 do {
@@ -55,7 +57,7 @@ extension AsyncSequence {
     public func toEventStream(
         endValue: @escaping () -> Element,
         onTermination callback: @escaping @Sendable (Termination) -> Void
-    ) -> EventSource<Element> {
+    ) -> EventStream<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
                 do {
@@ -90,7 +92,7 @@ extension AsyncSequence {
     public func toEventStream(
         initialValue: Element,
         onTermination callback: @escaping @Sendable (Termination) -> Void
-    ) -> EventSource<Element> {
+    ) -> EventStream<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
                 do {
@@ -126,7 +128,7 @@ extension AsyncSequence {
         initialValue: Element,
         endValue: @escaping () -> Element,
         onTermination callback: @escaping @Sendable (Termination) -> Void
-    ) -> EventSource<Element> {
+    ) -> EventStream<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
                 do {
@@ -161,7 +163,7 @@ extension AsyncSequence {
     public func toEventStream(
         initialValue: Element,
         endValue: @escaping () -> Element
-    ) -> EventSource<Element> {
+    ) -> EventStream<Element> {
         let stream = AsyncStream<Element> { continuation in
             let task = Task.init {
                 do {

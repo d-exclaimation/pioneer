@@ -38,7 +38,7 @@ public struct GraphQLMessage: Codable {
         }
     }
 
-    private static func parseError(_ err: [GraphQLErrors]) -> Map? {
+    private static func parseError(_ err: [GraphQLError]) -> Map? {
         guard let data = try? JSONEncoder().encode(err) else { return .none }
         return data.to(Map.self)
     }
@@ -50,7 +50,7 @@ public struct GraphQLMessage: Codable {
         public var payload: Map?
     }
 
-    static func errors(id: String? = nil, type: String, _ error: [GraphQLErrors]) -> Variance {
+    static func errors(id: String? = nil, type: String, _ error: [GraphQLError]) -> Variance {
         let err = error
             .map { $0.message }
             .map { msg -> Map in ["message": Map.string(msg)] }

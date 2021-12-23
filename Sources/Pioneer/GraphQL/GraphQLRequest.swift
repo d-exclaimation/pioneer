@@ -18,7 +18,7 @@ public struct GraphQLRequest: Codable {
     public var variables: [String: Map]?
 
     /// Getter a GraphQL AST Source from query
-    public var source: GraphQLSource {
+    public var source: Source {
         .init(body: query)
     }
 
