@@ -6,14 +6,10 @@
 //
 
 import GraphQL
-import Desolate
 
 /// AsyncSequence for GraphQL Result
 public typealias AsyncGraphQLSequence<Sequence: AsyncSequence> = AsyncEventStream<Future<GraphQL.GraphQLResult>, Sequence>
         where Sequence.Element == Future<GraphQL.GraphQLResult>
-
-/// AsyncStream for GraphQL Result
-public typealias AsyncGraphQLNozzle = AsyncGraphQLSequence<Nozzle<Future<GraphQL.GraphQLResult>>>
 
 /// AsyncStream for GraphQL Result
 public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncStream<Future<GraphQL.GraphQLResult>>>
@@ -21,43 +17,39 @@ public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncStream<Future<Gr
 extension SubscriptionEventStream {
     /// Get the AsyncStream from this event stream regardless of its sequence
     public func asyncStream() -> AsyncStream<Future<GraphQL.GraphQLResult>>? {
-        switch self {
-        case let asyncStream as AsyncGraphQLStream:
+        if let asyncStream = self as? AsyncGraphQLStream {
             return asyncStream.sequence
-        case let nozzle as AsyncGraphQLNozzle:
-            return nozzle.sequence.asyncStream()
-        default:
-            return nil
         }
+        return nil
     }
 }
 
 extension AsyncStream where Element == Future<GraphQL.GraphQLResult> {
-    /// Pipe the GraphQLResult into a DesolatedActor.
+    /// Pipe the GraphQLResult AsyncSequence into an actor.
     ///
     /// - Parameters:
-    ///   - to: Desolate of an Actor.
-    ///   - onComplete: A message for the actor on completion evaluated lazily.
-    ///   - onFailure: A message for the actor given an error occurred.
-    ///   - transform: A function to transform the GraphQLResult into a proper message
-    /// - Returns:
-    public func pipeBack<ActorType: AbstractDesolate>(
-        to actorRef: Desolate<ActorType>,
-        onComplete: @escaping () -> ActorType.MessageType,
-        onFailure: @escaping (Error) -> ActorType.MessageType,
-        transform: @escaping (GraphQL.GraphQLResult) -> ActorType.MessageType
-    ) -> Deferred<Void> {
+    ///   - to: Any type of Actor.
+    ///   - complete: A callback ran when this sequence completes.
+    ///   - error: A callback ran when an error were thrown when reading elements from this sequence.
+    ///   - next: A callback ran on each element of this sequence.
+    /// - Returns: The Task used to consume this AsyncSequence
+    public func pipe<ActorType: Actor>(
+        to sink: ActorType,
+        complete: @escaping @Sendable (ActorType) async -> Void,
+        failure: @escaping @Sendable (ActorType, Error) async -> Void,
+        next: @escaping @Sendable (ActorType, GraphQL.GraphQLResult) async -> Void
+    ) -> Task<Void, Error> {
         Task.init {
             do {
                 for await elem in self {
                     guard !Task.isCancelled else { return }
                     let fut: Future<GraphQL.GraphQLResult> = elem
                     let result = try await fut.get()
-                    await actorRef.task(with: transform(result))
+                    await next(sink, result)
                 }
-                await actorRef.task(with: onComplete())
+                await complete(sink)
             } catch {
-                await actorRef.task(with: onFailure(error))
+                await failure(sink, error)
             }
         }
     }

@@ -85,18 +85,18 @@ extension Pioneer {
 
 
             // Transform async stream into messages and pipe back all messages into the Actor itself
-            let task = asyncStream.pipeBack(to: oneself,
-                onComplete: {
-                    .ended(oid: oid)
+            let task = asyncStream.pipe(
+                to: self,
+                complete: { sink in
+                    await sink.onEnd(for: oid)
                 },
-                onFailure: { _ in
-                    .ended(oid: oid)
+                failure: { sink, _ in
+                    await sink.onEnd(for: oid)
                 },
-                transform: { res in
-                    .output(oid: oid, GraphQLMessage.from(type: nextTypename, id: oid, res))
+                next: { sink, res in
+                    await sink.onOutput(for: oid, given: .from(type: nextTypename, id: oid, res))
                 }
             )
-
             tasks.update(oid, with: task)
         }
         
