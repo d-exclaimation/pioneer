@@ -85,17 +85,21 @@ extension Pioneer {
             guard let process = clients[pid] else { return }
 
             let future = execute(gql, ctx: process.ctx, req: process.req)
-
-            pipeToSelf(future: future) { res in
+            
+            pipeToSelf(future: future) { sink, res in
                 switch res {
-                case .success(let result):
-                    return .outgoing(oid: oid, process: process,
-                        res: .from(type: self.proto.next, id: oid, result)
+                case .success(let value):
+                    await sink.onOutgoing(
+                        with: oid,
+                        to: process,
+                        given: .from(type: self.proto.next, id: oid, value)
                     )
                 case .failure(let error):
                     let result: GraphQLResult = .init(data: nil, errors: [.init(message: error.localizedDescription)])
-                    return .outgoing(oid: oid, process: process,
-                        res: .from(type: self.proto.next, id: oid, result)
+                    await sink.onOutgoing(
+                        with: oid,
+                        to: process,
+                        given: .from(type: self.proto.next, id: oid, result)
                     )
                 }
             }
