@@ -7,7 +7,6 @@
 
 import Foundation
 import Vapor
-import Desolate
 
 public extension Pioneer {
     /// Websocket sub-protocol

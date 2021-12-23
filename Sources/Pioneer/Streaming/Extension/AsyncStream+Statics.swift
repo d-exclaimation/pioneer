@@ -21,11 +21,16 @@ extension AsyncStream {
     /// - Returns: The AsyncStream itself
     public static func of(_ values: Element...) -> Self {
         .init { con in
-            Task {
+            let task = Task {
                 values.forEach {
                     con.yield($0)
                 }
                 con.finish()
+            }
+            
+            con.onTermination = { @Sendable termination in
+                guard case .cancelled = termination else { return }
+                task.cancel()
             }
         }
     }
@@ -35,11 +40,16 @@ extension AsyncStream {
     /// - Returns: The AsyncStream itself
     public static func iterable(_ values: [Element]) -> Self {
         .init { con in
-            Task {
+            let task = Task {
                 values.forEach {
                     con.yield($0)
                 }
                 con.finish()
+            }
+            
+            con.onTermination = { @Sendable termination in
+                guard case .cancelled = termination else { return }
+                task.cancel()
             }
         }
     }

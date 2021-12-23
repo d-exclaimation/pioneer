@@ -9,7 +9,6 @@
 import Foundation
 import XCTest
 import Vapor
-import Desolate
 import GraphQL
 import Graphiti
 @testable import Pioneer
@@ -25,12 +24,12 @@ final class ProbeTests: XCTestCase {
     struct Resolver {
         func test(_: Void, _: NoArguments) -> String { "test" }
         func subscription(_: Void, _: NoArguments) -> EventStream<String> {
-            Nozzle.single("hello").toEventStream()
+            AsyncStream.just("hello").toEventStream()
         }
     }
     
     /// Setup the GraphQL schema and Probe, then return the Probe
-    func setup() throws -> Desolate<Pioneer<Resolver, Void>.Probe> {
+    func setup() throws -> Pioneer<Resolver, Void>.Probe {
         let schema = try Schema<Resolver, Void>.init {
             Query {
                 Graphiti.Field("hello", at: Resolver.test)
@@ -40,7 +39,7 @@ final class ProbeTests: XCTestCase {
             }
         }.schema
 
-        return Desolate(of: .init(schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self))
+        return .init(schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self)
     }
 
     /// Setup a Process using a custom test consumer
@@ -59,7 +58,7 @@ final class ProbeTests: XCTestCase {
 
         let message = GraphQLMessage(id: "1", type: "next", payload: ["data": .null, "errors": .array([])])
 
-        await probe.task(with: .outgoing(oid: "1", process: process, res: message))
+        await probe.outgoing(with: "1", to: process, given: message)
 
         let results = await consumer.waitAll()
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {
@@ -83,8 +82,8 @@ final class ProbeTests: XCTestCase {
         let (process, consumer) = consumer()
         let probe = try setup()
 
-        await probe.task(with: .connect(process: process))
-        await probe.task(with: .once(pid: process.id, oid: "2", gql: .init(query: "query { hello }", operationName: nil, variables: nil)))
+        await probe.connect(with: process)
+        await probe.once(for: process.id, with: "2", given: .init(query: "query { hello }", operationName: nil, variables: nil))
         let results = await consumer.waitAllWithValue(requirement: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"2\"") }) else {
             return XCTFail("No completion")
@@ -106,7 +105,7 @@ final class ProbeTests: XCTestCase {
         }
 
         XCTAssert(data.contains("\"hello\":\"test\""))
-        await probe.task(with: .disconnect(pid: process.id))
+        await probe.disconnect(for: process.id)
     }
 
     /// Probe
@@ -118,8 +117,8 @@ final class ProbeTests: XCTestCase {
         let (process, consumer) = consumer()
         let probe = try setup()
 
-        await probe.task(with: .connect(process: process))
-        await probe.task(with: .once(pid: process.id, oid: "3", gql: .init(query: "query { idk }", operationName: nil, variables: nil)))
+        await probe.connect(with: process)
+        await probe.once(for: process.id, with: "3", given: .init(query: "query { idk }", operationName: nil, variables: nil))
         let results = await consumer.waitAllWithValue(requirement: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"3\"") }) else {
             return XCTFail("No completion")
@@ -135,6 +134,6 @@ final class ProbeTests: XCTestCase {
             return XCTFail("No payload")
         }
         XCTAssert(!errors.isEmpty)
-        await probe.task(with: .disconnect(pid: process.id))
+        await probe.disconnect(for: process.id)
     }
 }

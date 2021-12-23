@@ -9,8 +9,8 @@
 import Foundation
 import XCTest
 import Graphiti
+import GraphQL
 import NIO
-import Desolate
 @testable import Pioneer
 
 /// Simple message type with a custom computed properties
@@ -54,7 +54,7 @@ struct TestResolver {
         return message
     }
 
-    func onMessage(context: Void, arguments: NoArguments) async -> EventSource<Message> {
+    func onMessage(context: Void, arguments: NoArguments) async -> EventStream<Message> {
         let stream: AsyncStream<Message> = await pubsub.asyncStream(for: "*")
         return stream.toEventStream()
     }

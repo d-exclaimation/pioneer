@@ -72,7 +72,7 @@ extension Pioneer {
         // Dispatch process to probe so it can start accepting operations
         // Timer fired here to keep connection alive by sub-protocol standard
         case .initial:
-            await probe.task(with: .connect(process: process))
+            await probe.connect(with: process)
             websocketProtocol.initialize(ws: process.ws)
 
         // Ping is for requesting server to send a keep alive message
@@ -81,7 +81,7 @@ extension Pioneer {
 
         // Explicit message to terminate connection to deallocate resources, stop timer, and close connection
         case .terminate:
-            await probe.task(with: .disconnect(pid: process.id))
+            await probe.disconnect(for: process.id)
             keepAlive?.cancel()
             await process.close(code: .goingAway)
 
@@ -94,11 +94,11 @@ extension Pioneer {
                 ])
                 return process.send(err.jsonString)
             }
-            await probe.task(with: .start(
-                pid: process.id,
-                oid: oid,
-                gql: gql
-            ))
+            await probe.start(
+                for: process.id,
+                with: oid,
+                given: gql
+            )
 
         // Once -> Short lived operation
         case .once(oid: let oid, gql: let gql):
@@ -109,18 +109,18 @@ extension Pioneer {
                 ])
                 return process.send(err.jsonString)
             }
-            await probe.task(with: .once(
-                pid: process.id,
-                oid: oid,
-                gql: gql
-            ))
+            await probe.once(
+                for: process.id,
+                with: oid,
+                given: gql
+            )
 
         // Stop -> End any running operation
         case .stop(oid: let oid):
-            await probe.task(with: .stop(
-                pid: process.id,
-                oid: oid
-            ))
+            await probe.stop(
+                for: process.id,
+                with: oid
+            )
 
         // Error in validation should notify that no operation will be run, does not close connection
         case .error(oid: let oid, message: let message):
@@ -134,7 +134,7 @@ extension Pioneer {
             process.send(err.jsonString)
 
             // Deallocation of resources
-            await probe.task(with: .disconnect(pid: process.id))
+            await probe.disconnect(for: process.id)
             keepAlive?.cancel()
             await process.close(code: .policyViolation)
 
@@ -145,7 +145,9 @@ extension Pioneer {
 
     /// On closing connection callback
     func onEnd(pid: UUID, keepAlive: KeepAlive) -> Void {
-        probe.tell(with: .disconnect(pid: pid))
+        Task {
+            await probe.disconnect(for: pid)
+        }
         keepAlive?.cancel()
     }
 }

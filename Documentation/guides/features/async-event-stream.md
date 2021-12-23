@@ -86,14 +86,11 @@ Cases where stream is no longer consumed / stopped and termination will require 
 - Client send a explicit stop request to end the subscription (might be before stream ended)
 - Client disconnect and implicitly stop any running subscription
 
-!!!success AsyncStream, AsyncPubSub, Nozzle, Source, and Reservoir
+!!!success AsyncStream and AsyncPubSub
 Termination callback can be implicitly inferred for these types of `AsyncSequence`:
 
 - `AsyncStream`
 - `AsyncPubSub` (_due to `AsyncStream`_)
-- `Nozzle`
-- `Source` (_due to `Nozzle`_)
-- `Reservoir`(_due to `Source`_)
 
 +++ AsyncPubSub
 
@@ -123,28 +120,6 @@ let stream = AsyncStream<Quake> { con in
 // Using the AsyncStream's termination without specifying
 let eventStream: EventStream<Quake> = stream
     .toEventStream() // AsyncEventStream<Quake, AsyncStream<Quake>>
-```
-
-+++ Reservoir
-
-```swift
-
-let reservoir = Reservoir<String, Message>()
-
-// Using the Reservoir's termination without specifying
-let eventStream: EventStream<Message> = reservoir
-    .source(for: "some-topic") // Source<Message>
-    .toEventStream()           // AsyncEventStream<Message, Nozzle<Message>>
-```
-
-+++ Source
-
-```swift
-let source = Source<Message>()
-
-// Using the Source's termination without specifying
-let eventStream: EventStream<Message> = source
-    .toEventStream()
 ```
 
 +++

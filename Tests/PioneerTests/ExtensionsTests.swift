@@ -10,47 +10,42 @@ import Foundation
 import XCTest
 import OrderedCollections
 import NIO
-import Desolate
 @testable import Pioneer
 
 final class ExtensionsTests: XCTestCase {
     let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 4)
 
     /// Tester Actor
-    private actor Tester: AbstractDesolate, NonStop, BaseActor {
+    private actor Tester {
         enum Act {
             case call(expect: EventLoopFuture<XCTestExpectation>)
             case outcome(expect: XCTestExpectation)
             case none
         }
-        func onMessage(msg: Act) async -> Signal {
-            switch msg {
-            case .call(expect: let expect):
-                pipeToSelf(future: expect) { res in
-                    guard case .success(let ex) = res else { return .none }
-                    return .outcome(expect: ex)
-                }
-            case .outcome(expect: let expect):
-                expect.fulfill()
-            case .none:
-                break
+        
+        func call(expect: EventLoopFuture<XCTestExpectation>) {
+            pipeToSelf(future: expect) { sink, res in
+                guard case .success(let ex) = res else { return }
+                await sink.outcome(expect: ex)
             }
-            return same
         }
-        init(){}
+        
+        func outcome(expect: XCTestExpectation) {
+            expect.fulfill()
+        }
     }
 
-    /// Pipe back Future to an abstract desolate actor
+    /// Pipe back Future to an actor
     /// 1. Should not fulfill under 1 second
     /// 2. Should fulfill by the Actor after the delay
-    func testAbstractDesolateAndNIOFuture() async {
+    func testActorAndNIOFuture() async {
         let expectation = XCTestExpectation()
-        let tester = Tester.make()
+        let tester = Tester()
         let future = eventLoopGroup.task { () async -> XCTestExpectation in
             try? await Task.sleep(nanoseconds: 1000 * 1000 * 1000)
             return expectation
         }
-        tester.tell(with: .call(expect: future))
+        await tester.call(expect: future)
 
         wait(for: [expectation], timeout: 2)
     }

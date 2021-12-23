@@ -29,15 +29,6 @@
         }
       },
       {
-        "package": "Desolate",
-        "repositoryURL": "https://github.com/d-exclaimation/desolate.git",
-        "state": {
-          "branch": null,
-          "revision": "1907ee584b6b787c0de7736a083b333caa21611c",
-          "version": "1.5.0"
-        }
-      },
-      {
         "package": "Graphiti",
         "repositoryURL": "https://github.com/GraphQLSwift/Graphiti.git",
         "state": {

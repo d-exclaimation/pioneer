@@ -29,11 +29,12 @@ The context here will very simple which only grab the `Request` and `Response` s
 The resolver will include all the basic CRUD operations. Pioneer comes with extensions to Graphiti to allow the use of `async/await` in queries and/or mutations and also `EventStream` built from `AsyncSequence` for subscriptions in the resolvers.
 
 ```swift
-import Pioneer
 import Vapor
+import Pioneer
+import Graphiti
 
 struct Resolver {
-    func users(_: Context, _: NoArgs) async -> [User] {
+    func users(_: Context, _: NoArguments) async -> [User] {
         await Datastore.shared.select()
     }
 
@@ -75,6 +76,8 @@ struct Resolver {
 Pioneer has capabilities to handle subscription through websocket, all you need to provide is an `EventStream` that was built with `AsyncSequence`.
 
 ```swift
+import GraphQL
+
 struct Resolver {
     let pubsub = AsyncPubSub()
 

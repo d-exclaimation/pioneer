@@ -6,7 +6,6 @@
 //
 
 import Vapor
-import Desolate
 import GraphQL
 
 /// Pioneer GraphQL Vapor Server for handling all GraphQL operations
@@ -28,8 +27,8 @@ public struct Pioneer<Resolver, Context> {
     /// Keep alive period
     public var keepAlive: UInt64?
 
-    /// Internal running desolated actor for Pioneer
-    internal var probe: Desolate<Probe>
+    /// Internal running WebSocket actor for Pioneer
+    internal var probe: Probe
 
     /// - Parameters:
     ///   - schema: GraphQL schema used to execute operations
@@ -60,7 +59,7 @@ public struct Pioneer<Resolver, Context> {
         self.keepAlive = keepAlive
 
 
-        let proto: SubProtocol.Type = returns {
+        let proto: SubProtocol.Type = def {
             switch websocketProtocol {
             case .graphqlWs:
                 return GraphQLWs.self
@@ -69,11 +68,11 @@ public struct Pioneer<Resolver, Context> {
             }
         }
 
-        let probe = Desolate(of: Probe(
+        let probe = Probe(
             schema: schema,
             resolver: resolver,
             proto: proto
-        ))
+        )
         self.probe = probe
     }
 

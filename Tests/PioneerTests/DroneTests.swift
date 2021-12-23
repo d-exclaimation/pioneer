@@ -11,7 +11,6 @@ import XCTest
 import NIOWebSocket
 import Vapor
 import GraphQL
-import Desolate
 import Graphiti
 @testable import Pioneer
 
@@ -65,7 +64,7 @@ final class DroneTests: XCTestCase {
     
     /// Setup a GraphQLSchema, Pioneer drone, and a TestConsumer
     /// - Returns: The configured consumer and drone itself
-    func setup() throws -> (TestConsumer, Desolate<Pioneer<Resolver, Void>.Drone>) {
+    func setup() throws -> (TestConsumer, Pioneer<Resolver, Void>.Drone) {
         let schema = try Schema<Resolver, Void>.init {
             Query {
                 Field("hello", at: Resolver.hello)
@@ -78,7 +77,7 @@ final class DroneTests: XCTestCase {
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
         let process = Pioneer<Resolver, Void>.Process(ws: consumer, ctx: (), req: req)
-        let drone: Desolate<Pioneer<Resolver, Void>.Drone> = Desolate(of: .init(process, schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self))
+        let drone: Pioneer<Resolver, Void>.Drone = .init(process, schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self)
         return (consumer, drone)
     }
 
@@ -88,7 +87,7 @@ final class DroneTests: XCTestCase {
     func testBestCaseSubscription() async throws {
         let (consumer, drone) = try setup()
 
-        await drone.task(with: .start(oid: "1", gql: .init(query: "subscription { simple }", operationName: nil, variables: nil)))
+        await drone.start(for: "1", given: .init(query: "subscription { simple }", operationName: nil, variables: nil))
 
         let result = await consumer.wait()
         XCTAssert(result.contains("payload") && result.contains("Hello") && result.contains("1"))
@@ -102,8 +101,8 @@ final class DroneTests: XCTestCase {
     /// 3. should not give anything even completion
     func testOutsideStopSubscription() async throws {
         let (consumer, drone) = try setup()
-        await drone.task(with: .start(oid: "2", gql: .init(query: "subscription { delayed }", operationName: nil, variables: nil)))
-        await drone.task(with: .stop(oid: "2"))
+        await drone.start(for: "2", given: .init(query: "subscription { delayed }", operationName: nil, variables: nil))
+        await drone.stop(for: "2")
         let result = await consumer.waitThrowing(time: 0.3)
         XCTAssert(result == nil)
     }
@@ -114,8 +113,8 @@ final class DroneTests: XCTestCase {
     /// 3. should not give anything even completion
     func testKillableSubscription() async throws {
         let (consumer, drone) = try setup()
-        await drone.task(with: .start(oid: "2", gql: .init(query: "subscription { delayed }", operationName: nil, variables: nil)))
-        await drone.task(with: .acid)
+        await drone.start(for: "2", given: .init(query: "subscription { delayed }", operationName: nil, variables: nil))
+        await drone.acid()
         let result = await consumer.waitThrowing(time: 0.3)
         XCTAssert(result == nil)
     }

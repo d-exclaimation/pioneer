@@ -151,7 +151,7 @@ public extension Graphiti.Field {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitResolve<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type,
+        as: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
@@ -160,13 +160,13 @@ public extension Graphiti.Field {
             }
         }
 
-        self.init(name, at: resolve, as: type, argument)
+        self.init(name, at: resolve, as: `as`, argument)
     }
 
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitResolve<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type
+        as: FieldType.Type
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
@@ -174,7 +174,7 @@ public extension Graphiti.Field {
             }
         }
         
-        self.init(name, at: resolve, as: type, {})
+        self.init(name, at: resolve, as: `as`, {})
     }
 
     // -- (context, args) async throws -> result
@@ -182,7 +182,7 @@ public extension Graphiti.Field {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitThrowingResolve<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type,
+        as: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
@@ -191,13 +191,13 @@ public extension Graphiti.Field {
             }
         }
 
-        self.init(name, at: resolve, as: type, argument)
+        self.init(name, at: resolve, as: `as`, argument)
     }
 
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitThrowingResolve<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type
+        as: FieldType.Type
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
@@ -205,7 +205,7 @@ public extension Graphiti.Field {
             }
         }
 
-        self.init(name, at: resolve, as: type, {})
+        self.init(name, at: resolve, as: `as`, {})
     }
 
     // -- (context, args, eventLoop) async -> result
@@ -213,7 +213,7 @@ public extension Graphiti.Field {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type,
+        as: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
@@ -223,13 +223,13 @@ public extension Graphiti.Field {
                 }
             }
         }
-        self.init(name, at: resolve, as: type, argument)
+        self.init(name, at: resolve, as: `as`, argument)
     }
 
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type
+        as: FieldType.Type
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
@@ -238,7 +238,7 @@ public extension Graphiti.Field {
                 }
             }
         }
-        self.init(name, at: resolve, as: type, {})
+        self.init(name, at: resolve, as: `as`, {})
     }
 
     // -- (context, args, eventLoop) async throws -> result
@@ -246,7 +246,7 @@ public extension Graphiti.Field {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type,
+        as: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> [ArgumentComponent<Arguments>]
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
@@ -256,13 +256,13 @@ public extension Graphiti.Field {
                 }
             }
         }
-        self.init(name, at: resolve, as: type, argument)
+        self.init(name, at: resolve, as: `as`, argument)
     }
     
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
-        as type: FieldType.Type
+        as: FieldType.Type
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
@@ -271,7 +271,7 @@ public extension Graphiti.Field {
                 }
             }
         }
-        self.init(name, at: resolve, as: type, {})
+        self.init(name, at: resolve, as: `as`, {})
     }
 
 }

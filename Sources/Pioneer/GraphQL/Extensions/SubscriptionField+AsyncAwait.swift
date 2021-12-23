@@ -10,10 +10,10 @@ import NIO
 import GraphQL
 
 /// Async-await non-throwing GraphQL subscription resolver function
-public typealias AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType> = (ObjectType) -> (Context, Arguments) async -> EventStream<SourceEventType>
+public typealias AsyncAwaitSubscription<ObjectType, Context, Arguments, SourceEventType> = AsyncAwaitResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>
 
 /// Async-await throwing GraphQL subscription resolver function
-public typealias AsyncAwaitThrowingSubscription<ObjectType, Context, Arguments, SourceEventType> = (ObjectType) -> (Context, Arguments) async throws -> EventStream<SourceEventType>
+public typealias AsyncAwaitThrowingSubscription<ObjectType, Context, Arguments, SourceEventType> = AsyncAwaitThrowingResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>
 
 public extension SubscriptionField {
     
