@@ -104,7 +104,7 @@ extension Pioneer {
     
     /// Apply GraphiQL for `GET` on `/playground`.
     func applyGraphiQL(on router: RoutesBuilder, at path: PathComponent) {
-        let fetcher: String = returns {
+        let fetcher: String = def {
             switch websocketProtocol {
             case .subscriptionsTransportWs:
                 return """

@@ -12,10 +12,7 @@ extension AsyncSequence {
     ///
     /// - Returns: EventStream implementation for AsyncSequence.
     public func toEventStream() -> EventSource<Element> {
-        if let nozzle = self as? Nozzle<Element> {
-            return nozzle.eventStream()
-        }
-        return AsyncEventStream<Element, Self>(from: self)
+        AsyncEventStream<Element, Self>(from: self)
     }
 
     /// Convert any AsyncSequence to an EventStream
@@ -46,7 +43,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
+        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
     }
 
 
@@ -81,7 +78,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
+        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
     }
 
 
@@ -116,7 +113,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
+        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
     }
 
     /// Convert any AsyncSequence to an EventStream
@@ -153,7 +150,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
+        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
     }
     
     /// Convert any AsyncSequence to an EventStream
@@ -187,40 +184,6 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>.init(from: stream)
-    }
-}
-
-extension Nozzle {
-    /// Convert nozzle into async sequence
-    ///
-    /// - Returns: AsyncStream with the same element
-    public func asyncStream() -> AsyncStream<Element> {
-        AsyncStream { continuation in
-            let task = Task.init {
-                for await each in self {
-                    let element: Element = each
-                    continuation.yield(element)
-                }
-                continuation.finish()
-            }
-
-            @Sendable
-            func onTermination(_ termination: Termination) {
-                if case .cancelled = termination {
-                    shutdown()
-                }
-                task.cancel()
-            }
-
-            continuation.onTermination = onTermination
-        }
-    }
-
-    /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
-    ///
-    /// - Returns: EventStream implementation.
-    public func eventStream() -> EventSource<Element> {
-        AsyncEventStream<Element, AsyncStream<Element>>.init(from: asyncStream())
+        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
     }
 }

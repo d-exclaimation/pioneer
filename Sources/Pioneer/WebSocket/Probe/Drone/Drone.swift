@@ -33,7 +33,7 @@ extension Pioneer {
         }
 
         // MARK: - Private mutable states
-        var tasks: [String: Deferred<Void>] = [:]
+        var tasks: [String: Task<Void, Error>] = [:]
         
         // MARK: - Event callbacks
         
@@ -77,7 +77,7 @@ extension Pioneer {
             tasks.update(oid, with: task)
         }
         
-        /// Stop subscription, shutdown nozzle and remove it so preventing overflow of any messages
+        /// Stop subscription, shutdown task and remove it so preventing overflow of any messages
         func stop(for oid: String) {
             guard let task = tasks[oid] else { return }
 
@@ -86,7 +86,7 @@ extension Pioneer {
         }
         
         /// Send an ending message
-        /// but prevent completion message if nozzle doesn't exist
+        /// but prevent completion message if task doesn't exist
         /// e.g: - Shutdown-ed operation
         func end(for oid: String) {
             guard tasks.has(oid) else { return }
@@ -96,7 +96,7 @@ extension Pioneer {
         }
         
         /// Push message to websocket connection
-        /// but prevent completion message if nozzle doesn't exist
+        /// but prevent completion message if task doesn't exist
         /// e.g: - Shutdown-ed operation
         func next(for oid: String, given msg: GraphQLMessage) {
             guard tasks.has(oid) else { return }

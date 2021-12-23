@@ -19,7 +19,6 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/GraphQLSwift/GraphQL.git", from: "2.0.0"),
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.0.0"),
-        .package(url: "https://github.com/d-exclaimation/desolate.git", from: "1.5.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.54.0")
     ],
     targets: [
@@ -29,7 +28,6 @@ let package = Package(
             name: "Pioneer",
             dependencies: [
                 "GraphQL", "Graphiti",
-                .product(name: "Desolate", package: "desolate"),
                 .product(name: "Vapor", package: "vapor")
             ]),
         .testTarget(

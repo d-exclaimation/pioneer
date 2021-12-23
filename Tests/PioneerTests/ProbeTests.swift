@@ -24,7 +24,7 @@ final class ProbeTests: XCTestCase {
     struct Resolver {
         func test(_: Void, _: NoArguments) -> String { "test" }
         func subscription(_: Void, _: NoArguments) -> EventStream<String> {
-            Nozzle.single("hello").toEventStream()
+            AsyncStream.just("hello").toEventStream()
         }
     }
     

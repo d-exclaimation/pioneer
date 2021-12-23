@@ -19,7 +19,7 @@ struct TestConsumer: ProcessingConsumer {
 
         func set(_ s: String) async {
             store.append(s)
-            await Task.requeue()
+            try? await Task.sleep(nanoseconds: 0)
         }
 
         func pop() -> String? {
@@ -50,7 +50,7 @@ struct TestConsumer: ProcessingConsumer {
                         continuation.resume(returning: res)
                         return
                     }
-                    await Task.requeue()
+                    try? await Task.sleep(nanoseconds: 0)
                 }
             }
         }
@@ -73,7 +73,7 @@ struct TestConsumer: ProcessingConsumer {
                         continuation.resume(returning: res)
                         return
                     }
-                    await Task.requeue()
+                    try? await Task.sleep(nanoseconds: 0)
                 }
             }
         }

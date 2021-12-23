@@ -59,7 +59,7 @@ public struct Pioneer<Resolver, Context> {
         self.keepAlive = keepAlive
 
 
-        let proto: SubProtocol.Type = returns {
+        let proto: SubProtocol.Type = def {
             switch websocketProtocol {
             case .graphqlWs:
                 return GraphQLWs.self
