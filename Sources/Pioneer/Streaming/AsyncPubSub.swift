@@ -82,10 +82,10 @@ public struct AsyncPubSub: Sendable {
     /// - Parameters:
     ///   - type: DataType of this AsyncStream
     ///   - trigger: The topic string used to differentiate what data should this stream be accepting
-    public func asyncStream<DataType>(_ type: DataType.Type = DataType.self, for trigger: String) async -> AsyncStream<DataType> {
-        let pipe = await engine.asyncStream(for: trigger)
-        return AsyncStream<DataType> { con in
+    public func asyncStream<DataType>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
+        AsyncStream<DataType> { con in
             let task = Task {
+                let pipe = await engine.asyncStream(for: trigger)
                 for await untyped in pipe {
                     guard let typed = untyped as? DataType else { continue }
                     con.yield(typed)
