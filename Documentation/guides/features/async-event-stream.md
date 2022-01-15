@@ -98,7 +98,7 @@ Termination callback can be implicitly inferred for these types of `AsyncSequenc
 let pubsub = AsyncPubSub()
 
 // Using the PubSub's termination without specifying
-let eventStream: EventStream<Message> = await pubsub
+let eventStream: EventStream<Message> = pubsub
     .asyncStream(Message.self, for: "some-topic") // AsyncStream<Message>
     .toEventStream()                          // AsyncEventStream<Message, AsyncStream<Message>>
 ```

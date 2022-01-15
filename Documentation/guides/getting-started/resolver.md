@@ -78,6 +78,8 @@ Pioneer has capabilities to handle subscription through websocket, all you need 
 ```swift
 import GraphQL
 
+let ON_CHANGE_TRIGGER = "user-on-change"
+
 struct Resolver {
     let pubsub = AsyncPubSub()
 
@@ -86,7 +88,7 @@ struct Resolver {
     func create(_: Context, args: AddUserArgs) async -> User {
         let user = await Datastore.shared.insert(User(args.user))
         if user = user {
-            supply.tell(with: .next(user))
+            await pubsub.publish(ON_CHANGE_TRIGGER, payload: user)
         }
         return user
     }
@@ -96,16 +98,16 @@ struct Resolver {
     func update(_: Context, args: UpdateUserArgs) async -> User? {
         let user = await Datastore.shared.update(for args.id, with: User(args.user))
         if user = user {
-            supply.tell(with: .next(user))
+            await pubsub.publish(ON_CHANGE_TRIGGER, payload: user)
         }
         return user
     }
 
     ...
 
-    func onChange(_: Context, _: NoArgs) async -> EventStream<User> {
-        await pubsub
-            .asyncStream(User.self, for: "user-on-change")
+    func onChange(_: Context, _: NoArgs) -> EventStream<User> {
+        pubsub
+            .asyncStream(User.self, for: ON_CHANGE_TRIGGER)
             .toEventStream()
     }
 }
@@ -130,7 +132,7 @@ The `AsyncPubSub` can generate a new consumer `AsyncStream` of a certain type fr
 ```swift
 let pubsub = AsyncPubSub()
 
-let asyncStream: AsyncStream<Int> = await pubsub
+let asyncStream: AsyncStream<Int> = pubsub
     .asyncStream(for: "my-trigger")
 
 await pubsub.publish(for: "my-trigger", payload: 10)
