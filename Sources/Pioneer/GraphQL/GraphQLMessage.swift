@@ -65,7 +65,7 @@ public struct GraphQLMessage: Codable {
 extension Encodable {
     /// Any encodable into Data if possible
     var json: Data? {
-        try? JSONEncoder().encode(self)
+        try? GraphQLJSONEncoder().encode(self)
     }
 
     /// Any encodable into JSON String otherwise null is returned
