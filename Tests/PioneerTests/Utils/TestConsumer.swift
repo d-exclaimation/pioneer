@@ -14,7 +14,7 @@ import NIOWebSocket
 struct TestConsumer: ProcessingConsumer {
     var buffer: Buffer = .init()
     var group: EventLoopGroup
-        actor Buffer {
+    actor Buffer {
         var store: [String] = []
 
         func set(_ s: String) async {

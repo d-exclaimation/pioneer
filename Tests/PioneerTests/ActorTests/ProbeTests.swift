@@ -53,14 +53,15 @@ final class ProbeTests: XCTestCase {
     /// 1. Should be able to dispatch message given a `outgoing` message
     /// 2. The result should be in a JSON string format
     func testOutgoing() async throws {
-        let (process, consumer) = consumer()
+        let (process, con) = consumer()
         let probe = try setup()
 
         let message = GraphQLMessage(id: "1", type: "next", payload: ["data": .null, "errors": .array([])])
 
         await probe.outgoing(with: "1", to: process, given: message)
 
-        let results = await consumer.waitAll()
+        let results = await con.waitAll()
+        print(results)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {
             return XCTFail("No completion")
         }
