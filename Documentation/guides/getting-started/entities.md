@@ -14,7 +14,7 @@ Let's say for this example, we will have a user management system where the API 
 Declaring the `User` model is fairly straight forward.
 
 ```swift User.swift
-struct User: Identifiable, Codable {
+struct User: Identifiable, Codable, Sendable {
     var id: String
     var username: String?
     var email: String
@@ -40,7 +40,7 @@ This custom`ID` can be constructed from any string with its regular initializer 
 ```swift
 import Pioneer
 
-struct User: Identifiable, Codable {
+struct User: Identifiable, Codable, Sendable {
     var id: ID
     var friendIDs: [ID] = []
 }

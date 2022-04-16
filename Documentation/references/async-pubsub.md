@@ -21,10 +21,8 @@ The upstream will be differentiated by a trigger, and only consumer stream with 
 All consumer streams are not restricted to a single data type.
 !!!
 
-!!!warning Sendable
-At the moment, AsyncPubSub has no restriction to make emitted data and consumer data type to conform to Sendable. However, it's best if they are to avoid data races.
-
-In the future, This restriction (DataType must be Sendable) will be slowly added.
+!!!info Sendable
+AsyncPubSub only accept data type that conforms to the `Sendable` protocol to avoid any memory issues related to concurrency.
 !!!
 
 ### `init`
@@ -78,10 +76,10 @@ await pubsub.publish(
 
 ==- Options
 
-| Name      | Type                                     | Description                                |
-| --------- | ---------------------------------------- | ------------------------------------------ |
-| `for`     | [!badge variant="primary" text="String"] | The trigger this data will be published to |
-| `payload` | [!badge variant="danger" text="Any"]     | The data being emitted                     |
+| Name      | Type                                      | Description                                |
+| --------- | ----------------------------------------- | ------------------------------------------ |
+| `for`     | [!badge variant="primary" text="String"]  | The trigger this data will be published to |
+| `payload` | [!badge variant="danger" text="Sendable"] | The data being emitted                     |
 
 ===
 
