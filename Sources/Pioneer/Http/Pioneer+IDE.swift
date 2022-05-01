@@ -82,8 +82,8 @@ extension Pioneer {
         </div>
         <script>window.addEventListener('load', function (event) {
             GraphQLPlayground.init(document.getElementById('root'), {
-                endpoint: "/\(path)",
-                subscriptionEndpoint: "/\(path)/websocket"
+                endpoint: "./\(path)",
+                subscriptionEndpoint: "./\(path)/websocket"
             })
         })</script>
         </body>
@@ -110,7 +110,7 @@ extension Pioneer {
                 return """
                 <script src="https://unpkg.com/subscriptions-transport-ws/browser/client.js" type="application/javascript"></script>
                 <script>
-                    const url = '/\(path)';
+                    const url = './\(path)';
                     const subscriptionUrl = 'ws://' + window.location.host + '/\(path)/websocket';
                 
                     const legacyClient = new window.SubscriptionsTransportWs.SubscriptionClient(subscriptionUrl, { reconnect: true });
@@ -130,7 +130,7 @@ extension Pioneer {
             case .graphqlWs:
                 return """
                 <script>
-                    const url = '/\(path)';
+                    const url = './\(path)';
                     const subscriptionUrl = 'ws://' + window.location.host + '/\(path)/websocket';
 
                     const fetcher = GraphiQL.createFetcher({
@@ -148,7 +148,7 @@ extension Pioneer {
             case .disable:
                 return """
                 <script>
-                    const url = '/\(path)';
+                    const url = './\(path)';
 
                     const fetcher = GraphiQL.createFetcher({
                         url
