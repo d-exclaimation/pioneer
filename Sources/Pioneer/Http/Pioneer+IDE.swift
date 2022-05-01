@@ -111,7 +111,7 @@ extension Pioneer {
                 <script src="https://unpkg.com/subscriptions-transport-ws/browser/client.js" type="application/javascript"></script>
                 <script>
                     const url = './\(path)';
-                    const subscriptionUrl = 'ws://' + window.location.host + '/\(path)/websocket';
+                    const subscriptionUrl = window.location.href.replace("playground", "\(path)/websocket").replace("http", "ws");
                 
                     const legacyClient = new window.SubscriptionsTransportWs.SubscriptionClient(subscriptionUrl, { reconnect: true });
                 
@@ -131,7 +131,7 @@ extension Pioneer {
                 return """
                 <script>
                     const url = './\(path)';
-                    const subscriptionUrl = 'ws://' + window.location.host + '/\(path)/websocket';
+                    const subscriptionUrl = window.location.href.replace("playground", "\(path)/websocket").replace("http", "ws");
 
                     const fetcher = GraphiQL.createFetcher({
                         url,
