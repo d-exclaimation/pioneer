@@ -36,7 +36,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.54.0"),
-        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.4.3")
+        .package(url: "https://github.com/d-exclaimation/pioneer", from: "0.5.1")
     ],
     targets: [
         .target(

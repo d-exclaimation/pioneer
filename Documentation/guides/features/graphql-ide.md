@@ -11,10 +11,6 @@ GraphQL IDEs are quick and convenient ways to develop and test your GraphQL APIs
 Pioneer will disable any GraphQL IDE automatically regardless of the specified parameter, if introspection is disabled, as GraphQL IDE relies on introspection to provide syntax highlighting.
 !!!
 
-!!!warning Scoped route
-Due to the limitation with `RoutesGroup`, Pioneer cannot infer the prefixed route when given a scoped `RoutesGroup`, and any GraphQL IDE hosted will not be able to find the correct endpoints.
-!!!
-
 ## GraphiQL
 
 GraphiQL is the official GraphQL IDE by the GraphQL Foundation. The current GraphiQL version has met feature parody with [GraphQL Playground](#graphql-playground).

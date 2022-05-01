@@ -96,7 +96,7 @@ struct Resolver {
     ...
 
     func update(_: Context, args: UpdateUserArgs) async -> User? {
-        let user = await Datastore.shared.update(for args.id, with: User(args.user))
+        let user = await Datastore.shared.update(for: args.id, with: User(args.user))
         if user = user {
             await pubsub.publish(ON_CHANGE_TRIGGER, payload: user)
         }
