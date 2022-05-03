@@ -28,7 +28,7 @@ let schema = try? Schema<Resolver, Context> {
         Field("displayName", at: \.displayName)
 
         // Computed properties with custom resolver (for relationship)
-        Field("friends", at: \.friends)
+        Field("friends", at: User.friends, as: [TypeReference<User>].self)
     }
 
     Input(UserInput.self) {
