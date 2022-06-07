@@ -3,7 +3,7 @@ icon: database
 order: 60
 ---
 
-# Fluent
+# Fluent Integration
 
 Fluent is the most common choice of connecting to a database from a Vapor application. There can be some confusion on how to connect Fluent entities into a GraphQL Schema.
 
@@ -148,3 +148,5 @@ func schema() throws -> Schema<Resolver, Context> {
     }
 }
 ```
+
+This approach is actually not a specific to Pioneer. You can use the same or similar solutions if you are using Vapor, Fluent, and Graphiti, albeit without some features provided by Pioneer (i.e. async await resolver, and custom ID struct).
