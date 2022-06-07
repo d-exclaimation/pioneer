@@ -1,6 +1,6 @@
 ---
 icon: squirrel
-order: 60
+order: 50
 ---
 
 # GraphQL IDE

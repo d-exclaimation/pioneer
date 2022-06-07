@@ -59,15 +59,7 @@ let server = Pioneer(
 
 ### Consideration
 
-Even though the sub-protocol is the recommended option, there are still some consideration to take account of. Adoption for this sub-protocol are somewhat limited outside the Node.js / Javascript ecosystem.
-
-Here are some notable clients and tools that has yet to support [graphql-ws](https://github.com/enisdenjo/graphql-ws) as of 2021:
-
-- [apollo-ios](https://github.com/apollographql/apollo-ios), already an [issue](https://github.com/apollographql/apollo-ios/issues/1622) but not yet resolved.
-- [graphql-kotlin](https://github.com/ExpediaGroup/graphql-kotlin), no issue mentioning the new protocol yet.
-- [graphql-flutter](https://github.com/zino-app/graphql-flutter), already an [issue](https://github.com/zino-app/graphql-flutter/issues/958) but not yet resolved.
-- [gql (python)](https://github.com/graphql-python/gql/), already an [issue](https://github.com/graphql-python/gql/issues/240) but not yet resolved.
-- [Apollo Sandbox](https://www.apollographql.com/docs/studio/explorer/).
+Even though the sub-protocol is the recommended option, there are still some consideration to take account of. Adoption for this sub-protocol are somewhat limited outside the Node.js / Javascript ecosystem or major GraphQL client libraries.
 
 A good amount of other server implementations on many languages have also yet to support this sub-protocol. So, make sure that libraries and frameworks you are using already have support for [graphql-ws](https://github.com/enisdenjo/graphql-ws). If in doubt, it's best to understand how both sub-protocols work and have options to swap between both options.
 
