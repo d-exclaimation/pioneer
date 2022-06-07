@@ -33,7 +33,7 @@ Here are the available strategies:
 
 ## Request and Response
 
-Pioneer provide a similar solution to `apollo-server-express` in handling fetching the raw http requests and sending back custom responses. It provide both in the context builder that needed to be provided when constructing Pioneer.
+Pioneer provide a similar solution to `apollo-server-express` in handling fetching the raw http requests and sending back custom responses. It provide both in the context builder that needed to be provided when constructing Pioneer. This request and response will be request-specific / different for each GraphQL HTTP request.
 
 ```swift main.swift
 import Pioneer
@@ -55,6 +55,12 @@ let server = Pioneer(
     playground: .graphiql
 )
 ```
+
+!!!warning Websocket
+While all subscription resolver can also access the context object, given that subscription is handled via a single websocket connection, the request object is taken from the HTTP request to make the switch in protocol and will not change unless the new connection is made.
+
+On the other hand, the response object serves no function in any subscription resolver. It is also advisable to avoid performing authentication through websocket even though this library can perform GraphQL query and mutation through websocket.
+!!!
 
 ### Request
 

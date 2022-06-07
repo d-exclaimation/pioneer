@@ -3,13 +3,13 @@ icon: database
 order: 60
 ---
 
-# Fluent Integration
+# Fluent
 
-Fluent is the most common choice of connecting to a database from a Vapor application. There can be some confusion on how to connect Fluent entities into a GraphQL Schema.
+Fluent is the most common choice of connecting to a database from a Vapor application. There can be some confusion on how to connect Fluent entities into a GraphQL Schema, so here are some information to help tackle any of those issue.
 
 ## GraphQL ID
 
-As an example, let's use Graphiti as the GraphQL schema library and we have a `User` fluent entity as described below.
+Let's use Graphiti as the GraphQL schema library and we have a `User` fluent entity as described below.
 
 ```swift User.swift
 import Foundation
