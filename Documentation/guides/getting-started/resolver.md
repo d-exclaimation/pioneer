@@ -185,8 +185,6 @@ func makeUserLoader(req: Request) -> DataLoader<ID, User> {
 
 ```
 
-DataLoader Async/Await extensions coming soon in later version of Pioneer
-
 +++ Resolver
 
 ```swift
