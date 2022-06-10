@@ -80,12 +80,15 @@ extension Pioneer {
                 <span class="title">GraphQL Playground</span>
             </div>
         </div>
-        <script>window.addEventListener('load', function (event) {
-            GraphQLPlayground.init(document.getElementById('root'), {
-                endpoint: "./\(path)",
-                subscriptionEndpoint: "./\(path)/websocket"
+        <script>
+            const subscriptionEndpoint = window.location.href.replace("playground", "\(path)/websocket").replace("http", "ws");
+            window.addEventListener('load', function (event) {
+                GraphQLPlayground.init(document.getElementById('root'), {
+                    endpoint: "./\(path)",
+                    subscriptionEndpoint
+                })
             })
-        })</script>
+        </script>
         </body>
 
         </html>

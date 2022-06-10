@@ -44,10 +44,7 @@ import Pioneer
 
 extension User {
     var gid: ID {
-        if let uuid = id?.uuidString {
-            return .init(uuid)
-        }
-        return .uuid()
+        id?.uuidString?.toID() ?? .uuid()
     }
 }
 ```

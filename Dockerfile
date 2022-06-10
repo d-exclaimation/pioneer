@@ -1,5 +1,5 @@
 # Get the latest tag for Swift on Linux (non-slim one)
-FROM swift:5.5
+FROM swift:latest
 
 WORKDIR /package
 

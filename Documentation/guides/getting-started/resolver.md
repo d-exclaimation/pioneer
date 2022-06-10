@@ -172,24 +172,18 @@ struct Context {
 
 // Must use the EventLoopPromise API since DataLoader hasn't migrated over to async/await and Pioneer hasn't added extensions
 func makeUserLoader(req: Request) -> DataLoader<ID, User> {
-    return .init() { keys in
-        let promise: EventLoopPromise<User> = req.eventLoop.makePromise(of: User.self)
-
-        promise.completeWithTask {
-            let res = await Datastore.shared.find(with: keys)
-            return keys.compactMap { key in res.first { $0.id == key } }
-        }
-
-        // Map each result to the required enum
-        return promise.futureResult.map { users in
-            users.map { DataLoaderFutureValue.success($0) }
+    return .init(on: req.eventLoop) { keys async in
+        let res = await Datastore.shared.find(with: keys)
+        return keys.map { key in 
+            guard let value = res.first(where: { $0.id == key }) else {
+                return .error(GraphQLError(message: "No item with corresponding key: \(key)"))
+            }
+            return .success(value)
         }
     }
 }
 
 ```
-
-DataLoader Async/Await extensions coming soon in later version of Pioneer
 
 +++ Resolver
 
