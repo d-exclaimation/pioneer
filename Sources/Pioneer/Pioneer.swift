@@ -15,7 +15,7 @@ public struct Pioneer<Resolver, Context> {
     /// Resolver used by the GraphQL schema
     public var resolver: Resolver
     /// Context builder from request
-    public var contextBuilder: (Request, Response) -> Context
+    public var contextBuilder: (Request, Response) async throws -> Context
     /// HTTP strategy
     public var httpStrategy: HTTPStrategy
     /// Websocket sub-protocol
@@ -42,7 +42,7 @@ public struct Pioneer<Resolver, Context> {
     public init(
         schema: GraphQLSchema,
         resolver: Resolver,
-        contextBuilder: @escaping (Request, Response) -> Context,
+        contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
         introspection: Bool = true,
@@ -133,17 +133,22 @@ public struct Pioneer<Resolver, Context> {
             throw GraphQLError(ResolveError.unableToParseQuery)
         }
         let res = Response()
-        let result = try await executeGraphQL(
-            schema: schema,
-            request: gql.query,
-            resolver: resolver,
-            context: contextBuilder(req, res),
-            eventLoopGroup: req.eventLoop,
-            variables: gql.variables,
-            operationName: gql.operationName
-        )
-        try res.content.encode(result)
-        return res
+        do {
+            let context = try await contextBuilder(req, res)
+            let result = try await executeGraphQL(
+                schema: schema,
+                request: gql.query,
+                resolver: resolver,
+                context: context,
+                eventLoopGroup: req.eventLoop,
+                variables: gql.variables,
+                operationName: gql.operationName
+            )
+            try res.content.encode(result)
+            return res
+        } catch {
+            throw GraphQLError(error)
+        }
     }
 
     /// Guard for operation allowed

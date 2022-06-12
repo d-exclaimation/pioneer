@@ -30,28 +30,30 @@ extension Pioneer {
             }
 
             return req.webSocket(shouldUpgrade: shouldUpgrade) { req, ws in
-                let res = Response()
-                let ctx = contextBuilder(req, res)
-                let process = Process(ws: ws, ctx: ctx, req: req)
-
-                ws.sendPing()
-
-                /// Scheduled keep alive message interval
-                let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
-                    if ws.isClosed {
-                        throw GraphQLError(message: "WebSocket closed before any termination")
+                Task.init {
+                    let res = Response()
+                    let ctx = try await contextBuilder(req, res)
+                    let process = Process(ws: ws, ctx: ctx, req: req)
+                    
+                    try await ws.sendPing()
+                    
+                    /// Scheduled keep alive message interval
+                    let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
+                        if ws.isClosed {
+                            throw GraphQLError(message: "WebSocket closed before any termination")
+                        }
+                        process.send(websocketProtocol.keepAliveMessage)
                     }
-                    process.send(websocketProtocol.keepAliveMessage)
-                }
-
-                ws.onText { _, txt in
-                    Task.init {
-                        await onMessage(process: process, keepAlive: keepAlive, txt: txt)
+                    
+                    ws.onText { _, txt in
+                        Task.init {
+                            await onMessage(process: process, keepAlive: keepAlive, txt: txt)
+                        }
                     }
-                }
-
-                ws.onClose.whenComplete { _ in
-                    onEnd(pid: process.id, keepAlive: keepAlive)
+                    
+                    ws.onClose.whenComplete { _ in
+                        onEnd(pid: process.id, keepAlive: keepAlive)
+                    }
                 }
             }
         }
