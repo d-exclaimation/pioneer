@@ -33,7 +33,7 @@ let server = Pioneer(
 | ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `schema`            | [!badge variant="primary" text="GraphQLSchema"]              | GraphQL schema used to execute operations                                              |
 | `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
-| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) -> Void"] | Context builder from request                                                           |
+| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Void"] | Context builder from request (Can be async and can throw an error)                                                         |
 | `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
