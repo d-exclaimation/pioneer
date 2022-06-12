@@ -145,10 +145,12 @@ public struct Pioneer<Resolver, Context> {
                 operationName: gql.operationName
             )
             try res.content.encode(result)
-            return res
         } catch {
-            throw GraphQLError(error)
+            try res.content.encode(GraphQLResult(data: nil, errors: [
+                error as? GraphQLError ?? GraphQLError(error)
+            ]))
         }
+        return res
     }
 
     /// Guard for operation allowed

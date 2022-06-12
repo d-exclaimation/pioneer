@@ -17,7 +17,7 @@ extension Pioneer {
     
     /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
-        router.get(path) { req throws -> Response in
+        router.get(path) { req async throws -> Response in
             /// Explicitly handle Websocket upgrade with sub-protocol
             let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
             guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
@@ -28,38 +28,33 @@ extension Pioneer {
             func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
                 req.eventLoop.next().makeSucceededFuture(.some(header))
             }
-
+            
+            let res = Response()
+            let ctx = try await contextBuilder(req, res)
             return req.webSocket(shouldUpgrade: shouldUpgrade) { req, ws in
-                Task.init {
-                    do {
-                        let res = Response()
-                        let ctx = try await contextBuilder(req, res)
-                        let process = Process(ws: ws, ctx: ctx, req: req)
-                        
-                        try? await ws.sendPing()
-                        
-                        /// Scheduled keep alive message interval
-                        let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
-                            if ws.isClosed {
-                                throw GraphQLError(message: "WebSocket closed before any termination")
-                            }
-                            process.send(websocketProtocol.keepAliveMessage)
-                        }
-                        
-                        ws.onText { _, txt in
-                            Task.init {
-                                await onMessage(process: process, keepAlive: keepAlive, txt: txt)
-                            }
-                        }
-                        
-                        ws.onClose.whenComplete { _ in
-                            onEnd(pid: process.id, keepAlive: keepAlive)
-                        }
-                    } catch {
-                        try? await ws.close()
+                let process = Process(ws: ws, ctx: ctx, req: req)
+                
+                ws.sendPing()
+                
+                /// Scheduled keep alive message interval
+                let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
+                    if ws.isClosed {
+                        throw GraphQLError(message: "WebSocket closed before any termination")
+                    }
+                    process.send(websocketProtocol.keepAliveMessage)
+                }
+                
+                ws.onText { _, txt in
+                    Task.init {
+                        await onMessage(process: process, keepAlive: keepAlive, txt: txt)
                     }
                 }
+                
+                ws.onClose.whenComplete { _ in
+                    onEnd(pid: process.id, keepAlive: keepAlive)
+                }
             }
+
         }
     }
 
