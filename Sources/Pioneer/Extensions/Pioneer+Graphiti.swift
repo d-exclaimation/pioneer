@@ -21,7 +21,7 @@ public extension Pioneer {
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @escaping (Request, Response) -> Context,
+        contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
         introspection: Bool = true,
