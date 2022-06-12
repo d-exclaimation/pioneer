@@ -124,7 +124,8 @@ extension Pioneer {
                     });
                     ReactDOM.render(
                         React.createElement(GraphiQL, {
-                            fetcher
+                            fetcher,
+                            headerEditorEnabled: true
                         }),
                         document.getElementById('graphiql'),
                     );
@@ -142,7 +143,8 @@ extension Pioneer {
                     });
                     ReactDOM.render(
                         React.createElement(GraphiQL, {
-                            fetcher
+                            fetcher,
+                            headerEditorEnabled: true
                         }),
                         document.getElementById('graphiql'),
                     );
@@ -158,7 +160,8 @@ extension Pioneer {
                     });
                     ReactDOM.render(
                         React.createElement(GraphiQL, {
-                            fetcher
+                            fetcher,
+                            headerEditorEnabled: true
                         }),
                         document.getElementById('graphiql'),
                     );
