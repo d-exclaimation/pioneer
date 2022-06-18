@@ -28,19 +28,20 @@ public extension Request {
             query: "\(url.query ?? "")\(url.query.isSome ? "&" : "")\(payload.queries)",
             fragment: url.fragment
         )
-        let body = try JSONEncoder().encodeAsByteBuffer(gql, allocator: .init())
         let req = Request(
             application: application,
             method: .POST,
             url: uri,
             headers: payload.headers,
-            collectedBody: body,
             on: eventLoop
         )
+        try req.content.encode(gql)
         let res = Response()
         return try await contextBuilder(req, res)
     }
 }
+
+extension GraphQLRequest: Content {}
 
 public extension ConnectionParams {
     /// Query string from the connection parameter
