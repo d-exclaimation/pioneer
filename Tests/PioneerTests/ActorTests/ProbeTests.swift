@@ -39,14 +39,19 @@ final class ProbeTests: XCTestCase {
             }
         }.schema
 
-        return .init(schema: schema, resolver: Resolver(), proto: SubscriptionTransportWs.self)
+        return .init(
+            schema: schema,
+            resolver: Resolver(),
+            proto: SubscriptionTransportWs.self,
+            websocketContextBuilder: { _, _ in }
+        )
     }
 
     /// Setup a Process using a custom test consumer
     func consumer() -> (Pioneer<Resolver, Void>.Process, TestConsumer)  {
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
-        return (.init(ws: consumer, ctx: (), req: req), consumer)
+        return (.init(ws: consumer, payload: nil, req: req), consumer)
     }
 
     /// Probe
