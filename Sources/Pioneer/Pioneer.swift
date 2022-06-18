@@ -15,9 +15,11 @@ public struct Pioneer<Resolver, Context> {
     /// Resolver used by the GraphQL schema
     public var resolver: Resolver
     /// Context builder from request
-    public var contextBuilder: (Request, Response) async throws -> Context
+    public var contextBuilder: @Sendable (Request, Response) async throws -> Context
     /// HTTP strategy
     public var httpStrategy: HTTPStrategy
+    /// Websocket Context builder
+    public var websocketContextBuilder: @Sendable (ConnectionParams, GraphQLRequest) async throws -> Context
     /// Websocket sub-protocol
     public var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
@@ -44,7 +46,8 @@ public struct Pioneer<Resolver, Context> {
         resolver: Resolver,
         contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
+        websocketContextBuilder: @escaping @Sendable (ConnectionParams, GraphQLRequest) async throws -> Context,
+        websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,
         keepAlive: UInt64? = 12_500_000_000
@@ -53,6 +56,7 @@ public struct Pioneer<Resolver, Context> {
         self.resolver = resolver
         self.contextBuilder = contextBuilder
         self.httpStrategy = httpStrategy
+        self.websocketContextBuilder = websocketContextBuilder
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
         self.playground = !introspection ? .disable : playground
@@ -71,7 +75,8 @@ public struct Pioneer<Resolver, Context> {
         let probe = Probe(
             schema: schema,
             resolver: resolver,
-            proto: proto
+            proto: proto,
+            websocketContextBuilder: websocketContextBuilder
         )
         self.probe = probe
     }
