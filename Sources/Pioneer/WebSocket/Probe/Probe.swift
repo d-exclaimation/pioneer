@@ -16,11 +16,11 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
-        private let websocketContextBuilder: @Sendable (ConnectionParams, GraphQLRequest) async throws -> Context
+        private let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
 
         init(
             schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (ConnectionParams, GraphQLRequest) async throws -> Context
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
         ) {
             self.schema = schema
             self.resolver = resolver
@@ -30,7 +30,7 @@ extension Pioneer {
         
         init(
             schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (ConnectionParams, GraphQLRequest) async throws -> Context
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
         ) {
             self.schema = schema.schema
             self.resolver = resolver
@@ -113,7 +113,7 @@ extension Pioneer {
         /// Execute short-lived GraphQL Operation
         private func execute(_ gql: GraphQLRequest, payload: ConnectionParams, req: Request) -> Future<GraphQLResult> {
             req.eventLoop.performWithTask {
-                let ctx = try await self.websocketContextBuilder(payload, gql)
+                let ctx = try await self.websocketContextBuilder(req, payload, gql)
                 return try await executeGraphQL(
                     schema: self.schema,
                     request: gql.query,

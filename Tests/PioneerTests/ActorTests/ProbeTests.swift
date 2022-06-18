@@ -43,7 +43,7 @@ final class ProbeTests: XCTestCase {
             schema: schema,
             resolver: Resolver(),
             proto: SubscriptionTransportWs.self,
-            websocketContextBuilder: { _, _ in }
+            websocketContextBuilder: { _, _, _ in }
         )
     }
 
