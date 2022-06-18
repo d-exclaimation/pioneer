@@ -31,6 +31,7 @@ public extension Pioneer where Context == Void {
             resolver: resolver,
             contextBuilder: { _, _ in },
             httpStrategy: httpStrategy,
+            websocketContextBuilder: { _, _ in },
             websocketProtocol: websocketProtocol,
             introspection: introspection,
             playground: playground,
