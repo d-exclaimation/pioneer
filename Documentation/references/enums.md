@@ -44,13 +44,13 @@ GraphiQL Browser IDE
 
 ||| `apolloSandbox`
 
-Redirect to Apollo Sandbox (only for [subscriptions-graphql-ws](https://github.com/apollographql/subscriptions-transport-ws))
+Redirect to Apollo Sandbox
 
 |||
 
 ||| `bananaCakePop`
 
-Redirect to Banana Cake Pop for the cloud (only for [subscriptions-graphql-ws](https://github.com/apollographql/subscriptions-transport-ws))
+Redirect to Banana Cake Pop for the cloud)
 
 |||
 
