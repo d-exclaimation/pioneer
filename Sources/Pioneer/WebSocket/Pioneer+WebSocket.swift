@@ -11,6 +11,8 @@ import NIO
 import NIOHTTP1
 import GraphQL
 
+public typealias ConnectionParams = [String: Map]?
+
 extension Pioneer {
     /// KeepAlive Task
     typealias KeepAlive = Task<Void, Error>?
@@ -29,10 +31,8 @@ extension Pioneer {
                 req.eventLoop.next().makeSucceededFuture(.some(header))
             }
             
-            let res = Response()
-            let ctx = try await contextBuilder(req, res)
             return req.webSocket(shouldUpgrade: shouldUpgrade) { req, ws in
-                let process = Process(ws: ws, ctx: ctx, req: req)
+                let pid = UUID()
                 
                 ws.sendPing()
                 
@@ -41,17 +41,17 @@ extension Pioneer {
                     if ws.isClosed {
                         throw GraphQLError(message: "WebSocket closed before any termination")
                     }
-                    process.send(websocketProtocol.keepAliveMessage)
+                    ws.send(msg: websocketProtocol.keepAliveMessage)
                 }
                 
                 ws.onText { _, txt in
                     Task.init {
-                        await onMessage(process: process, keepAlive: keepAlive, txt: txt)
+                        await onMessage(pid: pid, ws: ws, req: req, keepAlive: keepAlive, txt: txt)
                     }
                 }
                 
                 ws.onClose.whenComplete { _ in
-                    onEnd(pid: process.id, keepAlive: keepAlive)
+                    onEnd(pid: pid, keepAlive: keepAlive)
                 }
             }
 
@@ -59,11 +59,11 @@ extension Pioneer {
     }
 
     /// On Websocket message callback
-    func onMessage(process: Process, keepAlive: KeepAlive, txt: String) async  -> Void {
+    func onMessage(pid: UUID, ws: ProcessingConsumer, req: Request, keepAlive: KeepAlive, txt: String) async -> Void {
         guard let data = txt.data(using: .utf8) else {
             // Shouldn't accept any message that aren't utf8 string
             // -> Close with 1003 code
-            await process.close(code: .unacceptableData)
+            try? await ws.close(code: .unacceptableData).get()
             return
         }
 
@@ -72,19 +72,20 @@ extension Pioneer {
         // Initial sub-protocol handshake established
         // Dispatch process to probe so it can start accepting operations
         // Timer fired here to keep connection alive by sub-protocol standard
-        case .initial:
+        case .initial(let payload):
+            let process = Process(id: pid, ws: ws, payload: payload, req: req)
             await probe.connect(with: process)
-            websocketProtocol.initialize(ws: process.ws)
+            websocketProtocol.initialize(ws: ws)
 
         // Ping is for requesting server to send a keep alive message
         case .ping:
-            process.send(websocketProtocol.keepAliveMessage)
+            ws.send(msg: websocketProtocol.keepAliveMessage)
 
         // Explicit message to terminate connection to deallocate resources, stop timer, and close connection
         case .terminate:
-            await probe.disconnect(for: process.id)
+            await probe.disconnect(for: pid)
             keepAlive?.cancel()
-            await process.close(code: .goingAway)
+            try? await ws.close(code: .goingAway).get()
 
         // Start -> Long running operation
         case .start(oid: let oid, gql: let gql):
@@ -93,10 +94,10 @@ extension Pioneer {
                 let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
                     .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
                 ])
-                return process.send(err.jsonString)
+                return ws.send(msg: err.jsonString)
             }
             await probe.start(
-                for: process.id,
+                for: pid,
                 with: oid,
                 given: gql
             )
@@ -108,10 +109,10 @@ extension Pioneer {
                 let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
                     .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
                 ])
-                return process.send(err.jsonString)
+                return ws.send(msg: err.jsonString)
             }
             await probe.once(
-                for: process.id,
+                for: pid,
                 with: oid,
                 given: gql
             )
@@ -119,25 +120,25 @@ extension Pioneer {
         // Stop -> End any running operation
         case .stop(oid: let oid):
             await probe.stop(
-                for: process.id,
+                for: pid,
                 with: oid
             )
 
         // Error in validation should notify that no operation will be run, does not close connection
         case .error(oid: let oid, message: let message):
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [.init(message: message)])
-            process.send(err.jsonString)
+            ws.send(msg: err.jsonString)
 
         // Fatal error is an event trigger when message given in unacceptable by protocol standard
         // This message if processed any further will cause securities vulnerabilities, thus connection should be closed
         case .fatal(message: let message):
             let err = GraphQLMessage.errors(type: websocketProtocol.error, [.init(message: message)])
-            process.send(err.jsonString)
+            ws.send(msg: err.jsonString)
 
             // Deallocation of resources
-            await probe.disconnect(for: process.id)
+            await probe.disconnect(for: pid)
             keepAlive?.cancel()
-            await process.close(code: .policyViolation)
+            try? await ws.close(code: .policyViolation).get()
 
         case .ignore:
             break
