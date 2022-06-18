@@ -80,7 +80,14 @@ public extension ConnectionParams {
     /// HTTPHeaaders from connection parameter
     var headers: HTTPHeaders {
         guard let payload = self else { return .init() }
-        guard case .dictionary(let headerDict) = payload["header"] ?? payload["headers"] else { return .init() }
+        guard case .dictionary(let headerDict) = payload["header"] ?? payload["headers"] else {
+            return .init(payload.map { (key, val) in
+                guard case .string(let value) = val else {
+                    return (key, val.jsonString)
+                }
+                return (key, value)
+            })
+        }
         return .init(headerDict.map { (key, val) in
             guard case .string(let value) = val else {
                 return (key, val.jsonString)

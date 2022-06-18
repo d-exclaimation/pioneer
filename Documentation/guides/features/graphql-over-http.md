@@ -67,7 +67,7 @@ By default if you don't provide a seperate context builder for websocket, Pionee
 
 ==- Custom Request for Websocket
 The custom request will similar to the request used to upgrade to websocket but will have:
-- The headers taken from `"header"/"headers"` value from the `ConnectionParams`
+- The headers taken from `"header"/"headers"` value from the `ConnectionParams` or all the entirety of `ConnectionParams`
 - The query parameters taken from `"query"/"queries"/"queryParams"/"queryParameters"` value from the `ConnectionParams`
 - The body from the `GraphQLRequest`
 

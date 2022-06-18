@@ -24,10 +24,7 @@ let server = Pioneer(
     },
     websocketContextBuilder: { req, params, gql in
         let res = Response()
-        guard case .dictionary(let headers) = params?["headers"] else {
-            return Context(req: req, res: res, auth: nil) 
-        }
-        guard case .string(let auth) = headers["Authorization"] else {
+        guard case .string(let auth) = params?["Authorization"] else {
             return Context(req: req, res: res, auth: nil) 
         }
         Context(req: req, res: res, auth: auth)
@@ -190,10 +187,7 @@ let server = try Pioneer(
     },
     websocketContextBuilder: { req, params, gql in
         let res = Response()
-        guard case .dictionary(let headers) = params?["headers"] else {
-            return Context(req: req, res: res, auth: nil) 
-        }
-        guard case .string(let auth) = headers["Authorization"] else {
+        guard case .string(let auth) = params?["Authorization"] else {
             return Context(req: req, res: res, auth: nil) 
         }
         Context(req: req, res: res, auth: auth)

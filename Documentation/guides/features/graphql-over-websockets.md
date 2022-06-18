@@ -126,7 +126,7 @@ By default if you don't provide a seperate context builder for websocket, Pionee
 
 ==- Custom Request for Websocket
 The custom request will similar to the request used to upgrade to websocket but will have:
-- The headers taken from `"header"/"headers"` value from the `ConnectionParams`
+- The headers taken from `"header"/"headers"` value from the `ConnectionParams` or all the entirety of `ConnectionParams`
 - The query parameters taken from `"query"/"queries"/"queryParams"/"queryParameters"` value from the `ConnectionParams`
 - The body from the `GraphQLRequest`
 
@@ -168,7 +168,7 @@ Given that the `payload` parameter is custom each client, it does not have any s
 Pioneer(
     ...
     websocketContextBuilder: { req, params, gql in 
-        let map: Map = params?["headers"]
+        let map: Map = params?["some-key"]
         switch map {
         case .undefined, .null:
             ...
@@ -189,11 +189,10 @@ Pioneer(
 ===
 !!!
 
-```swift Getting header
+```swift Getting some values
 struct Resolver {
     func someHeader(ctx: Context, _: NoArguments) async -> String? {
-        guard .dictionary(let headers) = ctx.params?["headers"] else { ... }
-        guard .string(let token) = headers["Authorization"] else { ... }
+        guard .string(let token) = ctx.params?["Authorization"] else { ... }
         return token
     }
 }
