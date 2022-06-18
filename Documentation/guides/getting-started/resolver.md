@@ -24,6 +24,8 @@ struct Context {
 
 The context here will very simple which only grab the `Request` and `Response` so we can get certain values from the request and set some to the response.
 
+[!ref More on Context Building](/guides/features/graphql-over-http/#context-request-and-response)
+
 ## Resolver
 
 The resolver will include all the basic CRUD operations. Pioneer comes with extensions to Graphiti to allow the use of `async/await` in queries and/or mutations and also `EventStream` built from `AsyncSequence` for subscriptions in the resolvers.

@@ -86,6 +86,8 @@ extension User {
 
 In a real application, you want these `User`(s) to be stored in a persistent database like PostgreSQL or something similar. For this example, we will be simplying the workflow by just building one in memory.
 
+[!ref Fluent FAQ](/guides/features/fluent)
+
 We will be taking advantange of Swift 5.5 `actor` which a structure suitable for cocurrent state management.
 
 ```swift

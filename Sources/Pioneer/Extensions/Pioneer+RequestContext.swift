@@ -21,7 +21,7 @@ public extension Pioneer where Context == Void {
         schema: Schema<Resolver, Void>,
         resolver: Resolver,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
+        websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,
         keepAlive: UInt64? = 12_500_000_000

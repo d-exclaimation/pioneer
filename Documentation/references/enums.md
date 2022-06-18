@@ -180,7 +180,7 @@ Disable GraphQL over Websocket entirely.
 
 !!!warning Disabled entirely
 
-Using this meant, no operations nor even a websocket connection is going to be accepted by the server.
+Using this meant no operations nor even a websocket connection is going to be accepted by the server.
 
 !!!
 

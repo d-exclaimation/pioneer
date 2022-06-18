@@ -23,7 +23,7 @@ public extension Pioneer {
         resolver: Resolver,
         contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
+        websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,
         keepAlive: UInt64? = 12_500_000_000
@@ -63,7 +63,7 @@ public extension Pioneer {
         contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketContextBuilder: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-        websocketProtocol: WebsocketProtocol = .subscriptionsTransportWs,
+        websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,
         keepAlive: UInt64? = 12_500_000_000

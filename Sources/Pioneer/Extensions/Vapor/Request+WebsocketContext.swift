@@ -47,7 +47,7 @@ public extension ConnectionParams {
     /// Query string from the connection parameter
     var queries: String {
         guard let payload = self else { return "" }
-        guard let query = payload["query"] ?? payload["queries"] ?? payload["queryString"] else { return "" }
+        guard let query = payload["query"] ?? payload["queries"] ?? payload["queryParams"] ?? payload["queryParameters"] else { return "" }
         switch query {
         // Single string query variables in form of "key1=value1&key2=value2"
         case .string(let str):
@@ -80,8 +80,7 @@ public extension ConnectionParams {
     /// HTTPHeaaders from connection parameter
     var headers: HTTPHeaders {
         guard let payload = self else { return .init() }
-        guard let header = payload["header"] ?? payload["headers"] else { return .init() }
-        guard case .dictionary(let headerDict) = header else { return .init() }
+        guard case .dictionary(let headerDict) = payload["header"] ?? payload["headers"] else { return .init() }
         return .init(headerDict.map { (key, val) in
             guard case .string(let value) = val else {
                 return (key, val.jsonString)
