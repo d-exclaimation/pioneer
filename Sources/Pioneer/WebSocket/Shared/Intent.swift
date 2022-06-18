@@ -12,7 +12,8 @@ import GraphQL
 extension Pioneer {
     /// Pioneer GraphQL message Intention to static differentiate GraphQL Message types
     enum Intent {
-        case initial, ping, terminate, ignore
+        case initial(payload: [String: Map]?)
+        case ping, terminate, ignore
         case start(oid: String, gql: GraphQLRequest)
         case once(oid: String, gql: GraphQLRequest)
         case stop(oid: String)

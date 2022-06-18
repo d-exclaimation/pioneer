@@ -14,13 +14,20 @@ extension Pioneer {
     /// Running and Valid GraphQL over Websocket connection
     struct Process: Identifiable {
         /// Unique process ID
-        var id: UUID = UUID()
+        var id: UUID
         /// Websocket connection for this process
         var ws: ProcessingConsumer
         /// Context from request attached to this context
-        var ctx: Context
+        var payload: ConnectionParams
         /// Request attached to this process
         var req: Request
+
+        init(id: UUID = UUID(), ws: ProcessingConsumer, payload: ConnectionParams, req: Request) {
+            self.id = id
+            self.ws = ws
+            self.payload = payload
+            self.req = req
+        }
 
         /// Send a text message
         func send(_ s: String) {
