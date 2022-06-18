@@ -38,8 +38,8 @@ enum SubscriptionTransportWs: SubProtocol {
             return .stop(oid: oid)
 
         // Initialize handshake and confirm connection
-        case (GQL_CONNECTION_INIT, _, .none):
-            return .initial
+        case (GQL_CONNECTION_INIT, let payload, .none):
+            return .initial(payload: payload)
         // De-initialize handshake and terminate connection
         case (GQL_CONNECTION_TERMINATE, .none, .none):
             return .terminate
