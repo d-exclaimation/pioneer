@@ -20,7 +20,14 @@ let server = Pioneer(
     schema: schema,
     resolver: .init(),
     contextBuilder: { req, res in
-        Context(req: req, res: res)
+        Context(req: req, res: res, auth: req.headers[.authorization].first)
+    },
+    websocketContextBuilder: { req, params, gql in
+        let res = Response()
+        guard case .string(let auth) = params?["Authorization"] else {
+            return Context(req: req, res: res, auth: nil) 
+        }
+        Context(req: req, res: res, auth: auth)
     }
 )
 ```
@@ -33,7 +40,48 @@ let server = Pioneer(
 | ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `schema`            | [!badge variant="primary" text="GraphQLSchema"]              | GraphQL schema used to execute operations                                              |
 | `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
-| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Context"] | Context builder from request (Can be async and can throw an error)                                                         |
+| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Context"] | Context builder from request (Can be async and can throw an error)     |
+| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
+| `websocketContextBuilder`    | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                      |
+| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
+| `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
+| `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+
+===
+
+
+### `init`
+
+**Constraint**:
+
+```swift
+where WebsocketContextBuilder == ContextBuilder
+```
+
+Returns an initialized [Pioneer](#pioneer) server instance.
+
+=== Example
+
+```swift
+let server = Pioneer(
+    schema: schema,
+    resolver: .init(),
+    contextBuilder: { req, res in
+        Context(req: req, res: res, auth: req.headers[.authorization].first)
+    }
+)
+```
+
+===
+
+==- Options
+
+| Name                | Type                                                         | Description                                                                            |
+| ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `schema`            | [!badge variant="primary" text="GraphQLSchema"]              | GraphQL schema used to execute operations                                              |
+| `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
+| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Context"] | Context builder from request (Can be async and can throw an error)     |
 | `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
@@ -77,12 +125,13 @@ let server = Pioneer(
 
 ===
 
+
 ### `init` (Graphiti)
 
 **Constraint**:
 
 ```swift
-where Schema == Graphiti.Schema<Resolver, Context>
+where Schema == Graphiti.Schema<Resolver, Context> and WebsocketContextBuilder == ContextBuilder
 ```
 
 Returns an initialized [Pioneer](#pioneer) server instance using [Graphiti](https://github.com/GraphQLSwift/Graphiti) schema.
@@ -109,6 +158,54 @@ let server = try Pioneer(
 | `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
 | `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Void"] | Context builder from request (Can be async and can throw an error)                                                        |
 | `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
+| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
+| `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
+| `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+
+===
+
+
+### `init` (Graphiti)
+
+**Constraint**:
+
+```swift
+where Schema == Graphiti.Schema<Resolver, Context>
+```
+
+Returns an initialized [Pioneer](#pioneer) server instance using [Graphiti](https://github.com/GraphQLSwift/Graphiti) schema.
+
+=== Example
+
+```swift
+let server = try Pioneer(
+    schema: Schema<Resolver, Context>(...),
+    resolver: .init(),
+    contextBuilder: { req, res in
+        Context(req: req, res: res)
+    },
+    websocketContextBuilder: { req, params, gql in
+        let res = Response()
+        guard case .string(let auth) = params?["Authorization"] else {
+            return Context(req: req, res: res, auth: nil) 
+        }
+        Context(req: req, res: res, auth: auth)
+    }
+)
+```
+
+===
+
+==- Options
+
+| Name                | Type                                                         | Description                                                                            |
+| ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `schema`            | [!badge variant="warning" text="Schema<Resolver, Context>"]  | Graphiti schema used to execute operations                                             |
+| `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
+| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Void"] | Context builder from request (Can be async and can throw an error)                                                        |
+| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
+| `websocketContextBuilder`    | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                      |
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
 | `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |

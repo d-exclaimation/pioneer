@@ -20,7 +20,10 @@ let server = Pioneer(
     schema: schema,
     resolver: Resolver(),
     contextBuilder: { req, res in
-        Context(req: req, res: req)
+        Context(req: req, res: res)
+    },
+    websocketContextBuilder { req, params, gql in 
+        Context(req: req, res: .init())
     },
     websocketProtocol: .graphqlWs,
     introspection: true,

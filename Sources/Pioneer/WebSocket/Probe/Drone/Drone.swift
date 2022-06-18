@@ -17,19 +17,28 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
+        private let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
 
-        init(_ process: Process, schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type) {
+        init(
+            _ process: Process, schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        ) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
             self.process = process
+            self.websocketContextBuilder = websocketContextBuilder
         }
 
-        init(_ process: Process, schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type) {
+        init(
+            _ process: Process, schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        ) {
             self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
             self.process = process
+            self.websocketContextBuilder = websocketContextBuilder
         }
 
         // MARK: - Private mutable states
@@ -114,11 +123,12 @@ extension Pioneer {
         /// Execute subscription from GraphQL Resolver and Schema, await the future value and catch error into a SubscriptionResult
         private func subscription(gql: GraphQLRequest) async -> SubscriptionResult {
             do {
+                let ctx = try await websocketContextBuilder(process.req, process.payload, gql)
                 return try await subscribeGraphQL(
                     schema: schema,
                     request: gql.query,
                     resolver: resolver,
-                    context: process.ctx,
+                    context: ctx,
                     eventLoopGroup: process.req.eventLoop,
                     variables: gql.variables,
                     operationName: gql.operationName

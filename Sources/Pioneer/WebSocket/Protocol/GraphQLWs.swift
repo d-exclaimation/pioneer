@@ -36,8 +36,8 @@ enum GraphQLWs: SubProtocol {
             return .stop(oid: oid)
 
         // Initialize handshake and confirm connection
-        case (ConnectionInit, _, .none):
-            return .initial
+        case (ConnectionInit, let payload, .none):
+            return .initial(payload: payload)
 
         // A request to validate active connection
         case (Ping, _, .none):

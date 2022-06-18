@@ -16,17 +16,26 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
+        private let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
 
-        init(schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type) {
+        init(
+            schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        ) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
+            self.websocketContextBuilder = websocketContextBuilder
         }
         
-        init(schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type) {
+        init(
+            schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        ) {
             self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
+            self.websocketContextBuilder = websocketContextBuilder
         }
 
         // MARK: - Private mutable states
@@ -55,7 +64,8 @@ extension Pioneer {
                 .init(process,
                     schema: schema,
                     resolver: resolver,
-                    proto: proto
+                    proto: proto,
+                    websocketContextBuilder: websocketContextBuilder
                 )
             }
             drones.update(pid, with: drone)
@@ -66,7 +76,7 @@ extension Pioneer {
         func once(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
             guard let process = clients[pid] else { return }
 
-            let future = execute(gql, ctx: process.ctx, req: process.req)
+            let future = execute(gql, payload: process.payload, req: process.req)
             
             pipeToSelf(future: future) { sink, res in
                 switch res {
@@ -77,7 +87,7 @@ extension Pioneer {
                         given: .from(type: self.proto.next, id: oid, value)
                     )
                 case .failure(let error):
-                    let result: GraphQLResult = .init(data: nil, errors: [.init(message: error.localizedDescription)])
+                    let result: GraphQLResult = .init(data: nil, errors: [error as? GraphQLError ?? .init(error)])
                     await sink.outgoing(
                         with: oid,
                         to: process,
@@ -101,19 +111,18 @@ extension Pioneer {
         // MARK: - Utility methods
         
         /// Execute short-lived GraphQL Operation
-        private func execute(_ gql: GraphQLRequest, ctx: Context, req: Request) -> Future<GraphQLResult> {
-            do {
-                return try graphql(
-                    schema: schema,
+        private func execute(_ gql: GraphQLRequest, payload: ConnectionParams, req: Request) -> Future<GraphQLResult> {
+            req.eventLoop.performWithTask {
+                let ctx = try await self.websocketContextBuilder(req, payload, gql)
+                return try await executeGraphQL(
+                    schema: self.schema,
                     request: gql.query,
-                    rootValue: resolver,
+                    resolver: self.resolver,
                     context: ctx,
                     eventLoopGroup: req.eventLoop,
-                    variableValues: gql.variables ?? [:],
+                    variables: gql.variables ?? [:],
                     operationName: gql.operationName
                 )
-            } catch {
-                return req.eventLoop.next().makeFailedFuture(error)
             }
         }
     }

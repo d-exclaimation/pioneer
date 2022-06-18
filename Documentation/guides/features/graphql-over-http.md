@@ -31,7 +31,7 @@ Here are the available strategies:
 | `splitQueryAndMutation`  | [!badge variant="success" text="Query"]                                            | [!badge variant="warning" text="Mutation"]                                         |
 | `both`                   | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] |
 
-## Request and Response
+## Context, Request and Response
 
 Pioneer provide a similar solution to `apollo-server-express` in handling fetching the raw http requests and sending back custom responses. It provide both in the context builder that needed to be provided when constructing Pioneer. This request and response will be request-specific / different for each GraphQL HTTP request.
 
@@ -41,6 +41,7 @@ import Vapor
 
 let app = try Application(.detect())
 
+@Sendable 
 func getContext(req: Request, res: Response) -> Context {
     // Do something extra if needed
     Context(req: req, res: req)
@@ -56,10 +57,24 @@ let server = Pioneer(
 )
 ```
 
-!!!warning Websocket
-While all subscription resolver can also access the context object, given that subscription is handled via a single websocket connection, the request object is taken from the HTTP request to make the switch in protocol and will not change unless the new connection is made.
+!!!info Websocket Context Builder
+From `v0.7.0`, You can now provide a different websocket context builder by passing `websocketContextBuilder`.
+[!ref Websocket Context](/guides/features/graphql-over-websockets/#websocket-context)
+!!!
 
-On the other hand, the response object serves no function in any subscription resolver. It is also advisable to avoid performing authentication through websocket even though this library can perform GraphQL query and mutation through websocket.
+!!!success Shared Context Builder
+By default if you don't provide a seperate context builder for websocket, Pioneer will try to use the regular `contextBuilder`, by passing a custom request and a dummy response (that serve no value).
+
+==- Custom Request for Websocket
+The custom request will similar to the request used to upgrade to websocket but will have:
+- The headers taken from `"header"/"headers"` value from the `ConnectionParams` or all the entirety of `ConnectionParams`
+- The query parameters taken from `"query"/"queries"/"queryParams"/"queryParameters"` value from the `ConnectionParams`
+- The body from the `GraphQLRequest`
+
+!!!warning Only when using shared builder
+These addition only apply when using shared context builder. If not, the request will be the exact one from the upgrade request with no custom headers
+
+===
 !!!
 
 ### Request

@@ -44,13 +44,13 @@ GraphiQL Browser IDE
 
 ||| `apolloSandbox`
 
-Redirect to Apollo Sandbox (only for [subscriptions-graphql-ws](https://github.com/apollographql/subscriptions-transport-ws))
+Redirect to Apollo Sandbox
 
 |||
 
 ||| `bananaCakePop`
 
-Redirect to Banana Cake Pop for the cloud (only for [subscriptions-graphql-ws](https://github.com/apollographql/subscriptions-transport-ws))
+Redirect to Banana Cake Pop for the cloud)
 
 |||
 
@@ -180,7 +180,7 @@ Disable GraphQL over Websocket entirely.
 
 !!!warning Disabled entirely
 
-Using this meant, no operations nor even a websocket connection is going to be accepted by the server.
+Using this meant no operations nor even a websocket connection is going to be accepted by the server.
 
 !!!
 

@@ -8,12 +8,15 @@
 
 import Foundation
 import XCTest
+import GraphQL
 import OrderedCollections
 import NIO
+import Vapor
 @testable import Pioneer
 
 final class ExtensionsTests: XCTestCase {
-    let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 4)
+    private let app = Application(.testing)
+    private let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 4)
 
     /// Tester Actor
     private actor Tester {
@@ -102,5 +105,39 @@ final class ExtensionsTests: XCTestCase {
             return XCTFail()
         }
         XCTAssert(res1 == 1 && res2 == 2)
+    }
+    
+    /// Bridging between websocket context builder with context builder
+    /// 1. Should set the headers and query parameters to the request
+    /// 2. Should set the graphql request into request body
+    func testDefaultWebsocketContextBuilder() async {
+        let originalReq = Request(application: app, method: .POST, url: "http://localhost:8080/graphql", on: app.eventLoopGroup.next())
+        let connectionParams = [
+            "query": Map.string("verified=true"),
+            "headers": Map.dictionary([
+                "auth":  "token"
+            ])
+        ]
+        let originalGql = Pioneer<Void, Void>.GraphQLRequest(query: "query { someField }")
+        do {
+            let req = try await originalReq.defaultWebsocketContextBuilder(
+                payload: connectionParams, gql: originalGql,
+                contextBuilder: { req, _ in req }
+            )
+            guard let verified: String = req.query["verified"] else {
+                return XCTFail("No query parameter")
+            }
+            XCTAssert(verified == "true")
+            guard let token = req.headers["auth"].first else {
+                return XCTFail("No headers")
+            }
+            XCTAssert(token == "token")
+            guard let gql = try? req.content.decode(Pioneer<Void, Void>.GraphQLRequest.self) else {
+                return XCTFail("cannot parse body")
+            }
+            XCTAssert(gql.query == originalGql.query)
+        } catch {
+            return XCTFail(error.localizedDescription)
+        }
     }
 }
