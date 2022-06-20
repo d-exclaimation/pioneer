@@ -29,7 +29,7 @@ extension Pioneer {
         case disable
         
         
-        /// Default IDE approach for Apollo Sandbox (Redirect)
+        /// Alias for the preferred Apollo Sandbox option (Currently ``Pioneer/Pioneer/IDE/apolloSandboxRedirect``)
         public static var apolloSandbox: IDE {
             .apolloSandboxRedirect
         }
