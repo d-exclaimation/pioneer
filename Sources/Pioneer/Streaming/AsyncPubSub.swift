@@ -8,17 +8,17 @@
 import Foundation
 
 /// AsyncPubSub is a in memory pubsub structure for managing AsyncStreams in a concurrent safe way utilizing Actors.
-public struct AsyncPubSub: Sendable, PubSub, BroadcastHub {
+public struct AsyncPubSub: PubSub, Broadcast, Sendable {
     public typealias Consumer = AsyncStream<Sendable>.Continuation
     
-    /// Engine is a actor for the pubsub to concurrently manage emitters and incoming data
-    public actor Engine: Broadcast {
-        private var emitters: [String: Emitter] = [:]
+    /// Dispatcher is a actor for the pubsub to concurrently manage publishers and incoming data
+    public actor Dispatcher: Dispatch {
+        private var emitters: [String: Producer] = [:]
         
         /// Subscribe get the emitters that is assigned to the given key 
         /// - Parameter key: The string topic / key used to differentiate emitters
         /// - Returns: The emitters stored or a new one 
-        internal func subscribe(for key: String) async -> Emitter {
+        internal func subscribe(for key: String) async -> Producer {
             let emitter = emitters.getOrElse(key) {
                 .init()
             }
@@ -64,7 +64,7 @@ public struct AsyncPubSub: Sendable, PubSub, BroadcastHub {
     }
     
     /// Emitter is an actor handling a single type, single topic, and multiple consumer concurrent data broadcasting
-    public actor Emitter {
+    public actor Producer {
         private var consumers: [String: Consumer] = [:]
         
         /// Subscribe saved and set up Consumer to receive broadcasted Sendable data
@@ -98,7 +98,7 @@ public struct AsyncPubSub: Sendable, PubSub, BroadcastHub {
         }
     }
     
-    public let engine: Engine = .init()
+    public let dispatcher: Dispatcher = .init()
     
     public init() {}
 }

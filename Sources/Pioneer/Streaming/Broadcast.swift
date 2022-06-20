@@ -7,16 +7,16 @@
 import Foundation
 
 /// A PubSub that utilize broadcast hub through an Actor
-public protocol BroadcastHub where Self: PubSub {
-    /// Engine is a actor for the pubsub to concurrently manage publishers and incoming data
-    associatedtype Engine: Broadcast
+public protocol Broadcast where Self: PubSub {
+    /// Dispatcher is a actor for the pubsub to concurrently manage publishers and incoming data
+    associatedtype Dispatcher: Dispatch
     
-    /// The engine actor instance
-    var engine: Engine { get }
+    /// The dispatcher actor instance
+    var dispatcher: Dispatcher { get }
 }
 
-/// A broadcasting actor for a pubsub to concurrently manage publishers and incoming data
-public protocol Broadcast where Self: Actor {
+/// An actor for a pubsub to concurrently manage publishers, incoming data, and dispatch data
+public protocol Dispatch where Self: Actor {
     /// Async stream return a new AsyncStream that is connected to the emitter that is assigned to the given key
     /// - Parameter key: The string topic / key used to find the emitter
     /// - Returns: An async stream that is linked to an emitter
