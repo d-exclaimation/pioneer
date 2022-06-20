@@ -20,7 +20,7 @@ extension Pioneer {
         case sandbox
         
         /// Redirect to a cloud based IDE
-        case redirect(to cloud: Cloud)
+        case redirect(to: Cloud)
         
         /// Disabled any IDEs
         case disable
@@ -36,7 +36,7 @@ extension Pioneer {
         
         /// Alias for the preferred Apollo Sandbox option (Currently ``Pioneer/Pioneer/IDE/apolloSandboxRedirect``)
         public static var apolloSandbox: IDE {
-            .redirect(cloud: .apolloSandbox)
+            .redirect(to: .apolloSandbox)
         }
     }
     
