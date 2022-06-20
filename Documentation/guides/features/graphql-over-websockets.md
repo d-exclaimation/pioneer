@@ -13,12 +13,11 @@ To perform GraphQL over WebSocket, there need to be a sub protocol to define ope
 
 The newer sub-protocol is [graphql-ws](https://github.com/enisdenjo/graphql-ws). Aimed mostly on solving most of the problem with the [subscriptions-transport-ws](#subscriptions-transport-ws).
 
-!!!success GraphiQL :heart: graphql-ws
-GraphiQL has full support for `graphql-ws` and Pioneer (since `0.3.0`) can now host GraphiQL with this support (and `subscriptions-transport-ws` support).
+!!!success GraphQL IDEs :heart: graphql-ws
+All major GraphQL IDEs (such as GraphiQL, Apollo Sandbox, BananaCakePop, etc.) has full support for `graphql-ws`. 
 
 !!!warning Incompatibilty
-The retired [graphql-playground](https://github.com/graphql/graphql-playground), cloud based IDE such as [Apollo Sandbox](https://studio.apollographql.com/sandbox), some clients and servers has yet to support this protocol. More explaination [here](#consideration).
-
+The [graphql-playground](https://github.com/graphql/graphql-playground) has been retired and will not support `graphql-ws`. More explaination [here](#https://github.com/graphql/graphql-playground/issues/1143).
 !!!
 
 #### Usage

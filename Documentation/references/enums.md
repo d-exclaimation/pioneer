@@ -42,9 +42,27 @@ GraphiQL Browser IDE
 
 |||
 
-||| `apolloSandbox`
+||| `embeddedSandbox`
+
+Embedded Apollo Sandbox Browser IDE 
+
+!!!warning Limited
+The embedded version of [Apollo Sandbox](https://www.apollographql.com/docs/studio/explorer/sandbox/#embedding-sandbox) has some limitation notably the lack of subscription support that is available for the regular [Sandbox](https://studio.apollographql.com/sandbox/explorer).
+
+Given that, the preffered / default option for `apolloSandbox` is the redirect option.
+!!!
+
+|||
+
+||| `apolloSandboxRedirect`
 
 Redirect to Apollo Sandbox
+
+|||
+
+||| `apolloSandbox`
+
+Alias for the preferred Apollo Sandbox option (Currently `.apolloSandboxRedirect`)
 
 |||
 
