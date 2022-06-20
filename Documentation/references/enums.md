@@ -42,15 +42,27 @@ GraphiQL Browser IDE
 
 |||
 
-||| `apolloSandbox`
+||| `sandbox`
 
-Redirect to Apollo Sandbox
+Embedded Apollo Sandbox Browser IDE 
+
+!!!warning Limited
+The embedded version of [Apollo Sandbox](https://www.apollographql.com/docs/studio/explorer/sandbox/#embedding-sandbox) has some limitation notably the lack of subscription support that is available for the regular [Sandbox](https://studio.apollographql.com/sandbox/explorer).
+
+Given that, the preffered / default option for `apolloSandbox` is the redirect option.
+!!!
 
 |||
 
-||| `bananaCakePop`
+||| <code>redirect(to: [Cloud](#idecloud))</code>
 
-Redirect to Banana Cake Pop for the cloud)
+Redirect to a cloud based IDE
+
+|||
+
+||| `apolloSandbox`
+
+Alias for the preferred Apollo Sandbox option (Currently `.redirect(to: .apolloSandbox)`)
 
 |||
 
@@ -59,6 +71,23 @@ Redirect to Banana Cake Pop for the cloud)
 Disabled any IDEs
 
 |||
+
+### IDE.Cloud
+
+GraphQL cloud based IDE options.
+
+||| `apolloSandbox`
+
+Cloud version of Apollo Sandbox
+
+|||
+
+||| `bananaCakePop`
+
+Cloud version of Banana Cake Pop
+
+|||
+
 
 ## HTTPStrategy
 
