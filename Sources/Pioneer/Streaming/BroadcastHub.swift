@@ -7,7 +7,7 @@
 import Foundation
 
 /// A PubSub that utilize broadcast hub through an Actor
-public protocol BroadcastHub {
+public protocol BroadcastHub where Self: PubSub {
     /// Engine is a actor for the pubsub to concurrently manage publishers and incoming data
     associatedtype Engine: Broadcast
     
