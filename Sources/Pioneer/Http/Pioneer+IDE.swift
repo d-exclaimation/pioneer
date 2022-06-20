@@ -17,21 +17,26 @@ extension Pioneer {
         case graphiql
         
         /// Embedded Apollo Sandbox
-        case embeddedSandbox
+        case sandbox
         
-        /// Redirect to Apollo Sandbox
-        case apolloSandboxRedirect
-        
-        /// Redirect to Banana Cake Pop
-        case bananaCakePop
+        /// Redirect to a cloud based IDE
+        case redirect(to cloud: Cloud)
         
         /// Disabled any IDEs
         case disable
         
+        public enum Cloud {
+            /// Cloud version of Apollo Sandbox
+            case apolloSandbox
+            
+            /// Cloud version of Banana Cake Pop
+            case bananaCakePop
+        }
+        
         
         /// Alias for the preferred Apollo Sandbox option (Currently ``Pioneer/Pioneer/IDE/apolloSandboxRedirect``)
         public static var apolloSandbox: IDE {
-            .apolloSandboxRedirect
+            .redirect(cloud: .apolloSandbox)
         }
     }
     
