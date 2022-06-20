@@ -114,7 +114,9 @@ public struct Pioneer<Resolver, Context> {
             applyPlayground(on: router, at: path)
         case .graphiql:
             applyGraphiQL(on: router, at: path)
-        case .apolloSandbox:
+        case .embeddedSandbox:
+            applyEmbeddedSandbox(on: router, at: path)
+        case .apolloSandboxRedirect:
             applySandboxRedirect(on: router, with: "https://studio.apollographql.com/sandbox/explorer")
         case .bananaCakePop:
             applySandboxRedirect(on: router, with: "https://eat.bananacakepop.com")
