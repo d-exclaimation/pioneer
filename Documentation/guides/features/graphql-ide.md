@@ -91,7 +91,7 @@ Redirecting route (at [/playground](http://localhost:8080/playground)) to Apollo
 ```swift
 let server = Pioneer(
     ...,
-    playground: .apolloSandboxRedirect // or .apolloSandbox
+    playground: .apolloSandbox // or .redirect(to: .apolloSandbox)
 )
 let cors = CORSMiddleware(configuration: .graphqlWithApolloSandbox())
 
@@ -109,7 +109,7 @@ Embedded version of Apollo Sandbox served similarly to [GraphiQL](#graphiql) wit
 ```swift
 let server = Pioneer(
     ...,
-    playground: .embeddedSandbox
+    playground: .sandbox
 )
 
 server.applyMiddleware(on: app)
@@ -137,7 +137,7 @@ Pioneer also can provide redirecting route (at [/playground](http://localhost:80
 ```swift
 let server = Pioneer(
     ...,
-    playground: .bananaCakePop
+    playground: .redirect(to: .bananaCakePop)
 )
 let cors = CORSMiddleware(configuration: .graphqlWithBananaCakePop())
 
