@@ -8,11 +8,11 @@
 import Foundation
 
 /// AsyncPubSub is a in memory pubsub structure for managing AsyncStreams in a concurrent safe way utilizing Actors.
-public struct AsyncPubSub: Sendable {
+public struct AsyncPubSub: Sendable, PubSub, BroadcastHub {
     public typealias Consumer = AsyncStream<Sendable>.Continuation
     
     /// Engine is a actor for the pubsub to concurrently manage emitters and incoming data
-    public actor Engine {
+    public actor Engine: Broadcast {
         private var emitters: [String: Emitter] = [:]
         
         /// Subscribe get the emitters that is assigned to the given key 
@@ -29,7 +29,7 @@ public struct AsyncPubSub: Sendable {
         /// Async stream return a new AsyncStream that is connected to the emitter that is assigned to the given key
         /// - Parameter key: The string topic / key used to find the emitter
         /// - Returns: An async stream that is linked to an emitter
-        internal func asyncStream(for key: String) async -> AsyncStream<Sendable> {
+        public func asyncStream(for key: String) async -> AsyncStream<Sendable> {
             let emitter = await subscribe(for: key)
             let id = UUID().uuidString.lowercased()
             return AsyncStream<Sendable> { con in
@@ -50,13 +50,13 @@ public struct AsyncPubSub: Sendable {
         /// - Parameters:
         ///   - key: The string topic / key used to find the emitter
         ///   - value: The sendable data being sent
-        internal func publish(for key: String, _ value: Sendable) async {
+        public func publish(for key: String, _ value: Sendable) async {
             await emitters[key]?.publish(value)
         }
         
         /// Close shutdowns an emitter that is assigned to the given key
         /// - Parameter key: The string / topic key
-        internal func close(for key: String) async {
+        public func close(for key: String) async {
             await emitters[key]?.close()
             emitters.delete(key)
         }
@@ -98,42 +98,7 @@ public struct AsyncPubSub: Sendable {
         }
     }
     
-    private let engine: Engine = .init()
+    public let engine: Engine = .init()
     
-    /// Returns a new AsyncStream with the correct type and for a specific trigger
-    ///
-    /// - Parameters:
-    ///   - type: DataType of this AsyncStream
-    ///   - trigger: The topic string used to differentiate what data should this stream be accepting
-    public func asyncStream<DataType: Sendable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
-        AsyncStream<DataType> { con in
-            let task = Task {
-                let pipe = await engine.asyncStream(for: trigger)
-                for await untyped in pipe {
-                    guard let typed = untyped as? DataType else { continue }
-                    con.yield(typed)
-                }
-                con.finish()
-            }
-            con.onTermination = { @Sendable _ in
-                task.cancel()
-            }
-        }
-    }
-    
-    /// Publish a new data into the pubsub for a specific trigger.
-    /// - Parameters:
-    ///   - trigger: The trigger this data will be published to
-    ///   - payload: The data being emitted
-    public func publish(for trigger: String, payload: Sendable) async {
-        await engine.publish(for: trigger, payload)
-    }
-    
-    /// Close a specific trigger and deallocate every consumer of that trigger
-    /// - Parameter trigger: The trigger this call takes effect on
-    public func close(for trigger: String) async {
-        await engine.close(for: trigger)
-    }
-
     public init() {}
 }
