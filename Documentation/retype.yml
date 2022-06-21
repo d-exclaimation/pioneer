@@ -15,6 +15,9 @@ links:
 - text: Github
   link: https://github.com/d-exclaimation/pioneer
   icon: mark-github
+- text: DocC
+  link: https://swiftpackageindex.com/d-exclaimation/pioneer/main/documentation/pioneer
+  icon: repo
 - text: Report a bug
   link: https://github.com/d-exclaimation/pioneer/issues
   icon: bug

@@ -227,3 +227,37 @@ guard !message.isIntrospection else {
 ```
 
 ===
+
+## Downstream
+
+An async stream with an id
+
+### `init`
+
+Return an instance of [Downstream](#downstream)
+
+=== Example
+
+```swift
+let downstream = Downstream<MessageType> { id, con in
+    let monitor = QuakeMonitor()
+    monitors[id] = monitor
+    monitor.quakeHandler = { quake in
+        continuation.yield(quake)
+    }
+    continuation.onTermination = { @Sendable _ in
+        monitor.stopMonitoring()
+    }
+    monitor.startMonitoring()
+}
+```
+
+===
+
+### `id`
+
+The id of the stream (`UUID`)
+
+### `stream`
+
+The stream itself (`AsyncStream<Element>`)
