@@ -142,17 +142,21 @@ struct Resolver {
 }
 ```
 
-## Custom PubSub
+## Custom Pub/Sub
 
 As mentioned before, [AsyncPubSub](/references/async-pubsub) is an in memory pub-sub implementation that is limited to a single server instance, which may become an issue on production environments where there are multiple distributed server instances.
 
-This means that events published by one instance of your GraphQL server are not received by subscriptions that are handled by other instances.
+In which case, you likely want to either use or implement a custom pub-sub system that is backed by an external datastore.
 
-In which case, you likely want to either use or implement a custom pub-sub system that is backed by an external datastore, but may still want to have similar API to [AsyncPubSub](/references/async-pubsub)
+Here are a few **optional** utility (structs, classes, protocols, actors, etc.) exported by Pioneer to help create that custom Pub/Sub implementation:
 
 ### PubSub as protocol
 
-Pioneer exported the [PubSub](/references/protocols/#pubsub) protocol which allow different implementation of [AsyncPubSub](/references/async-pubsub) notably implementation backed by popular event-publishing systems (i.e. Redis) with similar API which allow user of this library to prototype with the in memory AsyncPubSub and easily migrate to a distributed PubSub implementation without very little changes.
+!!!info Optional
+It's not necessary to conform to this protocol to create a Pub/Sub implementation. The protocol just enforces that implementation to have the same API to [AsyncPubSub](/references/async-pubsub)
+!!!
+
+Pioneer exported the [PubSub](/references/protocols/#pubsub) protocol which allow different implementation with the same API [AsyncPubSub](/references/async-pubsub) notably implementation backed by popular event-publishing systems (i.e. Redis) with similar API which allow user of this library to prototype with the in memory AsyncPubSub and easily migrate to a distributed PubSub implementation without very little changes.
 
 The basic rules to implement A [PubSub](/references/protocols/#pubsub) are as follow:
 
@@ -188,6 +192,12 @@ Additionally, common client libraries for popular event-publishing systems usual
   - Usually because subscription is its own new network connection and multiple of those can be resource intensive.
 
 In this case, the actor, [Broadcast](/references/actors/#broadcast), is provided which can broadcast any events from a publisher to multiple different downstream where each downstream share the same upstream and can be unsubscribed / disposed (to prevent leaks) without closing the upstream and publisher.
+
+!!!success Optional and Standalone
+Broadcast is an optional feature in implementing a custom Pub/Sub implementation. It provided to help solve the issue of broadcasting.
+
+Furthermore, Broadcast can be used with or without [PubSub](#pubsub-as-protocol).
+!!!
 
 ```mermaid
 %%{init: { 'theme': 'base' } }%%
@@ -262,7 +272,7 @@ await broadcast.close()
 As an example, say we want to build a redis backed [PubSub](/references/protocols/#pubsub).
 
 !!!warning Untested Example
-This is meant to be an example. This is meant to give a better idea on how to implement a custom implementation.
+This is meant to be an example. This is meant to give a better idea on how to implement a custom implementation that conform to [PubSub](#pubsub-as-protocol) and utilize [Broadcast](#broadcast).
 
 That meant:
 
