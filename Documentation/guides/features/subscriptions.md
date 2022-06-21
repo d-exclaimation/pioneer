@@ -333,8 +333,6 @@ struct RedisPubSub<Event: Sendable & RESPVlueConvertible>: PubSub {
     }
 
     public func asyncStream<DataType: Sendable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
-        /// If not event, give back empty downstream
-        guard type == Event.Type else { AsyncStream<DataType> { $0.finish() } }
         AsyncStream<DataType> { con in
             let task = Task {
                 let pipe = await dispatcher.subscribe(for: trigger)
