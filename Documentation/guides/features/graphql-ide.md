@@ -1,6 +1,6 @@
 ---
 icon: squirrel
-order: 50
+order: 40
 ---
 
 # GraphQL IDE
@@ -13,7 +13,7 @@ Pioneer will disable any GraphQL IDE automatically regardless of the specified p
 
 ## GraphiQL
 
-GraphiQL is the official GraphQL IDE by the GraphQL Foundation. The current GraphiQL version has met feature parody with [GraphQL Playground](#graphql-playground) (*mostly).
+GraphiQL is the official GraphQL IDE by the GraphQL Foundation. The current GraphiQL version has met feature parody with [GraphQL Playground](#graphql-playground) (\*mostly).
 
 ![](/static/graphiql.png)
 
@@ -76,7 +76,7 @@ GET /playground # (For playground)
 Apollo Sandbox is a cloud hosted in browser GraphQL IDE developed by Apollo GraphQL and their choice of replacement for [GraphQL Playground](#graphql-playground). Apollo Sandbox provide all features available in [GraphQL Playground](#graphql-playground) and a lot more. However, this is either:
 
 - A cloud based solution that require CORS configuration and cannot be self-hosted, or
-- A locally embedded solution that limited capabilities compared to the cloud version. 
+- A locally embedded solution that limited capabilities compared to the cloud version.
 
 Both solutions is not open source.
 
@@ -102,7 +102,7 @@ server.applyMiddleware(on: app)
 
 <sub>You can also just set this up on your own</sub>
 
-+++ Embedded Locally 
++++ Embedded Locally
 
 Embedded version of Apollo Sandbox served similarly to [GraphiQL](#graphiql) without needing to setup CORS.
 
@@ -122,7 +122,6 @@ Given that, the preffered / default option for `apolloSandbox` is the redirect o
 !!!
 
 +++
-
 
 Afterwards, you can go to [./playground](http://localhost:8080/playground) to open a instance of Apollo Sandbox whether it is the cloud or the locally embedded version.
 

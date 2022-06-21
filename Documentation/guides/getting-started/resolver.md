@@ -25,7 +25,7 @@ struct Context {
 The context here will very simple which only grab the `Request` and `Response` so we can get certain values from the request and set some to the response.
 
 !!!success Context building with async-await
-Since [`v0.6.0`](https://github.com/d-exclaimation/pioneer/releases/tag/0.6.0), Pioneer can accept async and/or throwing context builder, and this applies to the websocket context builder as well (since [`v0.7.0`](https://github.com/d-exclaimation/pioneer/releases/tag/0.6.0))
+Since `v0.6.0`, Pioneer can accept async and/or throwing context builder, and this applies to the websocket context builder as well (since `v0.7.0`)
 !!!
 
 [!ref More on Context Building](/guides/features/graphql-over-http/#context-request-and-response)

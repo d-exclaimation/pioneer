@@ -1,6 +1,6 @@
 ---
 icon: database
-order: 60
+order: 50
 ---
 
 # Fluent
@@ -206,7 +206,7 @@ This is what's called the N+1 problem which you want to avoid. The solution? [Da
 The GraphQL Foundation provided a specification for solution to the [N+1 problem](#n1-problem) called `dataloader`. Essentially, dataloaders combine the fetching of process across all resolvers for a given GraphQL request into a single query.
 
 !!!success DataLoader with async-await
-Since [`v0.5.2`](https://github.com/d-exclaimation/pioneer/releases/tag/0.5.2), Pioneer already provide extensions to use DataLoader with async await
+Since `v0.5.2`, Pioneer already provide extensions to use DataLoader with async await
 !!!
 
 The package [Dataloader](https://github.com/GraphQLSwift/DataLoader) implement that solution for [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/DataLoader).

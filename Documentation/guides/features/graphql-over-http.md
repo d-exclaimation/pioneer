@@ -1,6 +1,6 @@
 ---
 icon: file-binary
-order: 80
+order: 70
 ---
 
 # GraphQL Over HTTP
@@ -41,7 +41,7 @@ import Vapor
 
 let app = try Application(.detect())
 
-@Sendable 
+@Sendable
 func getContext(req: Request, res: Response) -> Context {
     // Do something extra if needed
     Context(req: req, res: req)
@@ -67,6 +67,7 @@ By default if you don't provide a seperate context builder for websocket, Pionee
 
 ==- Custom Request for Websocket
 The custom request will similar to the request used to upgrade to websocket but will have:
+
 - The headers taken from `"header"/"headers"` value from the `ConnectionParams` or all the entirety of `ConnectionParams`
 - The query parameters taken from `"query"/"queries"/"queryParams"/"queryParameters"` value from the `ConnectionParams`
 - The body from the `GraphQLRequest`
