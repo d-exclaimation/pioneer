@@ -278,7 +278,8 @@ Here is an example implementation,
 import Pioneer
 import Redis
 
-struct RedisPubSub<Event: Sendabale & RESPVlueConvertible>: PubSub {
+// Only for DataType that is Sendable & RESPVlueConvertible
+struct RedisPubSub<Event: Sendable & RESPVlueConvertible>: PubSub {
     let redis: RedisClient
     let dispatcher: Dispatcher = .init()
 
