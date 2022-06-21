@@ -256,3 +256,152 @@ await broadcast.close()
 ===
 
 [!ref More on Broadcast specification](/references/actors/#broadcast)
+
+### Redis Example
+
+As an example, say we want to build a redis backed [PubSub](/references/protocols/#pubsub).
+
+!!!warning Untested Example
+This is meant to be an example. This is meant to give a better idea on how to implement a custom implementation.
+
+That meant:
+
+- It is not tested and it may not even compile.
+- Some part of code is intentionally vaguely described.
+- This should not be used in a production environment
+
+!!!
+
+Here is an example implementation,
+
+```swift RedisPubSub
+import Pioneer
+import Redis
+
+struct RedisPubSub<Event: Sendabale & RESPVlueConvertible>: PubSub {
+    let redis: RedisClient
+    let dispatcher: Dispatcher = .init()
+
+    actor Dispatcher {
+        private var broadcasting: [String: Broadcast<Event>] = [:]
+
+        private func subscribe(to channel: String) async -> Broadcast<Event> {
+            // If exist, just return it because it is already set up properly
+            if let broadcast = broadcasting[channel] {
+                return broadcast
+            }
+            let broadcast = Broadcast<Event>()
+            broadcasting[channel] = broadcast
+            await applySubscription(from: .init(channel), to: broadcast)
+            return broadcast
+        }
+
+        private func applySubsription(from channel: RedisChannelName, to broadcast: Broadcast<Event>) async {
+            do {
+                // Try to subscribe and pass to broadcast
+                try? await redis.subscribe(
+                    to: channel,
+                    messageReceiver: { _, msg in
+                        guard let event = Event(fromRESP: msg) else { return }
+                        Task {
+                            await broadcast.publish(event)
+                        }
+                    },
+                    onUnsubscribe: { _, _ in
+                        Task {
+                            await broadcast.close()
+                        }
+                    }
+                )
+                .get()
+            } catch {
+              // If not, just close it
+              await broadcast.close()
+            }
+        }
+
+        private func publish(for channel: String, _ value: Event) async {
+            try? await redis.publish(value, to: .init(channel)).get()
+        }
+
+        private func close(for channel: String) async {
+            try? await redis.unsubscribe(from: .init(channel))
+            // Make sure broadcast is 100% closed
+            await broadcasting[channel]?.close()
+        }
+    }
+
+    public func asyncStream<DataType: Sendable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
+        /// If not event, give back empty downstream
+        guard type == Event.Type else { AsyncStream<DataType> { $0.finish() } }
+        AsyncStream<DataType> { con in
+            let task = Task {
+                let pipe = await dispatcher.subscribe(for: trigger)
+                for await event in pipe {
+                    guard let data = event as? DataType else { break }
+                    con.yield(data)
+                }
+                con.finish()
+            }
+            con.onTermination = { @Sendable _ in
+                task.cancel()
+            }
+        }
+    }
+
+    public func publish(for trigger: String, payload: Sendable) async {
+        /// If not event, don't publish
+        guard let payload = payload as? Event else { return }
+        await dispatcher.publish(for: trigger, event)
+    }
+
+    public func close(for trigger: String) async {
+        await dispatcher.close(for: trigger)
+    }
+}
+```
+
+Now we can have the context to require [PubSub](/references/protocols/#pubsub) instead of [AsyncPubSub](/references/async-pubsub).
+
+```swift Context.swift
+struct Context {
+    var pubsub: PubSub
+}
+```
+
+```swift Resolver.swift
+struct Message: Sendable, RESPValueConvertible { ... }
+
+struct Resolver {
+    func create(ctx: Context, _: NoArguments) async -> Message {
+        let message = ...
+        await ctx.pubsub.publish(message)
+        return message
+    }
+
+    func onCreate(ctx: Context, _: NoArguments) async -> EventStream<Message> {
+        ctx.pubsub.asyncStream(Message.self, for: "message-create").toEventStream()
+    }
+}
+```
+
+So now, if we can use the `RedisPubSub` on a production environment.
+
+```swift main
+...
+
+let pubsub: PubSub = app.environment.isRelease ? RedisPubSub<Message> : AsyncPubSub()
+
+let server = Pioneer(
+    ...,
+    contextBuilder: { _, _, in
+        Context(pubsub: pubsub)
+    },
+    websocketBuilder: { _, _, _ in
+        Context(pubsub: pubsub)
+    },
+    ...
+)
+
+...
+```
