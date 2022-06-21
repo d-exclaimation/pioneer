@@ -14,10 +14,10 @@ To perform GraphQL over WebSocket, there need to be a sub protocol to define ope
 The newer sub-protocol is [graphql-ws](https://github.com/enisdenjo/graphql-ws). Aimed mostly on solving most of the problem with the [subscriptions-transport-ws](#subscriptions-transport-ws).
 
 !!!success GraphQL IDEs :heart: graphql-ws
-All major GraphQL IDEs (such as GraphiQL, Apollo Sandbox, BananaCakePop, etc.) has full support for `graphql-ws`. 
+All major GraphQL IDEs (such as GraphiQL, Apollo Sandbox, BananaCakePop, etc.) has full support for `graphql-ws`.
 
 !!!warning Incompatibilty
-The [graphql-playground](https://github.com/graphql/graphql-playground) has been retired and will not support `graphql-ws`. More explaination [here](#https://github.com/graphql/graphql-playground/issues/1143).
+The [graphql-playground](https://github.com/graphql/graphql-playground) has been retired and will not support `graphql-ws`. More explaination [here](https://github.com/graphql/graphql-playground/issues/1143).
 !!!
 
 #### Usage
@@ -64,7 +64,6 @@ Most of the problems (mostly for the implementation) are described in this [issu
 
 We also recommend using the newer sub-protocol [graphql-ws](#graphql-ws) when possible unless you have to support a legacy client.
 
-
 ### Disabling
 
 You can also choose to disable GraphQL over WebSocket all together, which you can do by specifiying in the Pioneer initializer.
@@ -78,10 +77,9 @@ let server = Pioneer(
 
 ## Websocket Context
 
-Since `0.7.0`, Pioneer allow a seperate context builder for the websocket operations where it provide a different set of arguments. 
+Since `0.7.0`, Pioneer allow a seperate context builder for the websocket operations where it provide a different set of arguments.
 
 This context builder is similar to what you can provide to the [`context` property](https://github.com/enisdenjo/graphql-ws/blob/master/docs/interfaces/server.ServerOptions.md#context) in `graphql-ws` where you are given the `Request`, `ConnectionParams`, and `GraphQLRequest`.
-
 
 ```swift main.swift
 import Pioneer
@@ -89,20 +87,20 @@ import Vapor
 
 let app = try Application(.detect())
 
-@Sendable 
+@Sendable
 func getContext(req: Request, res: Response) -> Context {
     try Context(
         req: req, res: res,
-        params: nil, 
+        params: nil,
         gql: req.content.decode(GraphQLRequest.self)
     )
 }
 
-@Sendable 
+@Sendable
 func getWebsocketContext(req: Request, params: ConnectionParams, gql: GraphQLRequest) -> {
     Context(
         req: req, res: .init(),
-        params: params, 
+        params: params,
         gql: gql
     )
 }
@@ -125,6 +123,7 @@ By default if you don't provide a seperate context builder for websocket, Pionee
 
 ==- Custom Request for Websocket
 The custom request will similar to the request used to upgrade to websocket but will have:
+
 - The headers taken from `"header"/"headers"` value from the `ConnectionParams` or all the entirety of `ConnectionParams`
 - The query parameters taken from `"query"/"queries"/"queryParams"/"queryParameters"` value from the `ConnectionParams`
 - The body from the `GraphQLRequest`
@@ -135,13 +134,12 @@ These addition only apply when using shared context builder. If not, the request
 ===
 !!!
 
-
 ### Request
 
 The request given is directly from Vapor when upgrading to websocket, so you can use any method you would use in a regular Vapor application to get any values from it.
 
 !!!warning Switching Protocol Request
-This request object will be the same for each websocket connection and will not change unless the new connection is made. 
+This request object will be the same for each websocket connection and will not change unless the new connection is made.
 
 It will also not have **any custom headers** and the operation specific graphql query which is different from request given in HTTP.
 !!!
@@ -156,7 +154,7 @@ struct Resolver {
 
 ### ConnectionParams
 
-The connection params is given during websocket initialization from [`payload` as part of `ConnectionInit` message](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit) inside an established WebSocket connection. 
+The connection params is given during websocket initialization from [`payload` as part of `ConnectionInit` message](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit) inside an established WebSocket connection.
 
 !!!warning Not strongly typed
 Given that the `payload` parameter is custom each client, it does not have any strong typing, so you would have to work with `Map` enum.
@@ -166,7 +164,7 @@ Given that the `payload` parameter is custom each client, it does not have any s
 ```swift
 Pioneer(
     ...
-    websocketContextBuilder: { req, params, gql in 
+    websocketContextBuilder: { req, params, gql in
         let map: Map = params?["some-key"]
         switch map {
         case .undefined, .null:
@@ -185,6 +183,7 @@ Pioneer(
     }
 )
 ```
+
 ===
 !!!
 
@@ -217,5 +216,3 @@ struct Resolver {
 ```
 
 [!ref GraphQLRequest API References](/references/structs/#graphqlrequest)
-
-
