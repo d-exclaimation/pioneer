@@ -25,11 +25,21 @@ public struct GraphQLRequest: Codable {
     /// Getting parsed operationType
     public func operationType() throws -> OperationType? {
         let ast = try parse(source: source)
-        return ast.definitions
-            .compactMap { def -> OperationType? in
-                (def as? OperationDefinition)?.operation
+        let operations = ast.definitions
+            .compactMap { def -> OperationDefinition? in
+                def as? OperationDefinition
             }
-            .first
+            
+        guard let operationName = operationName else {
+            return operations.first?.operation
+        }
+        
+        return operations
+            .first {
+                guard let name = $0.name?.value else { return false }
+                return operationName == name
+            }?
+            .operation
     }
 
     /// Check if query is any type of introspection
