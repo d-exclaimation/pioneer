@@ -44,7 +44,7 @@ GraphiQL Browser IDE
 
 ||| `sandbox`
 
-Embedded Apollo Sandbox Browser IDE 
+Embedded Apollo Sandbox Browser IDE
 
 !!!warning Limited
 The embedded version of [Apollo Sandbox](https://www.apollographql.com/docs/studio/explorer/sandbox/#embedding-sandbox) has some limitation notably the lack of subscription support that is available for the regular [Sandbox](https://studio.apollographql.com/sandbox/explorer).
@@ -87,7 +87,6 @@ Cloud version of Apollo Sandbox
 Cloud version of Banana Cake Pop
 
 |||
-
 
 ## HTTPStrategy
 

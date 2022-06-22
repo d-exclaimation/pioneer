@@ -25,7 +25,7 @@ let server = Pioneer(
     websocketContextBuilder: { req, params, gql in
         let res = Response()
         guard case .string(let auth) = params?["Authorization"] else {
-            return Context(req: req, res: res, auth: nil) 
+            return Context(req: req, res: res, auth: nil)
         }
         Context(req: req, res: res, auth: auth)
     }
@@ -36,20 +36,19 @@ let server = Pioneer(
 
 ==- Options
 
-| Name                | Type                                                         | Description                                                                            |
-| ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `schema`            | [!badge variant="primary" text="GraphQLSchema"]              | GraphQL schema used to execute operations                                              |
-| `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
-| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Context"] | Context builder from request (Can be async and can throw an error)     |
-| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
-| `websocketContextBuilder`    | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                      |
-| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
-| `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
-| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| Name                      | Type                                                                                                 | Description                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `schema`                  | [!badge variant="primary" text="GraphQLSchema"]                                                      | GraphQL schema used to execute operations                                              |
+| `resolver`                | [!badge variant="success" text="Resolver"]                                                           | Resolver used by the GraphQL schema                                                    |
+| `contextBuilder`          | [!badge variant="danger" text="(Request, Response) async throws -> Context"]                         | Context builder from request (Can be async and can throw an error)                     |
+| `httpStrategy`            | [!badge variant="primary" text="HTTPStrategy"]                                                       | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
+| `websocketContextBuilder` | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                                      |
+| `websocketProtocol`       | [!badge variant="primary" text="WebsocketProtocol"]                                                  | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
+| `introspection`           | [!badge variant="primary" text="Bool"]                                                               | Allowing introspection <br/> **Default**: `true`                                       |
+| `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
-
 
 ### `init`
 
@@ -77,16 +76,16 @@ let server = Pioneer(
 
 ==- Options
 
-| Name                | Type                                                         | Description                                                                            |
-| ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `schema`            | [!badge variant="primary" text="GraphQLSchema"]              | GraphQL schema used to execute operations                                              |
-| `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
-| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Context"] | Context builder from request (Can be async and can throw an error)     |
-| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
-| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
-| `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
-| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| Name                | Type                                                                         | Description                                                                            |
+| ------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `schema`            | [!badge variant="primary" text="GraphQLSchema"]                              | GraphQL schema used to execute operations                                              |
+| `resolver`          | [!badge variant="success" text="Resolver"]                                   | Resolver used by the GraphQL schema                                                    |
+| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Context"] | Context builder from request (Can be async and can throw an error)                     |
+| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]                               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
+| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]                          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
+| `introspection`     | [!badge variant="primary" text="Bool"]                                       | Allowing introspection <br/> **Default**: `true`                                       |
+| `playground`        | [!badge variant="primary" text="IDE"]                                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
 
@@ -125,7 +124,6 @@ let server = Pioneer(
 
 ===
 
-
 ### `init` (Graphiti)
 
 **Constraint**:
@@ -152,19 +150,18 @@ let server = try Pioneer(
 
 ==- Options
 
-| Name                | Type                                                         | Description                                                                            |
-| ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `schema`            | [!badge variant="warning" text="Schema<Resolver, Context>"]  | Graphiti schema used to execute operations                                             |
-| `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
-| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Void"] | Context builder from request (Can be async and can throw an error)                                                        |
-| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
-| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
-| `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
-| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| Name                | Type                                                                      | Description                                                                            |
+| ------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `schema`            | [!badge variant="warning" text="Schema<Resolver, Context>"]               | Graphiti schema used to execute operations                                             |
+| `resolver`          | [!badge variant="success" text="Resolver"]                                | Resolver used by the GraphQL schema                                                    |
+| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Void"] | Context builder from request (Can be async and can throw an error)                     |
+| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]                            | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
+| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]                       | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
+| `introspection`     | [!badge variant="primary" text="Bool"]                                    | Allowing introspection <br/> **Default**: `true`                                       |
+| `playground`        | [!badge variant="primary" text="IDE"]                                     | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                 | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
-
 
 ### `init` (Graphiti)
 
@@ -188,7 +185,7 @@ let server = try Pioneer(
     websocketContextBuilder: { req, params, gql in
         let res = Response()
         guard case .string(let auth) = params?["Authorization"] else {
-            return Context(req: req, res: res, auth: nil) 
+            return Context(req: req, res: res, auth: nil)
         }
         Context(req: req, res: res, auth: auth)
     }
@@ -199,17 +196,17 @@ let server = try Pioneer(
 
 ==- Options
 
-| Name                | Type                                                         | Description                                                                            |
-| ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `schema`            | [!badge variant="warning" text="Schema<Resolver, Context>"]  | Graphiti schema used to execute operations                                             |
-| `resolver`          | [!badge variant="success" text="Resolver"]                   | Resolver used by the GraphQL schema                                                    |
-| `contextBuilder`    | [!badge variant="danger" text="(Request, Response) async throws -> Void"] | Context builder from request (Can be async and can throw an error)                                                        |
-| `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
-| `websocketContextBuilder`    | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                      |
-| `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
-| `introspection`     | [!badge variant="primary" text="Bool"]                       | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`        | [!badge variant="primary" text="IDE"]                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
-| `keepAlive`         | [!badge variant="warning" text="UInt64?"]                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| Name                      | Type                                                                                                 | Description                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `schema`                  | [!badge variant="warning" text="Schema<Resolver, Context>"]                                          | Graphiti schema used to execute operations                                             |
+| `resolver`                | [!badge variant="success" text="Resolver"]                                                           | Resolver used by the GraphQL schema                                                    |
+| `contextBuilder`          | [!badge variant="danger" text="(Request, Response) async throws -> Void"]                            | Context builder from request (Can be async and can throw an error)                     |
+| `httpStrategy`            | [!badge variant="primary" text="HTTPStrategy"]                                                       | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
+| `websocketContextBuilder` | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                                      |
+| `websocketProtocol`       | [!badge variant="primary" text="WebsocketProtocol"]                                                  | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
+| `introspection`           | [!badge variant="primary" text="Bool"]                                                               | Allowing introspection <br/> **Default**: `true`                                       |
+| `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
 
@@ -248,3 +245,12 @@ server.applyMiddleware(
 | `at` | [!badge variant="primary" text="PathComponent"] | Resolver used by the GraphQL schema        |
 
 ===
+
+---
+
+!!!success DocC API Reference
+Swift Package Index can now host DocC compatible API documentation taken from the code comments
+
+You can check out Pioneer's DocC API Docs here:
+[!ref Pioneer API Reference](https://swiftpackageindex.com/d-exclaimation/pioneer/main/documentation/pioneer)
+!!!

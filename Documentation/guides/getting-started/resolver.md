@@ -24,6 +24,10 @@ struct Context {
 
 The context here will very simple which only grab the `Request` and `Response` so we can get certain values from the request and set some to the response.
 
+!!!success Context building with async-await
+Since `v0.6.0`, Pioneer can accept async and/or throwing context builder, and this applies to the websocket context builder as well (since `v0.7.0`)
+!!!
+
 [!ref More on Context Building](/guides/features/graphql-over-http/#context-request-and-response)
 
 ## Resolver
@@ -161,6 +165,8 @@ extension User {
 !!!warning N+1 problem
 In an actual application where this request is made to database, it's best to avoid directly making a request in a relationship resolver and use a [Dataloader](https://github.com/GraphQLSwift/DataLoader) instead which helps to avoid unnecessary request for fetching the exact same data.
 
+[!ref More on N+1 problem](/guides/features/fluent/#n1-problem)
+
 ==- Dataloader example
 
 +++ Context and DataLoader
@@ -176,7 +182,7 @@ struct Context {
 func makeUserLoader(req: Request) -> DataLoader<ID, User> {
     return .init(on: req.eventLoop) { keys async in
         let res = await Datastore.shared.find(with: keys)
-        return keys.map { key in 
+        return keys.map { key in
             guard let value = res.first(where: { $0.id == key }) else {
                 return .error(GraphQLError(message: "No item with corresponding key: \(key)"))
             }
@@ -213,8 +219,6 @@ let server = Pioneer(
 ```
 
 +++
-
-[!ref Getting EventLoop](/guides/features/async-await/#getting-eventloop)
 
 ===
 

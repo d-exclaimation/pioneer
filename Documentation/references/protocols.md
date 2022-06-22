@@ -1,51 +1,35 @@
 ---
-icon: rows
-order: 90
+icon: cpu
+order: 60
 ---
 
-# AsyncPubSub
+# Protocols
 
-## AsyncPubSub
+## PubSub
 
-AsyncPubSub is a in memory pubsub structure for managing [AsyncStreams](https://developer.apple.com/documentation/swift/asyncstream) in a concurrent safe way utilizing Actors.
+A base protocol for pub/sub data structure that utilize async stream
 
-!!!success Multiple upstream, multiple data type
-AsyncPubSub is a multiple upstream and multiple data type pubsub stream.
-
-**Trigger-based**
-
-The upstream will be differentiated by a trigger, and only consumer stream with the same trigger will receive the emitted data.
-
-**Multi types consumer**
-
-All consumer streams are not restricted to a single data type.
-!!!
-
-!!!success PubSub conformance
-AsyncPubSub is an in memory implemention for [`PubSub`](/references/protocols/#pubsub).
+!!!info Multiple topic
+If implemented properly, PubSub should be able to handle multiple topic where each topic can have multiple downstream
 !!!
 
 !!!info Sendable, Encodable, and Decodable
-AsyncPubSub only accept data type that conforms to the `Sendable` protocol to avoid any memory issues related to concurrency.
+PubSub only accept data type that conforms to the `Sendable` protocol to avoid any memory issues related to concurrency.
 
 From [PubSub](/references/protocols/#pubsub) conformance, the data type has to be either `Decodable` (for [`asyncStream`](#asyncstream)) and `Encodable` (for [`publish`](#publish)) so it can always be encoded and decoded properly.
 !!!
 
-### `init`
-
-Returns an initialized [AsyncPubSub](#asyncpubsub).
-
-=== Example
-
-```swift
-let pubsub = AsyncPubSub()
-```
-
-===
+!!!success AsyncPubSub
+If you are looking for an implementation, take a look at [`AsyncPubSub`](/references/async-pubsub)
+!!!
 
 ### `asyncStream`
 
 Returns a new [AsyncStream](https://developer.apple.com/documentation/swift/asyncstream) with the specified type and for a specific trigger.
+
+!!!info Downstream
+If implemented properly, this method should returns a downstream that can be unsubscribed from the pubsub without affecting other downstreams.
+!!!
 
 === Example
 
