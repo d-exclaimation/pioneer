@@ -148,12 +148,12 @@ As mentioned before, [AsyncPubSub](/references/async-pubsub) is an in memory pub
 
 In which case, you likely want to either use or implement a custom pub-sub system that is backed by an external datastore.
 
-Here are a few **optional** utility (structs, classes, protocols, actors, etc.) exported by Pioneer to help create that custom Pub/Sub implementation:
-
 ### PubSub as protocol
 
-!!!info Optional
-It's not necessary to conform to this protocol to create a Pub/Sub implementation. The protocol just enforces that implementation to have the same API to [AsyncPubSub](/references/async-pubsub)
+!!!success Integration
+Pub/Sub implementation conform to this protocol is enforced to have the same API to [AsyncPubSub](/references/async-pubsub), which make easy to switch between.
+
+However, it is **not necessary** to use PubSub for your subscription resolver and to build a custom Pub/Sub implementation.
 !!!
 
 Pioneer exported the [PubSub](/references/protocols/#pubsub) protocol which allow different implementation with the same API [AsyncPubSub](/references/async-pubsub) notably implementation backed by popular event-publishing systems (i.e. Redis) with similar API which allow user of this library to prototype with the in memory AsyncPubSub and easily migrate to a distributed PubSub implementation without very little changes.
@@ -164,10 +164,13 @@ The basic rules to implement A [PubSub](/references/protocols/#pubsub) are as fo
 
 The method `asyncStream` should return an `AsyncStream` for a single subscriber where it can be unsubscribed without closing the topic entirely.
 
-- Recommend to create a new `AsyncStream` on each method call.
-- If you are having trouble with broadcasting a publisher to multiple consumer/subscriber, recommend taking a look at [Broadcast](#broadcast).
+- The type of `DataType` should conform to `Sendable` and `Decodabble` to help make sure it is safe to pass around and be able to decoded if necessary (since it is likely to come from a network call).
+- Recommended to create a new `AsyncStream` on each method call.
+- If you are having trouble with broadcasting a publisher to multiple consumer/subscriber, recommended taking a look at [Broadcast](#broadcast).
 
 The method `publish` should publish events to all subscriber that associated with the trigger.
+
+- The `DataType` conform to `Sendable` and `Encodable` to help make sure it is safe to pass around and be able to encoded if necessary (since it is likely to be send on a network call).
 
 The method `close` should dispose and shutdown all subscriber that associated with the trigger.
 
@@ -192,12 +195,6 @@ Additionally, common client libraries for popular event-publishing systems usual
   - Usually because subscription is its own new network connection and multiple of those can be resource intensive.
 
 In this case, the actor, [Broadcast](/references/actors/#broadcast), is provided which can broadcast any events from a publisher to multiple different downstream where each downstream share the same upstream and can be unsubscribed / disposed (to prevent leaks) without closing the upstream and publisher.
-
-!!!success Optional and Standalone
-Broadcast is an optional feature in implementing a custom Pub/Sub implementation. It provided to help solve the issue of broadcasting.
-
-Furthermore, Broadcast can be used with or without [PubSub](#pubsub-as-protocol).
-!!!
 
 ```mermaid
 %%{init: { 'theme': 'base' } }%%
@@ -272,50 +269,48 @@ await broadcast.close()
 As an example, say we want to build a redis backed [PubSub](/references/protocols/#pubsub).
 
 !!!warning Untested Example
-This is meant to be an example. This is meant to give a better idea on how to implement a custom implementation that conform to [PubSub](#pubsub-as-protocol) and utilize [Broadcast](#broadcast).
-
-That meant:
+This is only meant to be an example to give a better idea on how to implement a custom implementation that conform to [PubSub](#pubsub-as-protocol) and utilize [Broadcast](#broadcast).
 
 - It is not tested and it may not even compile.
 - Some part of code is intentionally vaguely described.
-- This should not be used in a production environment
+- This should not be used in a production environment without modified and reviewed
 
 !!!
 
 Here is an example implementation,
 
-```swift RedisPubSub
+```swift RedisPubSub.swift
 import Pioneer
 import Redis
+import Foundation
+import NIOFoundationCompat
 
-// Only for DataType that is Sendable & RESPVlueConvertible
-struct RedisPubSub<Event: Sendable & RESPVlueConvertible>: PubSub {
-    let redis: RedisClient
-    let dispatcher: Dispatcher = .init()
+struct RedisPubSub: PubSub {
+    let dispatcher: Dispatcher
 
     actor Dispatcher {
-        private var broadcasting: [String: Broadcast<Event>] = [:]
+        private let redis: RedisClient
+        private var broadcasting: [String: Broadcast<Data>] = [:]
 
-        private func subscribe(to channel: String) async -> Broadcast<Event> {
-            // If exist, just return it because it is already set up properly
+        private func subscribe(to channel: String) async -> Broadcast<Data> {
             if let broadcast = broadcasting[channel] {
                 return broadcast
             }
-            let broadcast = Broadcast<Event>()
+            let broadcast = Broadcast<Data>()
             broadcasting[channel] = broadcast
-            await applySubscription(from: .init(channel), to: broadcast)
+            await apply(from: .init(channel), to: broadcast)
             return broadcast
         }
 
-        private func applySubsription(from channel: RedisChannelName, to broadcast: Broadcast<Event>) async {
+        private func apply(from channel: RedisChannelName, to broadcast: Broadcast<Data>) async {
             do {
-                // Try to subscribe and pass to broadcast
                 try? await redis.subscribe(
                     to: channel,
                     messageReceiver: { _, msg in
-                        guard let event = Event(fromRESP: msg) else { return }
+                        guard case .bulkString(.some(let buffer)) = msg else { return }
+                        let data = Data(buffer: buffer)
                         Task {
-                            await broadcast.publish(event)
+                            await broadcast.publish(data)
                         }
                     },
                     onUnsubscribe: { _, _ in
@@ -326,29 +321,30 @@ struct RedisPubSub<Event: Sendable & RESPVlueConvertible>: PubSub {
                 )
                 .get()
             } catch {
-              // If not, just close it
               await broadcast.close()
             }
         }
 
-        private func publish(for channel: String, _ value: Event) async {
+        private func publish(for channel: String, _ value: Data) async {
             try? await redis.publish(value, to: .init(channel)).get()
         }
 
         private func close(for channel: String) async {
             try? await redis.unsubscribe(from: .init(channel))
-            // Make sure broadcast is 100% closed
             await broadcasting[channel]?.close()
         }
     }
 
-    public func asyncStream<DataType: Sendable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
+    // MARK: -- Protocol required methods
+
+
+    public func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
         AsyncStream<DataType> { con in
             let task = Task {
                 let pipe = await dispatcher.subscribe(for: trigger)
-                for await event in pipe {
-                    guard let data = event as? DataType else { break }
-                    con.yield(data)
+                for await data in pipe {
+                    guard let event = try? JSONDecoding().decode(DataType.self, data) else { continue }
+                    con.yield(event)
                 }
                 con.finish()
             }
@@ -358,14 +354,17 @@ struct RedisPubSub<Event: Sendable & RESPVlueConvertible>: PubSub {
         }
     }
 
-    public func publish(for trigger: String, payload: Sendable) async {
-        /// If not event, don't publish
-        guard let payload = payload as? Event else { return }
-        await dispatcher.publish(for: trigger, event)
+    public func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async {
+        guard let data = try? JSONEncoder().encode(payload) else { return }
+        await dispatcher.publish(for: trigger, data)
     }
 
     public func close(for trigger: String) async {
         await dispatcher.close(for: trigger)
+    }
+
+    public init(_ redis: RedisClient) {
+        self.dispatcher = .init(redis: redis)
     }
 }
 ```
@@ -379,7 +378,7 @@ struct Context {
 ```
 
 ```swift Resolver.swift
-struct Message: Sendable, RESPValueConvertible { ... }
+struct Message: Sendable, Codable { ... }
 
 struct Resolver {
     func create(ctx: Context, _: NoArguments) async -> Message {
@@ -399,7 +398,7 @@ So now, if we can use the `RedisPubSub` on a production environment.
 ```swift main
 ...
 
-let pubsub: PubSub = app.environment.isRelease ? RedisPubSub<Message> : AsyncPubSub()
+let pubsub: PubSub = app.environment.isRelease ? RedisPubSub() : AsyncPubSub()
 
 let server = Pioneer(
     ...,

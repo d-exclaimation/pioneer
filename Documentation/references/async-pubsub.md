@@ -25,8 +25,10 @@ All consumer streams are not restricted to a single data type.
 AsyncPubSub is an in memory implemention for [`PubSub`](/references/protocols/#pubsub).
 !!!
 
-!!!info Sendable
+!!!info Sendable, Encodable, and Decodable
 AsyncPubSub only accept data type that conforms to the `Sendable` protocol to avoid any memory issues related to concurrency.
+
+From [PubSub](/references/protocols/#pubsub) conformance, the data type has to be either `Decodable` (for [`asyncStream`](#asyncstream)) and `Encodable` (for [`publish`](#publish)) so it can always be encoded and decoded properly.
 !!!
 
 ### `init`
@@ -80,10 +82,10 @@ await pubsub.publish(
 
 ==- Options
 
-| Name      | Type                                      | Description                                |
-| --------- | ----------------------------------------- | ------------------------------------------ |
-| `for`     | [!badge variant="primary" text="String"]  | The trigger this data will be published to |
-| `payload` | [!badge variant="danger" text="Sendable"] | The data being emitted                     |
+| Name      | Type                                       | Description                                |
+| --------- | ------------------------------------------ | ------------------------------------------ |
+| `for`     | [!badge variant="primary" text="String"]   | The trigger this data will be published to |
+| `payload` | [!badge variant="success" text="DataType"] | The data being emitted                     |
 
 ===
 

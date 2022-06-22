@@ -91,6 +91,7 @@ Termination callback can be implicitly inferred for these types of `AsyncSequenc
 
 - `AsyncStream`
 - `AsyncPubSub` (_due to `AsyncStream`_)
+- `PubSub` (_due to `AsyncStream`_)
 
 +++ AsyncPubSub
 

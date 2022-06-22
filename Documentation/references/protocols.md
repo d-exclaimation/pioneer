@@ -13,6 +13,12 @@ A base protocol for pub/sub data structure that utilize async stream
 If implemented properly, PubSub should be able to handle multiple topic where each topic can have multiple downstream
 !!!
 
+!!!info Sendable, Encodable, and Decodable
+PubSub only accept data type that conforms to the `Sendable` protocol to avoid any memory issues related to concurrency.
+
+From [PubSub](/references/protocols/#pubsub) conformance, the data type has to be either `Decodable` (for [`asyncStream`](#asyncstream)) and `Encodable` (for [`publish`](#publish)) so it can always be encoded and decoded properly.
+!!!
+
 !!!success AsyncPubSub
 If you are looking for an implementation, take a look at [`AsyncPubSub`](/references/async-pubsub)
 !!!
@@ -60,10 +66,10 @@ await pubsub.publish(
 
 ==- Options
 
-| Name      | Type                                      | Description                                |
-| --------- | ----------------------------------------- | ------------------------------------------ |
-| `for`     | [!badge variant="primary" text="String"]  | The trigger this data will be published to |
-| `payload` | [!badge variant="danger" text="Sendable"] | The data being emitted                     |
+| Name      | Type                                       | Description                                |
+| --------- | ------------------------------------------ | ------------------------------------------ |
+| `for`     | [!badge variant="primary" text="String"]   | The trigger this data will be published to |
+| `payload` | [!badge variant="success" text="DataType"] | The data being emitted                     |
 
 ===
 
