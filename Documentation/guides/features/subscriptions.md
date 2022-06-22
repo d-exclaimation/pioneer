@@ -292,6 +292,10 @@ struct RedisPubSub: PubSub {
         private let redis: RedisClient
         private var broadcasting: [String: Broadcast<Data>] = [:]
 
+        init(_ redis: RedisClient) {
+            self.redis = redis
+        }
+
         private func subscribe(to channel: String) async -> Broadcast<Data> {
             if let broadcast = broadcasting[channel] {
                 return broadcast
@@ -369,7 +373,7 @@ struct RedisPubSub: PubSub {
     private let dispatcher: Dispatcher
 
     public init(_ redis: RedisClient) {
-        self.dispatcher = .init(redis: redis)
+        self.dispatcher = .init(redis)
     }
 }
 ```
