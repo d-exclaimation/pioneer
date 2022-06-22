@@ -61,7 +61,7 @@ public struct AsyncPubSub: PubSub, Sendable {
     /// - Parameters:
     ///   - type: DataType of this AsyncStream
     ///   - trigger: The topic string used to differentiate what data should this stream be accepting
-    public func asyncStream<DataType: Sendable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
+    public func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
         AsyncStream<DataType> { con in
             let task = Task {
                 let pipe = await dispatcher.asyncStream(for: trigger)
@@ -81,7 +81,7 @@ public struct AsyncPubSub: PubSub, Sendable {
     /// - Parameters:
     ///   - trigger: The trigger this data will be published to
     ///   - payload: The data being emitted
-    public func publish(for trigger: String, payload: Sendable) async {
+    public func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async {
         await dispatcher.publish(for: trigger, payload)
     }
     
