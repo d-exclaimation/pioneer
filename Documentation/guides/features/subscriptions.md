@@ -286,8 +286,8 @@ import Foundation
 import NIOFoundationCompat
 
 struct RedisPubSub: PubSub {
-    let dispatcher: Dispatcher
 
+    // MARK: - Actor for distribution
     actor Dispatcher {
         private let redis: RedisClient
         private var broadcasting: [String: Broadcast<Data>] = [:]
@@ -362,6 +362,10 @@ struct RedisPubSub: PubSub {
     public func close(for trigger: String) async {
         await dispatcher.close(for: trigger)
     }
+
+    // MARK: - Properties
+
+    private let dispatcher: Dispatcher
 
     public init(_ redis: RedisClient) {
         self.dispatcher = .init(redis: redis)
