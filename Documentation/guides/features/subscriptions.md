@@ -330,7 +330,7 @@ struct RedisPubSub: PubSub {
         }
 
         private func close(for channel: String) async {
-            try? await redis.unsubscribe(from: .init(channel))
+            try? await redis.unsubscribe(from: .init(channel)).get()
             await broadcasting[channel]?.close()
         }
     }
@@ -341,8 +341,9 @@ struct RedisPubSub: PubSub {
     public func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
         AsyncStream<DataType> { con in
             let task = Task {
-                let pipe = await dispatcher.subscribe(for: trigger)
-                for await data in pipe {
+                let broadcast = await dispatcher.subscribe(for: trigger)
+                let stream = await broadcast.downstream()
+                for await data in stream {
                     guard let event = try? JSONDecoding().decode(DataType.self, data) else { continue }
                     con.yield(event)
                 }
