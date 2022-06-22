@@ -65,6 +65,8 @@ final class ProbeTests: XCTestCase {
 
         await probe.outgoing(with: "1", to: process, given: message)
 
+        try? await Task.sleep(nanoseconds: 1_000_000)
+        
         let results = await con.waitAll()
         print(results)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {
