@@ -1,0 +1,25 @@
+name: Automated Swift Test Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  five-five:
+    container: 
+      image: swift:xenial
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: swift build
+    - run: swift test
+  latest:
+    container: 
+      image: swift:bionic
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: swift build
+    - run: swift test
