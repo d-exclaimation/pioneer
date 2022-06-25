@@ -66,7 +66,7 @@ struct Resolver {
     }
 
     func update(_: Context, args: UpdateUserArgs) async -> User? {
-        await Datastore.shared.update(for args.id, with: User(args.user))
+        await Datastore.shared.update(for args.id, with: User(id: args.id, args.user))
     }
 
 
@@ -92,7 +92,7 @@ struct Resolver {
     ...
 
     func create(_: Context, args: AddUserArgs) async -> User {
-        let user = await Datastore.shared.insert(User(args.user))
+        let user = await Datastore.shared.insert(User(id: args.id, args.user))
         if user = user {
             await pubsub.publish(ON_CHANGE_TRIGGER, payload: user)
         }
@@ -157,7 +157,7 @@ You can add a custom resolver by extending the User type with a function that re
 ```swift
 extension User {
     func friends(_: Context, _: NoArgs) async -> [User] {
-        await Datastore.shared.find(with: friendIDs)
+        await Datastore.shared.find(with: _friendIDs)
     }
 }
 ```
@@ -199,7 +199,7 @@ func makeUserLoader(req: Request) -> DataLoader<ID, User> {
 extension User {
     func friends(ctx: Context, _: NoArgs, eventLoopGroup: EventLoopGroup) async -> [User] {
         // Get from the DataLoader preventing N+1 problems
-        try await ctx.userLoader.loadMany(keys: friendIDs, on: eventLoopGroup).get()
+        try await ctx.userLoader.loadMany(keys: _friendIDs, on: eventLoopGroup).get()
     }
 }
 
