@@ -9,7 +9,7 @@ order: 80
 
 GraphQL Hosted IDE or online redirect to a cloud based one.
 
-[!ref GraphQL IDE Guide](/guides/features/graphql-ide)
+[!ref GraphQL IDE Guide](/features/graphql-ide)
 
 !!!success Endpoint
 All GraphQL IDE will be hosted or given a redirect on `"/playground"` endpoint.
@@ -31,7 +31,7 @@ let server = Pioneer(
 GraphQL Playground IDE (only for [subscriptions-graphql-ws](https://github.com/apollographql/subscriptions-transport-ws)) |
 
 !!!warning Deprecated
-[GraphQL Playground](/guides/features/graphql-ide/#graphql-playground) project has been [retired](https://github.com/graphql/graphql-playground/issues/1143), recommended using [GraphiQL](/guides/features/graphql-ide/#graphiql) instead
+[GraphQL Playground](/features/graphql-ide/#graphql-playground) project has been [retired](https://github.com/graphql/graphql-playground/issues/1143), recommended using [GraphiQL](/features/graphql-ide/#graphiql) instead
 !!!
 
 |||
@@ -92,7 +92,7 @@ Cloud version of Banana Cake Pop
 
 HTTP Operation and routing strategy for GraphQL
 
-[!ref GraphQL over HTTP Guide](/guides/features/graphql-over-http)
+[!ref GraphQL over HTTP Guide](/features/graphql-over-http)
 
 ```swift
 let server = Pioneer(
@@ -195,7 +195,7 @@ Allow all operation through `GET` and `POST`.
 
 GraphQL over Websocket sub-protocol
 
-[!ref GraphQL over WebSocket Guide](/guides/features/graphql-over-websockets)
+[!ref GraphQL over WebSocket Guide](/features/graphql-over-websocket.md)
 
 ```swift
 let server = Pioneer(

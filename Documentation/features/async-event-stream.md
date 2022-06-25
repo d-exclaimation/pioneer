@@ -126,28 +126,3 @@ let eventStream: EventStream<Quake> = stream
 +++
 
 !!!
-
-## PubSub
-
-In cases where you need to have a Pub/Sub system for event streams, Pioneer provide a protocol to define an implemention for [AsyncPubSub](/references/async-pubsub) named [PubSub](#pubsub) which allow you to use AsyncPubSub to start with and later move on to PubSub implementation backed by popular event-publishing systems that worked better for distributed systems.
-
-```swift Context.swift
-struct Context {
-    var pubsub: PubSub
-}
-
-```
-
-```swift main.swift
-let pubsub: PubSub = app.environment.isRelease ? CustomKafkaPubSub(...) : AsyncPubSub()
-
-let pioneer = Pioneer(
-    ...,
-    contextBuilder: { req, res in
-        Context(req, res, pubsub)
-    },
-    ...
-)
-```
-
-[!ref More on PubSub]()
