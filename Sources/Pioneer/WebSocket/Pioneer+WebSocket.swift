@@ -23,7 +23,10 @@ extension Pioneer {
             /// Explicitly handle Websocket upgrade with sub-protocol
             let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
             guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
-                throw GraphQLError(ResolveError.unsupportedProtocol)
+                return try GraphQLError(
+                    message: "Unrecognized websocket protocol. Specify the 'sec-websocket-protocol' header with '\(websocketProtocol.name)'"
+                )
+                .response(with: .badRequest)
             }
 
             let header: HTTPHeaders = ["Sec-WebSocket-Protocol": websocketProtocol.name]
@@ -39,7 +42,7 @@ extension Pioneer {
                 /// Scheduled keep alive message interval
                 let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
                     if ws.isClosed {
-                        throw GraphQLError(message: "WebSocket closed before any termination")
+                        throw Abort(.conflict, reason: "WebSocket closed before any termination")
                     }
                     ws.send(msg: websocketProtocol.keepAliveMessage)
                 }
@@ -90,7 +93,7 @@ extension Pioneer {
         // Start -> Long running operation
         case .start(oid: let oid, gql: let gql):
             // Introspection guard
-            guard case .some(true) = try? allowed(from: gql) else {
+            guard allowed(from: gql) else {
                 let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
                     .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
                 ])
@@ -105,7 +108,7 @@ extension Pioneer {
         // Once -> Short lived operation
         case .once(oid: let oid, gql: let gql):
             // Introspection guard
-            guard case .some(true) = try? allowed(from: gql) else {
+            guard allowed(from: gql) else {
                 let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
                     .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
                 ])
