@@ -19,7 +19,7 @@ let schema = try? Schema<Resolver, Context> {
     Scalar(ID.self)
 
     Type(User.self) {
-        Field("id", at: \.id)
+        Field("id", at: \._id) // Use the `_id` to utilize the ID Scalar
         Field("username", at: \.username)
         Field("email", at: \.email)
         Field("bio", at: \.bio)

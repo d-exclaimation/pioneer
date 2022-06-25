@@ -15,7 +15,7 @@ Declaring the `User` model is fairly straight forward.
 
 ```swift User.swift
 struct User: Identifiable, Codable, Sendable {
-    var id: String
+    var id: UUID
     var username: String?
     var email: String
     var bio: String
@@ -24,7 +24,7 @@ struct User: Identifiable, Codable, Sendable {
         username ?? email
     }
 
-    var friendIDs: [String]
+    var friendIDs: [UUID]
 }
 ```
 
@@ -40,9 +40,14 @@ This custom`ID` can be constructed from any string with its regular initializer 
 ```swift
 import Pioneer
 
-struct User: Identifiable, Codable, Sendable {
-    var id: ID
-    var friendIDs: [ID] = []
+extension User {
+    var _id: ID {
+        id.uuidString.toID()
+    }
+
+    var _friendIDs: [ID] {
+        friendIDs.map { $0.uuidString.toID() }
+    }
 }
 
 let schema = try Schema<Void, Resolver> {
@@ -70,13 +75,13 @@ struct UserInput: Codable {
 }
 
 extension User {
-    init(_ input: UserInput) {
+    init(id: ID = .uuid(), _ input: UserInput) {
         self.init(
-            id: .uuid(), // <- ID type from a generated UUID string
+            id: UUID(id.string) ?? UUID(),
             username: input.username,
             email: input.email,
             bio: input.bio,
-            friendIDs: input.friendIDs,
+            friendIDs: input.friendIDs.compactMap { UUID($0) },
         )
     }
 }
@@ -86,7 +91,7 @@ extension User {
 
 In a real application, you want these `User`(s) to be stored in a persistent database like PostgreSQL or something similar. For this example, we will be simplying the workflow by just building one in memory.
 
-[!ref Fluent FAQ](/guides/features/fluent)
+[!ref Fluent FAQ](/guides/advanced/fluent)
 
 We will be taking advantange of Swift 5.5 `actor` which a structure suitable for cocurrent state management.
 
@@ -105,7 +110,7 @@ actor Datastore {
     }
 
     func insert(_ newUser: User) async -> User {
-        users[newUser.id] = newUser
+        users[newUser._id] = newUser
         return newUser
     }
 

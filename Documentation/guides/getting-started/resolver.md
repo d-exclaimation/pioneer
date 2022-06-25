@@ -28,7 +28,7 @@ The context here will very simple which only grab the `Request` and `Response` s
 Since `v0.6.0`, Pioneer can accept async and/or throwing context builder, and this applies to the websocket context builder as well (since `v0.7.0`)
 !!!
 
-[!ref More on Context Building](/guides/features/graphql-over-http/#context-request-and-response)
+[!ref Context Building](/guides/advanced/context)
 
 ## Resolver
 
@@ -66,7 +66,7 @@ struct Resolver {
     }
 
     func update(_: Context, args: UpdateUserArgs) async -> User? {
-        await Datastore.shared.update(for args.id, with: User(args.user))
+        await Datastore.shared.update(for args.id, with: User(id: args.id, args.user))
     }
 
 
@@ -92,7 +92,7 @@ struct Resolver {
     ...
 
     func create(_: Context, args: AddUserArgs) async -> User {
-        let user = await Datastore.shared.insert(User(args.user))
+        let user = await Datastore.shared.insert(User(id: args.id, args.user))
         if user = user {
             await pubsub.publish(ON_CHANGE_TRIGGER, payload: user)
         }
@@ -124,7 +124,7 @@ Pioneer can only accept `EventStream` built with `AsyncEventStream`, which is an
 
 Learn why on:
 
-[!ref EventStream](/guides/features/async-event-stream)
+[!ref EventStream](/features/async-event-stream.md)
 
 !!!
 
@@ -157,7 +157,7 @@ You can add a custom resolver by extending the User type with a function that re
 ```swift
 extension User {
     func friends(_: Context, _: NoArgs) async -> [User] {
-        await Datastore.shared.find(with: friendIDs)
+        await Datastore.shared.find(with: _friendIDs)
     }
 }
 ```
@@ -165,7 +165,7 @@ extension User {
 !!!warning N+1 problem
 In an actual application where this request is made to database, it's best to avoid directly making a request in a relationship resolver and use a [Dataloader](https://github.com/GraphQLSwift/DataLoader) instead which helps to avoid unnecessary request for fetching the exact same data.
 
-[!ref More on N+1 problem](/guides/features/fluent/#n1-problem)
+[!ref N+1 problem](/guides/advanced/fluent/#n1-problem)
 
 ==- Dataloader example
 
@@ -199,7 +199,7 @@ func makeUserLoader(req: Request) -> DataLoader<ID, User> {
 extension User {
     func friends(ctx: Context, _: NoArgs, eventLoopGroup: EventLoopGroup) async -> [User] {
         // Get from the DataLoader preventing N+1 problems
-        try await ctx.userLoader.loadMany(keys: friendIDs, on: eventLoopGroup).get()
+        try await ctx.userLoader.loadMany(keys: _friendIDs, on: eventLoopGroup).get()
     }
 }
 

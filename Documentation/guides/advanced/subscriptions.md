@@ -1,20 +1,20 @@
 ---
 icon: file-symlink-file
-order: 80
+order: 90
 ---
 
 # Subscriptions
 
 ## Resolving a subscription
 
-Resolvers for `Subscription` fields differ from resolvers for fields of other types. Specifically, `Subscription` field resolvers require to return an implementation of `EventStream`.
+Resolvers for Subscription differ from resolvers for fields of other types. Specifically, Subscription resolvers require to return an implementation of `EventStream`.
 
 !!!success Websocket Context Building
 Since `0.7.0`, Pioneer allow a seperate context builder for the websocket operations where it provide a different set of arguments, and will be using that to build context in a websocket.
 
 Subscription in Pioneer run through websocket so it will use that websocket context builder.
 
-[!ref More on Websocket Context](/guides/features/graphql-over-websockets/#websocket-context)
+[!ref Websocket Context](/guides/advanced/context/#websocket-context)
 
 !!!
 
@@ -37,7 +37,7 @@ struct Resolver {
 }
 ```
 
-The resolver function must return an `EventStream` built from [`AsyncEventStream`](/guides/features/async-event-stream) which can come from any `AsyncSequence`, a standard protocol in Swift 5.5 for asynchronous, sequential, iterated elements.
+The resolver function must return an `EventStream` built from [`AsyncEventStream`](/features/async-event-stream) which can come from any `AsyncSequence`, a standard protocol in Swift 5.5 for asynchronous, sequential, iterated elements.
 
 ## AsyncPubSub
 
@@ -184,7 +184,7 @@ The implementation should be free of data races and be working safely under asyn
 
 |||
 
-[!ref More on PubSub specification](/references/protocols/#pubsub)
+[!ref PubSub specification](/references/protocols/#pubsub)
 
 ### Broadcast
 
@@ -262,7 +262,7 @@ await broadcast.close()
 
 ===
 
-[!ref More on Broadcast specification](/references/actors/#broadcast)
+[!ref Broadcast specification](/references/actors/#broadcast)
 
 ### Redis Example
 
