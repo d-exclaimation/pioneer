@@ -83,30 +83,34 @@ public struct Pioneer<Resolver, Context> {
     }
 
     /// Apply Pioneer GraphQL handlers to a Vapor route
-    public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql") {
+    public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql", bodyStrategy: HTTPBodyStreamStrategy = .collect) {
         // HTTP Portion
         switch httpStrategy {
         case .onlyPost:
-            applyPost(on: router, at: path, allowing: [.query, .mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
 
         case .onlyGet:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
 
         case .queryOnlyGet:
             applyGet(on: router, at: path, allowing: [.query])
-            applyPost(on: router, at: path, allowing: [.query, .mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
 
         case .mutationOnlyPost:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
-            applyPost(on: router, at: path, allowing: [.mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
 
         case .splitQueryAndMutation:
             applyGet(on: router, at: path, allowing: [.query])
-            applyPost(on: router, at: path, allowing: [.mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
+            
+        case .csrfPrevention:
+            applyGet(on: router, at: path, csrf: true, allowing: [.query])
+            applyPost(on: router, at: path, csrf: true, allowing: [.query, .mutation])
 
         case .both:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
-            applyPost(on: router, at: path, allowing: [.query, .mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
         }
         
         switch playground {
@@ -130,15 +134,11 @@ public struct Pioneer<Resolver, Context> {
         }
     }
 
-    enum ResolveError: Error {
-        case unableToParseQuery
-        case unsupportedProtocol
-    }
-
     /// Handle execution for GraphQL operation
     internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
-        guard try allowed(from: gql, allowing: allowing) else {
-            throw GraphQLError(ResolveError.unableToParseQuery)
+        guard allowed(from: gql, allowing: allowing) else {
+            return try GraphQLError(message: "Operation of this type is not allowed and has been blocked")
+                .response(with: .badRequest)
         }
         let res = Response()
         do {
@@ -153,22 +153,28 @@ public struct Pioneer<Resolver, Context> {
                 operationName: gql.operationName
             )
             try res.content.encode(result)
+            return res
+        } catch let error as GraphQLError {
+            return try error.response(with: res.status != .ok ? res.status : .internalServerError)
+        } catch let error as AbortError {
+            return try GraphQLError(message: error.reason).response(with: error.status)
         } catch {
-            try res.content.encode(GraphQLResult(data: nil, errors: [
-                error as? GraphQLError ?? GraphQLError(error)
-            ]))
+            return try GraphQLError(error).response(with: res.status != .ok ? res.status : .internalServerError)
         }
-        return res
     }
 
     /// Guard for operation allowed
-    internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) throws -> Bool {
+    internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) -> Bool {
         guard introspection || !gql.isIntrospection else {
             return false
         }
-        guard let operationType = try gql.operationType() else {
+        do {
+            guard let operationType = try gql.operationType() else {
+                return false
+            }
+            return allowing.contains(operationType)
+        } catch {
             return false
         }
-        return allowing.contains(operationType)
     }
 }

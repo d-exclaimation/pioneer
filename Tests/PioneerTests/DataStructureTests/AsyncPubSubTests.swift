@@ -76,7 +76,7 @@ final class AsyncPubSubTests: XCTestCase {
             exp1.fulfill()
         }
         
-        try? await Task.sleep(nanoseconds: 1_000_000)
+        try? await Task.sleep(nanoseconds: 500_000)
         
         await pubsub.close(for: trigger)
         

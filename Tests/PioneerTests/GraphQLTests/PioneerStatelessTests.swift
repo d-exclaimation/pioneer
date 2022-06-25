@@ -62,9 +62,9 @@ final class PioneerStatelessTests: XCTestCase {
             operationName: nil,
             variables: nil
         )
-        let res0 = try pioneer.allowed(from: gql, allowing: [.mutation])
+        let res0 = pioneer.allowed(from: gql, allowing: [.mutation])
         XCTAssert(!res0)
-        let res1 = try pioneer.allowed(from: gql, allowing: [.query, .mutation])
+        let res1 = pioneer.allowed(from: gql, allowing: [.query, .mutation])
         XCTAssert(res1)
     }
 

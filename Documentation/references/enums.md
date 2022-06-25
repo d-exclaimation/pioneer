@@ -163,6 +163,20 @@ Query must go through `GET` while any mutations through `POST`, follow and utili
 
 |||
 
+||| `csrfPrevention`
+
+Allow all operation through `POST`, allow only Queries through `GET`, and enable Apollo's [CSRF and XS-Search prevention](https://www.apollographql.com/docs/apollo-server/security/cors#preventing-cross-site-request-forgery-csrf)
+
+**GET**
+
+- [!badge variant="success" text="Query"]
+
+**POST**
+
+- [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"]
+
+|||
+
 ||| `both`
 
 Allow all operation through `GET` and `POST`.
