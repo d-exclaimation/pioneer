@@ -78,7 +78,7 @@ extension Pioneer {
     /// - Returns: True if the request is CSRF protected
     internal func isCSRFProtected(isActive: Bool = true, on req: Request) -> Bool {
         guard isActive else {
-            return false
+            return true
         }
         let hasPreflight = !req.headers[HTTPHeaders.Name("Apollo-Require-Preflight")].isEmpty
         let hasOperationName = !req.headers[HTTPHeaders.Name("X-Apollo-Operation-Name")].isEmpty
