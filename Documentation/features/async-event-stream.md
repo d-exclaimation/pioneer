@@ -90,6 +90,7 @@ Cases where stream is no longer consumed / stopped and termination will require 
 Termination callback can be implicitly inferred for these types of `AsyncSequence`:
 
 - `AsyncStream`
+- `AsyncThrowingStream`
 - `AsyncPubSub` (_due to `AsyncStream`_)
 - `PubSub` (_due to `AsyncStream`_)
 

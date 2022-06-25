@@ -14,7 +14,7 @@ Since `0.7.0`, Pioneer allow a seperate context builder for the websocket operat
 
 Subscription in Pioneer run through websocket so it will use that websocket context builder.
 
-[!ref More on Websocket Context](/guides/advanced/context/#websocket-context)
+[!ref Websocket Context](/guides/advanced/context/#websocket-context)
 
 !!!
 
@@ -184,7 +184,7 @@ The implementation should be free of data races and be working safely under asyn
 
 |||
 
-[!ref More on PubSub specification](/references/protocols/#pubsub)
+[!ref PubSub specification](/references/protocols/#pubsub)
 
 ### Broadcast
 
@@ -262,7 +262,7 @@ await broadcast.close()
 
 ===
 
-[!ref More on Broadcast specification](/references/actors/#broadcast)
+[!ref Broadcast specification](/references/actors/#broadcast)
 
 ### Redis Example
 

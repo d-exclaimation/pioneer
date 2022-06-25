@@ -124,7 +124,7 @@ extension Item {
 
 In a real producation application, this example resolver is flawed with the [N+1 problem](#n1-problem).
 
-[!ref More on N+1 problem](#n1-problem)
+[!ref N+1 problem](#n1-problem)
 !!!
 
 And update the schema accordingly.

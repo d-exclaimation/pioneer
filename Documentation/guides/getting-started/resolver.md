@@ -28,7 +28,7 @@ The context here will very simple which only grab the `Request` and `Response` s
 Since `v0.6.0`, Pioneer can accept async and/or throwing context builder, and this applies to the websocket context builder as well (since `v0.7.0`)
 !!!
 
-[!ref More on Context Building](/guides/advanced/context)
+[!ref Context Building](/guides/advanced/context)
 
 ## Resolver
 
@@ -165,7 +165,7 @@ extension User {
 !!!warning N+1 problem
 In an actual application where this request is made to database, it's best to avoid directly making a request in a relationship resolver and use a [Dataloader](https://github.com/GraphQLSwift/DataLoader) instead which helps to avoid unnecessary request for fetching the exact same data.
 
-[!ref More on N+1 problem](/guides/advanced/fluent/#n1-problem)
+[!ref N+1 problem](/guides/advanced/fluent/#n1-problem)
 
 ==- Dataloader example
 
