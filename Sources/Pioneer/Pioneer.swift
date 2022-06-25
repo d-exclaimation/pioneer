@@ -104,7 +104,7 @@ public struct Pioneer<Resolver, Context> {
             applyGet(on: router, at: path, allowing: [.query])
             applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
             
-        case .csrfProtected:
+        case .csrfPrevention:
             applyGet(on: router, at: path, csrf: true, allowing: [.query])
             applyPost(on: router, at: path, csrf: true, allowing: [.query, .mutation])
 

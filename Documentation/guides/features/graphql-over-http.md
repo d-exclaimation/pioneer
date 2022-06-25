@@ -22,14 +22,17 @@ Pioneer(
 
 Here are the available strategies:
 
-| HTTPStrategy             | GET                                                                                | POST                                                                               |
-| ------------------------ | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `onlyPost`               | -                                                                                  | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] |
-| `onlyGet`                | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | -                                                                                  |
-| `queryOnlyGet` (default) | [!badge variant="success" text="Query"]                                            | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] |
-| `mutationOnlyPost`       | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | [!badge variant="warning" text="Mutation"]                                         |
-| `splitQueryAndMutation`  | [!badge variant="success" text="Query"]                                            | [!badge variant="warning" text="Mutation"]                                         |
-| `both`                   | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] |
+| HTTPStrategy             | GET                                                                                | POST                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `onlyPost`               | -                                                                                  | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"]   |
+| `onlyGet`                | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | -                                                                                    |
+| `queryOnlyGet` (default) | [!badge variant="success" text="Query"]                                            | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"]   |
+| `mutationOnlyPost`       | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | [!badge variant="warning" text="Mutation"]                                           |
+| `splitQueryAndMutation`  | [!badge variant="success" text="Query"]                                            | [!badge variant="warning" text="Mutation"]                                           |
+| `csrfPrevention`         | [!badge variant="success" text="*Query"]                                           | [!badge variant="success" text="*Query"] [!badge variant="warning" text="*Mutation"] |
+| `both`                   | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"]   |
+
+_\*: Apollo's [CSRF and XS-Search prevention](https://www.apollographql.com/docs/apollo-server/security/cors#preventing-cross-site-request-forgery-csrf) is enabled_
 
 ## Context, Request and Response
 

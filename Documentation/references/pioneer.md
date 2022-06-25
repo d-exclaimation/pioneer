@@ -239,10 +239,11 @@ server.applyMiddleware(
 
 ==- Options
 
-| Name | Type                                            | Description                                |
-| ---- | ----------------------------------------------- | ------------------------------------------ |
-| `on` | [!badge variant="danger" text="RoutesBuilder"]  | Graphiti schema used to execute operations |
-| `at` | [!badge variant="primary" text="PathComponent"] | Resolver used by the GraphQL schema        |
+| Name           | Type                                                     | Description                                              |
+| -------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| `on`           | [!badge variant="danger" text="RoutesBuilder"]           | Graphiti schema used to execute operations               |
+| `at`           | [!badge variant="primary" text="PathComponent"]          | Resolver used by the GraphQL schema                      |
+| `bodyStrategy` | [!badge variant="primary" text="HTTPBodyStreamStrategy"] | The strategy to resolve the body, defaults to `.collect` |
 
 ===
 
