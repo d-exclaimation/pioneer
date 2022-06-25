@@ -83,30 +83,34 @@ public struct Pioneer<Resolver, Context> {
     }
 
     /// Apply Pioneer GraphQL handlers to a Vapor route
-    public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql") {
+    public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql", bodyStrategy: HTTPBodyStreamStrategy = .collect) {
         // HTTP Portion
         switch httpStrategy {
         case .onlyPost:
-            applyPost(on: router, at: path, allowing: [.query, .mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
 
         case .onlyGet:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
 
         case .queryOnlyGet:
             applyGet(on: router, at: path, allowing: [.query])
-            applyPost(on: router, at: path, allowing: [.query, .mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
 
         case .mutationOnlyPost:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
-            applyPost(on: router, at: path, allowing: [.mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
 
         case .splitQueryAndMutation:
             applyGet(on: router, at: path, allowing: [.query])
-            applyPost(on: router, at: path, allowing: [.mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
+            
+        case .csrfProtected:
+            applyGet(on: router, at: path, csrf: true, allowing: [.query])
+            applyPost(on: router, at: path, csrf: true, allowing: [.query, .mutation])
 
         case .both:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
-            applyPost(on: router, at: path, allowing: [.query, .mutation])
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
         }
         
         switch playground {

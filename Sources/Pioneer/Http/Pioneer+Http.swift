@@ -15,7 +15,7 @@ extension Pioneer {
         on router: RoutesBuilder,
         at path: PathComponent = "graphql",
         csrf: Bool = false,
-        bodyStreamStrategy: HTTPBodyStreamStrategy = .collect,
+        bodyStrategy: HTTPBodyStreamStrategy = .collect,
         allowing: [OperationType]
     ) {
         func handler(req: Request) async throws -> Response {
@@ -30,10 +30,10 @@ extension Pioneer {
             let gql = try req.content.decode(GraphQLRequest.self)
             return try await handle(req: req, from: gql, allowing: allowing)
         }
-        router.on(.POST, path, body: bodyStreamStrategy, use: handler(req:))
+        router.on(.POST, path, body: bodyStrategy, use: handler(req:))
     }
 
-    /// Apply middleware for `GEt`
+    /// Apply middleware for `GET`
     func applyGet(
         on router: RoutesBuilder,
         at path: PathComponent = "graphql",

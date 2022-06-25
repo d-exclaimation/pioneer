@@ -29,16 +29,12 @@ final class SecurityTest: XCTestCase {
     /// - Return false if protection is inactive
     /// - Return false if protection is active and request has no required headers
     /// - Return true if protection is active and request has either `Apollo-Require-Preflight` or `X-Apollo-Operation-Name`
-    /// - Return false if protection is active, request has unacceptable content type, and no allowed header
     /// - Return true if protection is active, request has acceptable content type
+    /// - Return false otherwise
     func testCsrfPreventionChecking() {
         let req = Request(application: application, headers: .init([]), on: application.eventLoopGroup.next())
         let res = pioneer.isCSRFProtected(isActive: false, on: req)
         XCTAssertFalse(res)
-        
-        let req0 = Request(application: application, headers: .init([]), on: application.eventLoopGroup.next())
-        let res0 = pioneer.isCSRFProtected(on: req0)
-        XCTAssertFalse(res0)
         
         let req1 = Request(application: application, headers: .init([("Apollo-Require-Preflight", "True")]), on: application.eventLoopGroup.next())
         let res1 = pioneer.isCSRFProtected(on: req1)
