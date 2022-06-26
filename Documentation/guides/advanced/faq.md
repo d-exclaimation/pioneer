@@ -13,7 +13,7 @@ This page is to host all frequently asked / common questions and answers about P
 
 #### Does Pioneer support other GraphQL libraries other than Graphiti?
 
-Yes, Pioneer only have extensions and convenience initializer for Graphiti, but it works with any schema library built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL), which is done by passing in the `GraphQLSchema` object.
+Yes. Pioneer have extensions for Graphiti, but it works with any schema libraries built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). You can use them by passing in the `GraphQLSchema` object.
 
 ### Scalars
 
@@ -99,11 +99,9 @@ Particularly with relationship, there is common problem called the N+1 which hap
 
 ### Errors
 
-#### Is there a custom error from Pioneer? If not, is there an error recommened to be use in the resolver?
+#### Is there a custom error from Pioneer?
 
-No, there is no custom error from Pioneer (as of now).
-
-No, there is no recommendation, just use what works best (e.g. `Abort`). Pioneer only concern itself with encoding that error into the GraphQLError format.
+No, there is no custom error from Pioneer (as of now), just use what works best (e.g. `Abort`). Pioneer only concern itself with encoding that error into the GraphQLError format.
 
 #### Does Pioneer support Vapor's `Abort` and `AbortError`?
 
