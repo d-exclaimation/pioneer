@@ -296,7 +296,7 @@ struct RedisPubSub: PubSub {
             self.redis = redis
         }
 
-        private func downstream(to channel: String) async -> AsynStream<Data> {
+        func downstream(to channel: String) async -> AsyncStream<Data> {
             let broadcast = await subscribe(to: channel)
             let downstream = await broadcast.downstream()
             return downstream.stream
@@ -314,7 +314,7 @@ struct RedisPubSub: PubSub {
 
         private func apply(from channel: RedisChannelName, to broadcast: Broadcast<Data>) async {
             do {
-                try? await redis.subscribe(
+                try await redis.subscribe(
                     to: channel,
                     messageReceiver: { _, msg in
                         guard case .bulkString(.some(let buffer)) = msg else { return }
@@ -335,11 +335,11 @@ struct RedisPubSub: PubSub {
             }
         }
 
-        private func publish(for channel: String, _ value: Data) async {
-            try? await redis.publish(value, to: .init(channel)).get()
+        func publish(for channel: String, _ value: Data) async {
+            let _ = try? await redis.publish(value, to: .init(channel)).get()
         }
 
-        private func close(for channel: String) async {
+        func close(for channel: String) async {
             try? await redis.unsubscribe(from: .init(channel)).get()
             await broadcasting[channel]?.close()
         }
@@ -351,7 +351,7 @@ struct RedisPubSub: PubSub {
     public func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
         AsyncStream<DataType> { con in
             let task = Task {
-                let broadcast = await dispatcher.downstream(to: trigger)
+                let stream = await dispatcher.downstream(to: trigger)
                 for await data in stream {
                     guard let event = try? JSONDecoder().decode(DataType.self, data) else { continue }
                     con.yield(event)
