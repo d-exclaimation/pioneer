@@ -64,7 +64,8 @@ public actor Broadcast<MessageType: Sendable> {
         }
         consumers.removeAll()
     }
-    
+
+    public init() {}
 }
 
 /// An async stream with an id
