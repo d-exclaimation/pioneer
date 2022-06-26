@@ -268,16 +268,12 @@ await broadcast.close()
 
 As an example, say we want to build a redis backed [PubSub](/references/protocols/#pubsub).
 
-!!!warning Untested Example
+!!!warning Basic Example
 This is only meant to be an example to give a better idea on how to implement a custom implementation that conform to [PubSub](#pubsub-as-protocol) and utilize [Broadcast](#broadcast).
-
-- It is not tested and it may not even compile.
-- Some part of code is intentionally vaguely described.
-- This should not be used in a production environment without modified and reviewed
 
 !!!
 
-Here is an example implementation,
+Here we create an example implementation of [PubSub](#pubsub-as-protocol) using Redis, that utilize Redis channel for Pub/Sub. We also make use of [Broadcast](#broadcast) to not open multiple connection and use the 1 redis subscription connection for all GraphQL subscription of the same topic.
 
 ```swift RedisPubSub.swift
 import Pioneer
@@ -296,12 +292,14 @@ struct RedisPubSub: PubSub {
             self.redis = redis
         }
 
+        /// Get a downstream from the broadcast for the channel given
         func downstream(to channel: String) async -> AsyncStream<Data> {
             let broadcast = await subscribe(to: channel)
             let downstream = await broadcast.downstream()
             return downstream.stream
         }
 
+        /// Get the broadcast for the channel if exist, otherwise make a new one
         private func subscribe(to channel: String) async -> Broadcast<Data> {
             if let broadcast = broadcasting[channel] {
                 return broadcast
@@ -312,6 +310,7 @@ struct RedisPubSub: PubSub {
             return broadcast
         }
 
+        /// Apply broadcasting to the Redis channel subscription
         private func apply(from channel: RedisChannelName, to broadcast: Broadcast<Data>) async {
             do {
                 try await redis.subscribe(
@@ -335,10 +334,12 @@ struct RedisPubSub: PubSub {
             }
         }
 
+        /// Pubblish the data (which is RESPValueConvertible) to the specific redis channel
         func publish(for channel: String, _ value: Data) async {
             let _ = try? await redis.publish(value, to: .init(channel)).get()
         }
 
+        /// Close the redis channel subscription and all of the downstreams
         func close(for channel: String) async {
             try? await redis.unsubscribe(from: .init(channel)).get()
             await broadcasting[channel]?.close()
@@ -346,7 +347,6 @@ struct RedisPubSub: PubSub {
     }
 
     // MARK: -- Protocol required methods
-
 
     public func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
         AsyncStream<DataType> { con in
@@ -383,47 +383,27 @@ struct RedisPubSub: PubSub {
 }
 ```
 
-Now we can have the context to require [PubSub](/references/protocols/#pubsub) instead of [AsyncPubSub](/references/async-pubsub).
+Now we can have the Resolver to have a property `pubsub` of type [PubSub](/references/protocols/#pubsub) instead of [AsyncPubSub](/references/async-pubsub), while still being able to use [AsyncPubSub](/references/async-pubsub) during development.
 
-```swift Context.swift
-struct Context {
-    var pubsub: PubSub
-}
+```swift Message.swift
+struct Message: Sendable, Codable { ... }
 ```
 
 ```swift Resolver.swift
-struct Message: Sendable, Codable { ... }
 
 struct Resolver {
+    let pubsub: PubSub = app.environment.isRelease ? RedisPubSub(app.redis) : AsyncPubSub()
+
     func create(ctx: Context, _: NoArguments) async -> Message {
         let message = ...
-        await ctx.pubsub.publish(message)
+        await pubsub.publish(message)
         return message
     }
 
     func onCreate(ctx: Context, _: NoArguments) async -> EventStream<Message> {
-        ctx.pubsub.asyncStream(Message.self, for: "message-create").toEventStream()
+        pubsub.asyncStream(Message.self, for: "message-create").toEventStream()
     }
 }
 ```
 
 So now, if we can use the `RedisPubSub` on a production environment.
-
-```swift main
-...
-
-let pubsub: PubSub = app.environment.isRelease ? RedisPubSub() : AsyncPubSub()
-
-let server = Pioneer(
-    ...,
-    contextBuilder: { _, _, in
-        Context(pubsub: pubsub)
-    },
-    websocketBuilder: { _, _, _ in
-        Context(pubsub: pubsub)
-    },
-    ...
-)
-
-...
-```

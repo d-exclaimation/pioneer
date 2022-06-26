@@ -13,7 +13,7 @@ This page is to host all frequently asked / common questions and answers about P
 
 #### Does Pioneer support other GraphQL libraries other than Graphiti?
 
-Yes, Pioneer only have extensions and convenience initializer for Graphiti, but it works with any schema library built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL), which is done by passing in the `GraphQLSchema` object.
+Yes. Pioneer have extensions for Graphiti, but it works with any schema libraries built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). You can use them by passing in the `GraphQLSchema` object.
 
 ### Scalars
 
