@@ -87,7 +87,7 @@ extension Pioneer {
                         given: .from(type: self.proto.next, id: oid, value)
                     )
                 case .failure(let error):
-                    let result: GraphQLResult = .init(data: nil, errors: [error as? GraphQLError ?? .init(error)])
+                    let result: GraphQLResult = .init(data: nil, errors: [error.graphql])
                     await sink.outgoing(
                         with: oid,
                         to: process,

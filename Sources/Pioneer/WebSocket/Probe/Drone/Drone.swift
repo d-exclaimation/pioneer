@@ -77,7 +77,7 @@ extension Pioneer {
                     await sink.end(for: oid)
                 },
                 failure: { sink, error in
-                    await sink.next(for: oid, given: .from(type: nextTypename, id: oid, .init(errors: [error as? GraphQLError ?? .init(error)])))
+                    await sink.next(for: oid, given: .from(type: nextTypename, id: oid, .init(errors: [error.graphql])))
                     await sink.end(for: oid)
                 },
                 next: { sink, res in
