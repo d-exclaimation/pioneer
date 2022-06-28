@@ -12,11 +12,11 @@ public typealias AsyncGraphQLSequence<Sequence: AsyncSequence> = AsyncEventStrea
         where Sequence.Element == Future<GraphQL.GraphQLResult>
 
 /// AsyncStream for GraphQL Result
-public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncStream<Future<GraphQL.GraphQLResult>>>
+public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncThrowingStream<Future<GraphQL.GraphQLResult>, Error>>
 
 extension SubscriptionEventStream {
     /// Get the AsyncStream from this event stream regardless of its sequence
-    public func asyncStream() -> AsyncStream<Future<GraphQL.GraphQLResult>>? {
+    public func asyncStream() -> AsyncThrowingStream<Future<GraphQL.GraphQLResult>, Error>? {
         if let asyncStream = self as? AsyncGraphQLStream {
             return asyncStream.sequence
         }
@@ -24,7 +24,7 @@ extension SubscriptionEventStream {
     }
 }
 
-extension AsyncStream where Element == Future<GraphQL.GraphQLResult> {
+extension AsyncSequence where Element == Future<GraphQL.GraphQLResult> {
     /// Pipe the GraphQLResult AsyncSequence into an actor.
     ///
     /// - Parameters:
@@ -41,7 +41,7 @@ extension AsyncStream where Element == Future<GraphQL.GraphQLResult> {
     ) -> Task<Void, Error> {
         Task.init {
             do {
-                for await elem in self {
+                for try await elem in self {
                     guard !Task.isCancelled else { return }
                     let fut: Future<GraphQL.GraphQLResult> = elem
                     let result = try await fut.get()

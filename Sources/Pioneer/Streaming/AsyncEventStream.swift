@@ -24,7 +24,7 @@ public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Ele
         /// Use AsyncStream as bridging instead of the built-in map function to allow for type casting
         /// as using `map` will make the type too complicated to be casted to any meaningful value
         /// Performance and efficiency has been tested to mostly not affected but do keep in mind to try to find a better solution.
-        let stream = AsyncStream(To.self) { continuation in
+        let stream = AsyncThrowingStream(To.self) { continuation in
             let task = Task.init {
                 do {
                     for try await each in self.sequence {
@@ -33,18 +33,18 @@ public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Ele
                     }
                     continuation.finish()
                 } catch {
-                    continuation.finish()
+                    continuation.finish(throwing: error)
                 }
             }
 
             @Sendable
-            func onTermination(_: AsyncStream<To>.Continuation.Termination) {
+            func onTermination(_: AsyncThrowingStream<To, Error>.Continuation.Termination) {
                 task.cancel()
             }
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<To, AsyncStream<To>>.init(from: stream)
+        return AsyncEventStream<To, AsyncThrowingStream<To, Error>>.init(from: stream)
     }
 }
 

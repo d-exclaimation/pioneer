@@ -10,3 +10,4 @@ DerivedData/
 /.build-docs
 /Documentation/.build/
 /Documentation/.netlify/
+/.vscode
