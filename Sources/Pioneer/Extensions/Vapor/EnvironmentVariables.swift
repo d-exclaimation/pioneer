@@ -5,8 +5,7 @@
 //  Created by d-exclaimation on 3:32 PM.
 //
 
-import Foundation
-import Vapor
+import struct Vapor.Environment
 
 extension Environment {
     /// Setup an environment by specifying the information required

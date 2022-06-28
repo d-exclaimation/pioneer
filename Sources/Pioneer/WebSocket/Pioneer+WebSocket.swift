@@ -5,11 +5,10 @@
 //  Created by d-exclaimation on 11:36 AM.
 //
 
-import Foundation
 import Vapor
-import NIO
-import NIOHTTP1
-import GraphQL
+import struct Foundation.UUID
+import struct GraphQL.GraphQLError
+import enum GraphQL.Map
 
 public typealias ConnectionParams = [String: Map]?
 

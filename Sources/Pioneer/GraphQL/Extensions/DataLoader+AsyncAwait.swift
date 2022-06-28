@@ -4,12 +4,12 @@
 //  Created by d-exclaimation on 10/06/22.
 //
 
-import Foundation
 import DataLoader
-import Vapor
+import class Vapor.Request
+import protocol NIO.EventLoop
 
 /// Async-await non-throwing batch loading function
-public typealias AsyncgBatchLoadFunction<Key, Value> = (_ keys: [Key]) async -> [DataLoaderFutureValue<Value>]
+public typealias AsyncBatchLoadFunction<Key, Value> = (_ keys: [Key]) async -> [DataLoaderFutureValue<Value>]
 
 /// Async-await throwing batch loading function
 public typealias AsyncThrowingBatchLoadFunction<Key, Value> = (_ keys: [Key]) async throws -> [DataLoaderFutureValue<Value>]
@@ -20,7 +20,7 @@ public extension DataLoader {
     convenience init(
         on req: Request,
         with options: DataLoaderOptions<Key, Value> = DataLoaderOptions(),
-        load asyncLoadFunction: @escaping AsyncgBatchLoadFunction<Key, Value>
+        load asyncLoadFunction: @escaping AsyncBatchLoadFunction<Key, Value>
     ) {
         self.init(options: options, batchLoadFunction: { keys in
             req.eventLoop.performWithTask {
@@ -32,7 +32,7 @@ public extension DataLoader {
     convenience init(
         on eventLoop: EventLoop,
         with options: DataLoaderOptions<Key, Value> = DataLoaderOptions(),
-        load asyncLoadFunction: @escaping AsyncgBatchLoadFunction<Key, Value>
+        load asyncLoadFunction: @escaping AsyncBatchLoadFunction<Key, Value>
     ) {
         self.init(options: options, batchLoadFunction: { keys in
             eventLoop.performWithTask {

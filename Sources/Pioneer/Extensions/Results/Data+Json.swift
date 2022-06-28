@@ -5,7 +5,8 @@
 //  Created by d-exclaimation on 10:55 PM.
 //
 
-import Foundation
+import struct Foundation.Data
+import class Foundation.JSONDecoder
 
 extension Data {
     /// Parse data into any Decodable type if possible, otherwise return nil

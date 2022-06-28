@@ -5,10 +5,9 @@
 //  Created by d-exclaimation on 4:55 PM.
 //
 
-import Foundation
-import Vapor
 import GraphQL
-import Graphiti
+import class Graphiti.Schema
+import class Vapor.Request
 
 extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions
@@ -42,7 +41,7 @@ extension Pioneer {
         }
 
         // MARK: - Private mutable states
-        var tasks: [String: Task<Void, Error>] = [:]
+        private var tasks: [String: Task<Void, Error>] = [:]
         
         // MARK: - Event callbacks
         
@@ -62,7 +61,7 @@ extension Pioneer {
             // Guard for getting the async stream, if not sent `next` saying failure in convertion, and end subscription
             guard let asyncStream = subscription.asyncStream() else {
                 let res = GraphQL.GraphQLResult(errors: [
-                    .init(message: "Internal server error, failed to fetch AsyncStream")
+                    .init(message: "Internal server error, failed to fetch AsyncThrowingStream")
                 ])
                 process.send(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
                 process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
@@ -76,7 +75,8 @@ extension Pioneer {
                 complete: { sink in
                     await sink.end(for: oid)
                 },
-                failure: { sink, _ in
+                failure: { sink, error in
+                    await sink.next(for: oid, given: .from(type: nextTypename, id: oid, .init(errors: [error.graphql])))
                     await sink.end(for: oid)
                 },
                 next: { sink, res in

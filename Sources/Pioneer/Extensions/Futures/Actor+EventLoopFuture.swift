@@ -5,8 +5,7 @@
 //  Created by d-exclaimation on 11:41 PM.
 //
 
-import Foundation
-import NIO
+import class NIO.EventLoopFuture
 
 extension Actor {
     /// Method for handling NIO EventLoopFuture with an Actor using the pipe pattern

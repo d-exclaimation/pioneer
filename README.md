@@ -8,13 +8,14 @@
 
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dswift-versions&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dplatforms&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fd-exclaimation%2Fpioneer%2Fbadge%3Fref%3Dmain&style=flat-square)](https://actions-badge.atrox.dev/d-exclaimation/pioneer/goto?ref=main)
 
-Pioneer is a open-source Swift GraphQL server, for [Vapor](https://github.com/vapor/vapor). 
+Pioneer is a open-source Swift GraphQL server, for [Vapor](https://github.com/vapor/vapor).
 
 ## Setup
 
 ```swift
-.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.8.2")
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.8.3")
 ```
 
 ## Swift for GraphQL
@@ -27,6 +28,7 @@ It can work with any GraphQL schema built with [GraphQLSwift/GraphQL](https://gi
 
 - [Documentation](https://pioneer-graphql.netlify.app)
 - [Getting started](https://pioneer-graphql.netlify.app/guides/getting-started/setup/)
+- [DocC](https://swiftpackageindex.com/d-exclaimation/pioneer/main/documentation/pioneer)
 
 ### Protocols (WebSocket)
 

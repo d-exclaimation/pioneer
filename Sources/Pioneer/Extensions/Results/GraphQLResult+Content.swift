@@ -5,8 +5,7 @@
 //  Created by d-exclaimation on 11:02 PM.
 //
 
-import Foundation
-import GraphQL
-import Vapor
+import struct GraphQL.GraphQLResult
+import protocol Vapor.Content
 
 extension GraphQLResult: Content {}

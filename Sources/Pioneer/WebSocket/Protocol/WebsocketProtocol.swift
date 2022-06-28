@@ -5,8 +5,7 @@
 //  Created by d-exclaimation on 4:30 PM.
 //
 
-import Foundation
-import Vapor
+import struct Foundation.Data
 
 public extension Pioneer {
     /// Websocket sub-protocol

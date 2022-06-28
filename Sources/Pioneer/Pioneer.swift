@@ -6,7 +6,9 @@
 //
 
 import Vapor
-import GraphQL
+import class GraphQL.GraphQLSchema
+import struct GraphQL.GraphQLError
+import enum GraphQL.OperationType
 
 /// Pioneer GraphQL Vapor Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
@@ -154,12 +156,10 @@ public struct Pioneer<Resolver, Context> {
             )
             try res.content.encode(result)
             return res
-        } catch let error as GraphQLError {
-            return try error.response(with: res.status != .ok ? res.status : .internalServerError)
         } catch let error as AbortError {
             return try GraphQLError(message: error.reason).response(with: error.status)
         } catch {
-            return try GraphQLError(error).response(with: res.status != .ok ? res.status : .internalServerError)
+            return try error.graphql.response(with: res.status != .ok ? res.status : .internalServerError)
         }
     }
 

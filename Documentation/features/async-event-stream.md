@@ -46,16 +46,16 @@ One of the problem occured with requiring a protocol instead of a concrete type,
 `EventStream` by itself can't do much beside allowing transforming the value of the stream, and it's recommended to cast the `EventStream` to a concrete type.
 !!!
 
-Due to that, Pioneer will use `AsyncStream` when transforming stream values instead of using the built-in `.compactMap` method to avoid deeply uncastable type.
+Due to that, Pioneer will use `AsyncThrowingStream` when transforming stream values instead of using the built-in `.compactMap` method to avoid deeply uncastable type.
 
 ==- .map and .compactMap type results
 
 ```swift
-let asyncStream: AsyncStream<Int>
+let asyncStream: AsyncThrowingStream<Int>
 
-let asyncStream1: AsyncMapSequence<AsyncStream<Int>, Int> = asyncStream.map { $0 + 1 }
+let asyncStream1: AsyncMapSequence<AsyncThrowingStream<Int>, Int> = asyncStream.map { $0 + 1 }
 
-let asyncStream2: AsyncThrowingCompactMapSequence<AsyncMapSequence<AsyncStream<Int>, Data>, String> = asyncStream.compactMap { try JSONEncoder().encode($0) }
+let asyncStream2: AsyncThrowingCompactMapSequence<AsyncMapSequence<AsyncThrowingStream<Int>, Data>, String> = asyncStream.compactMap { try JSONEncoder().encode($0) }
 ```
 
 ===

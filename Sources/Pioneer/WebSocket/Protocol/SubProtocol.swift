@@ -5,9 +5,8 @@
 //  Created by d-exclaimation on 1:24 PM.
 //
 
-import Foundation
-import GraphQL
-import Vapor
+import struct Foundation.Data
+import enum GraphQL.Map
 
 /// GraphQL Over Websocket sub-protocol
 protocol SubProtocol {

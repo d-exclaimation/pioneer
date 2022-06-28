@@ -130,7 +130,7 @@ final class GraphitiTests: XCTestCase {
         // -- Consuming stream --
         
         let task = Task.init {
-            for await future in asyncStream {
+            for try await future in asyncStream {
                 let message = try await future.get()
                 let expected = GraphQLResult(data: [
                     "onMessage": [

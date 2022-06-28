@@ -5,10 +5,10 @@
 //  Created by d-exclaimation on 11:32 PM.
 //
 
-import Foundation
-import Vapor
 import GraphQL
-import Graphiti
+import class Graphiti.Schema
+import class Vapor.Request
+import struct Foundation.UUID
 
 extension Pioneer {
     /// Actor for handling Websocket distribution and dispatching of client specific actor
@@ -87,7 +87,7 @@ extension Pioneer {
                         given: .from(type: self.proto.next, id: oid, value)
                     )
                 case .failure(let error):
-                    let result: GraphQLResult = .init(data: nil, errors: [error as? GraphQLError ?? .init(error)])
+                    let result: GraphQLResult = .init(data: nil, errors: [error.graphql])
                     await sink.outgoing(
                         with: oid,
                         to: process,

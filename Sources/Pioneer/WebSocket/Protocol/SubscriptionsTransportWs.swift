@@ -5,9 +5,7 @@
 //  Created by d-exclaimation on 1:11 PM.
 //
 
-import Foundation
-import GraphQL
-import Vapor
+import struct Foundation.Data
 
 /// GraphQL Over Websocket Protocol namespace for `subscriptions-transport-ws/graphql-ws`
 enum SubscriptionTransportWs: SubProtocol {

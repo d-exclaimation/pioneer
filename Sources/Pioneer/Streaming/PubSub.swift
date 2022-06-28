@@ -4,8 +4,6 @@
 //  Created by d-exclaimation on 20/06/22.
 //
 
-import Foundation
-
 /// A base protocol for pub/sub data structure that utilize async stream
 public protocol PubSub {
     /// Returns a new AsyncStream with the correct type and for a specific trigger

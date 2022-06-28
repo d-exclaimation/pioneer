@@ -4,7 +4,7 @@
 //  Created by d-exclaimation on 20/06/22.
 //
 
-import Foundation
+import struct Foundation.UUID
 
 /// An actor to broadcast messages to multiple downstream from a single upstream
 public actor Broadcast<MessageType: Sendable> {

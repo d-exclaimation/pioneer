@@ -5,9 +5,9 @@
 //  Created by d-exclaimation on 3:32 PM.
 //
 
-import Foundation
-import NIOHTTP1
-import Vapor
+import struct NIOHTTP1.HTTPHeaders
+import enum NIOHTTP1.HTTPMethod
+import class Vapor.CORSMiddleware
 
 extension CORSMiddleware.Configuration {
     /// Setup CORS for GraphQL allowing Apollo Sandbox
