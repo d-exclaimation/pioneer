@@ -37,12 +37,9 @@ public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Ele
                 }
             }
 
-            @Sendable
-            func onTermination(_: AsyncThrowingStream<To, Error>.Continuation.Termination) {
+            continuation.onTermination = { @Sendable _ in 
                 task.cancel()
             }
-
-            continuation.onTermination = onTermination
         }
         return AsyncEventStream<To, AsyncThrowingStream<To, Error>>.init(from: stream)
     }
