@@ -27,6 +27,7 @@ It can work with any GraphQL schema built with [GraphQLSwift/GraphQL](https://gi
 
 - [Documentation](https://pioneer-graphql.netlify.app)
 - [Getting started](https://pioneer-graphql.netlify.app/guides/getting-started/setup/)
+- [DocC](https://swiftpackageindex.com/d-exclaimation/pioneer/main/documentation/pioneer)
 
 ### Protocols (WebSocket)
 
