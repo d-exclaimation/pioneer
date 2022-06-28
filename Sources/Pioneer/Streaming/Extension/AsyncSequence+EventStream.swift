@@ -8,7 +8,7 @@
 import class GraphQL.EventStream
 
 extension AsyncSequence {
-    public typealias Termination = AsyncStream<Element>.Continuation.Termination
+    public typealias Termination = AsyncThrowingStream<Element, Error>.Continuation.Termination
     
     /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
     ///
@@ -24,7 +24,7 @@ extension AsyncSequence {
     public func toEventStream(
         onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventStream<Element> {
-        let stream = AsyncStream<Element> { continuation in
+        let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
                 do {
                     for try await each in self {
@@ -33,7 +33,7 @@ extension AsyncSequence {
                     }
                     continuation.finish()
                 } catch {
-                    continuation.finish()
+                    continuation.finish(throwing: error)
                 }
             }
 
@@ -45,7 +45,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
+        return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
 
 
@@ -58,7 +58,7 @@ extension AsyncSequence {
         endValue: @escaping () -> Element,
         onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventStream<Element> {
-        let stream = AsyncStream<Element> { continuation in
+        let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
                 do {
                     for try await each in self {
@@ -68,7 +68,7 @@ extension AsyncSequence {
                     continuation.yield(endValue())
                     continuation.finish()
                 } catch {
-                    continuation.finish()
+                    continuation.finish(throwing: error)
                 }
             }
 
@@ -80,7 +80,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
+        return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
 
 
@@ -93,7 +93,7 @@ extension AsyncSequence {
         initialValue: Element,
         onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventStream<Element> {
-        let stream = AsyncStream<Element> { continuation in
+        let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
                 do {
                     continuation.yield(initialValue)
@@ -103,7 +103,7 @@ extension AsyncSequence {
                     }
                     continuation.finish()
                 } catch {
-                    continuation.finish()
+                    continuation.finish(throwing: error)
                 }
             }
 
@@ -115,7 +115,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
+        return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
 
     /// Convert any AsyncSequence to an EventStream
@@ -129,7 +129,7 @@ extension AsyncSequence {
         endValue: @escaping () -> Element,
         onTermination callback: @escaping @Sendable (Termination) -> Void
     ) -> EventStream<Element> {
-        let stream = AsyncStream<Element> { continuation in
+        let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
                 do {
                     continuation.yield(initialValue)
@@ -140,7 +140,7 @@ extension AsyncSequence {
                     continuation.yield(endValue())
                     continuation.finish()
                 } catch {
-                    continuation.finish()
+                    continuation.finish(throwing: error)
                 }
             }
 
@@ -152,7 +152,7 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
+        return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
     
     /// Convert any AsyncSequence to an EventStream
@@ -164,7 +164,7 @@ extension AsyncSequence {
         initialValue: Element,
         endValue: @escaping () -> Element
     ) -> EventStream<Element> {
-        let stream = AsyncStream<Element> { continuation in
+        let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
                 do {
                     continuation.yield(initialValue)
@@ -175,7 +175,7 @@ extension AsyncSequence {
                     continuation.yield(endValue())
                     continuation.finish()
                 } catch {
-                    continuation.finish()
+                    continuation.finish(throwing: error)
                 }
             }
 
@@ -186,6 +186,6 @@ extension AsyncSequence {
 
             continuation.onTermination = onTermination
         }
-        return AsyncEventStream<Element, AsyncStream<Element>>(from: stream)
+        return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
 }
