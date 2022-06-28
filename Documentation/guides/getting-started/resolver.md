@@ -131,7 +131,7 @@ Learn why on:
 !!!success AsyncPubSub
 Pioneer brings a data structure that acts like a in memory PubSub for managing topic/trigger based `AsyncSequence` using Swift `actors` and `AsyncStream`.
 
-The `AsyncPubSub` can generate a new consumer `AsyncStream` of a certain type from a single Source stream differentiated through the trigger string.
+The [AsyncPubSub](/guides/advanced/subscriptions/#asyncpubsub) can generate a new consumer `AsyncStream` of a certain type from a single Source stream differentiated through the trigger string.
 
 ==- Example code
 

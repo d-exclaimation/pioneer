@@ -273,6 +273,10 @@ This is only meant to be an example to give a better idea on how to implement a 
 
 !!!
 
+!!!success Packaged
+If you are looking to use thie example, There is a package for that called [PioneerRedisPubSub](https://github.com/d-exclaimation/pioneer-redis-pubsub), where it has been reorganized and tested.
+!!!
+
 Here we create an example implementation of [PubSub](#pubsub-as-protocol) using Redis, that utilize Redis channel for Pub/Sub. We also make use of [Broadcast](#broadcast) to not open multiple connection and use the 1 redis subscription connection for all GraphQL subscription of the same topic.
 
 ```swift RedisPubSub.swift

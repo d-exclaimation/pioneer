@@ -9,12 +9,12 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dswift-versions&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dplatforms&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
 
-Pioneer is a open-source Swift GraphQL server, for [Vapor](https://github.com/vapor/vapor). 
+Pioneer is a open-source Swift GraphQL server, for [Vapor](https://github.com/vapor/vapor).
 
 ## Setup
 
 ```swift
-.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.8.2")
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.8.3")
 ```
 
 ## Swift for GraphQL

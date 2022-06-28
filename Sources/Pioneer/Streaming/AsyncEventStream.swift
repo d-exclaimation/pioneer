@@ -8,7 +8,7 @@
 import class GraphQL.EventStream
 
 /// EventStream implementation for AsyncSequence for allowing GraphQL Streaming.
-public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Element> where Sequence.Element == Element {
+public final class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Element> where Sequence.Element == Element {
     /// Inner AsyncSequence
     public let sequence: Sequence
 
@@ -20,7 +20,7 @@ public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Ele
     ///
     /// - Parameter closure: Transformation closure.
     /// - Returns: A new EventStream with the new type.
-    override open func map<To>(_ closure: @escaping (Element) throws -> To) -> EventStream<To> {
+    override public func map<To>(_ closure: @escaping (Element) throws -> To) -> EventStream<To> {
         /// Use AsyncStream as bridging instead of the built-in map function to allow for type casting
         /// as using `map` will make the type too complicated to be casted to any meaningful value
         /// Performance and efficiency has been tested to mostly not affected but do keep in mind to try to find a better solution.
