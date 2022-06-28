@@ -21,7 +21,11 @@ Yes. Pioneer have extensions for Graphiti, but it works with any schema librarie
 
 Yes. The [ID](/references/structs/#id) is just a wrapper around string used to help Graphiti differentiate between `String` to an `ID` from GraphQL built in scalars.
 
-`UUID` can be easily parsed back into a string and used for making [ID](/references/structs/#id). You can use extension and computed property to turn `UUID` into [ID](/references/structs/#id)
+!!!success UUID to ID extension
+Since `0.8.3`, you can call the method `.toID()` or use the computed property `.id` to turn any `UUID` or `String` into an [ID](/references/structs/#id).
+!!!
+
+`UUID` can be easily parsed back into a string and used for making [ID](/references/structs/#id).
 
 [!ref ID and UUID](/guides/advanced/fluent/#graphql-id)
 
@@ -81,7 +85,9 @@ You can set them in the [Response](/guides/advanced/context/#response) object gi
 
 #### Does Pioneer support `graphql-ws`'s `connectionParams`?
 
-Yes, you can ccess it from the [Websocket Context Builder](/guides/advanced/context/#connectionparams) from the Pioneer initializer.
+Yes, you can access it from the [Websocket Context Builder](/guides/advanced/context/#connectionparams) from the Pioneer initializer.
+
+[!ref ConnectionParams](/guides/advanced/context/#connectionparams)
 
 ### Data Source
 
@@ -188,6 +194,10 @@ However, Pioneer is not compatible with [GraphQLRxSwift](https://github.com/Grap
 #### Does Pioneer provide an [AsyncPubSub](/references/async-pubsub.md) that is backed by Redis?
 
 No, Pioneer only provide [AsyncPubSub](/references/async-pubsub.md), the in-memory implementation [PubSub](/references/protocols/#pubsub). However, Pioneer does export the [PubSub](/references/protocols/#pubsub) protocol to allow custom implemenation that have similar API with [AsyncPubSub](/references/async-pubsub.md).
+
+!!!success RedisPubSub
+Implementation of Redis backed [PubSub](/references/protocols/#pubsub) is available under the package [PioneerRedisPubSub](https://github.com/d-exclaimation/pioneer-redis-pubsub). Alternatively, you could build your own implementation using this [example](/guides/advanced/subscriptions/#redis-example) as a starting point.
+!!!
 
 [!ref PubSub as a protocol](/guides/advanced/subscriptions/#pubsub-as-protocol)
 
