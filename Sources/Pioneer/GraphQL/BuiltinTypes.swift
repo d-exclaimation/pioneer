@@ -79,3 +79,15 @@ public extension String {
         .init(self)
     }
 }
+
+public extension UUID {
+        /// ID from this string
+    var id: ID {
+        .init(self.uuidString)
+    }
+    
+    /// ID from this string
+    func toID() -> ID {
+        .init(self.uuidString)
+    }
+}
