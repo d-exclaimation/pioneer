@@ -5,8 +5,6 @@
 //  Created by d-exclaimation.
 //
 
-import Foundation
-
 /// AsyncPubSub is a in memory pubsub structure for managing AsyncStreams in a concurrent safe way utilizing Actors.
 public struct AsyncPubSub: PubSub, Sendable {
     public typealias Producer = Broadcast<Sendable>

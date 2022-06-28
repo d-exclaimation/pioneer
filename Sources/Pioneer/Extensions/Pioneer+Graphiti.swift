@@ -5,8 +5,9 @@
 //  Created by d-exclaimation on 9:46 PM.
 //
 
-import Graphiti
-import Vapor
+import class Graphiti.Schema
+import class Vapor.Request
+import class Vapor.Response
 
 public extension Pioneer {
     /// - Parameters:

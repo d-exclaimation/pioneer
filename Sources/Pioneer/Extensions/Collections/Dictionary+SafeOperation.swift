@@ -5,8 +5,6 @@
 //  Created by d-exclaimation on 11:38 PM.
 //
 
-import Foundation
-
 extension Dictionary {
     /// Method for mutating value of a Dictionary instead of using a assignment.
     mutating func update(_ key: Key, with value: Value) {

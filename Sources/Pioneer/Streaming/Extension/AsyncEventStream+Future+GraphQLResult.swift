@@ -5,7 +5,9 @@
 //  Created by d-exclaimation on 3:38 PM.
 //
 
-import GraphQL
+import struct GraphQL.GraphQLResult
+import class GraphQL.Future
+import class GraphQL.SubscriptionEventStream
 
 /// AsyncSequence for GraphQL Result
 public typealias AsyncGraphQLSequence<Sequence: AsyncSequence> = AsyncEventStream<Future<GraphQL.GraphQLResult>, Sequence>

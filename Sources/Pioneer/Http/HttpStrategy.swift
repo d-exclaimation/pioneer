@@ -5,8 +5,6 @@
 //  Created by d-exclaimation on 4:30 PM.
 //
 
-import Foundation
-
 extension Pioneer {
     /// HTTP Operation and routing strategy for GraphQL
     public enum HTTPStrategy {

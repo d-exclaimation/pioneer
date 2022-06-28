@@ -5,9 +5,10 @@
 //  Created by d-exclaimation on 11:34 AM.
 //
 
-import Foundation
 import Vapor
-import GraphQL
+import enum GraphQL.OperationType
+import enum GraphQL.Map
+import struct GraphQL.GraphQLError
 
 extension Pioneer {
     /// Apply middleware for `POST`

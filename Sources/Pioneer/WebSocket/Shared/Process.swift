@@ -5,9 +5,9 @@
 //  Created by d-exclaimation on 11:49 PM.
 //
 
-import Foundation
-import NIOWebSocket
-import NIO
+import struct Foundation.UUID
+import enum NIOWebSocket.WebSocketErrorCode
+import class NIO.EventLoopFuture
 import Vapor
 
 extension Pioneer {

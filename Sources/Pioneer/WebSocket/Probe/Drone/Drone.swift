@@ -5,10 +5,9 @@
 //  Created by d-exclaimation on 4:55 PM.
 //
 
-import Foundation
-import Vapor
 import GraphQL
-import Graphiti
+import class Graphiti.Schema
+import class Vapor.Request
 
 extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions

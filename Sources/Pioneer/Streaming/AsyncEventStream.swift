@@ -5,7 +5,7 @@
 //  Created by d-exclaimation on 3:17 PM.
 //
 
-import GraphQL
+import class GraphQL.EventStream
 
 /// EventStream implementation for AsyncSequence for allowing GraphQL Streaming.
 public class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStream<Element> where Sequence.Element == Element {

@@ -5,8 +5,9 @@
 //  Created by d-exclaimation.
 //
 
-import Vapor
-import NIOHTTP1
+import struct NIOHTTP1.HTTPHeaders
+import enum NIOHTTP1.HTTPMethod
+import class Vapor.CORSMiddleware
 
 extension CORSMiddleware.Configuration {
     /// Setup CORS for GraphQL allowing Banana Cake Pop GraphQL IDE (Cloud Version)

@@ -4,8 +4,9 @@
 //  Created by d-exclaimation on 18/06/22.
 //
 
-import Vapor
-import GraphQL
+import class Vapor.Request
+import class Vapor.Response
+import class GraphQL.GraphQLSchema
 
 public extension Pioneer {
     /// - Parameters:

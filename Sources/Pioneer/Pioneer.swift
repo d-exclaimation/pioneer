@@ -6,7 +6,9 @@
 //
 
 import Vapor
-import GraphQL
+import class GraphQL.GraphQLSchema
+import struct GraphQL.GraphQLError
+import enum GraphQL.OperationType
 
 /// Pioneer GraphQL Vapor Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {

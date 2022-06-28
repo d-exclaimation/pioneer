@@ -6,7 +6,6 @@
 //
 
 import Graphiti
-import NIO
 import GraphQL
 
 /// Async-await non-throwing GraphQL subscription resolver function

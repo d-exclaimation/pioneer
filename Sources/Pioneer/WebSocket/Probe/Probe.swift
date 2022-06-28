@@ -5,10 +5,10 @@
 //  Created by d-exclaimation on 11:32 PM.
 //
 
-import Foundation
-import Vapor
 import GraphQL
-import Graphiti
+import class Graphiti.Schema
+import class Vapor.Request
+import struct Foundation.UUID
 
 extension Pioneer {
     /// Actor for handling Websocket distribution and dispatching of client specific actor

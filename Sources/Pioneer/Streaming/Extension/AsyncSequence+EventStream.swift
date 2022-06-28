@@ -5,7 +5,7 @@
 //  Created by d-exclaimation on 3:38 PM.
 //
 
-import GraphQL
+import class GraphQL.EventStream
 
 extension AsyncSequence {
     public typealias Termination = AsyncStream<Element>.Continuation.Termination

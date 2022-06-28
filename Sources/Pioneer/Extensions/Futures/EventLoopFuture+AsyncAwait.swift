@@ -5,7 +5,8 @@
 //  Created by d-exclaimation.
 //
 
-import NIO
+import protocol NIO.EventLoopGroup
+import class NIO.EventLoopFuture
 
 extension EventLoopGroup {
     /// Create a promise that solve-able by an async function

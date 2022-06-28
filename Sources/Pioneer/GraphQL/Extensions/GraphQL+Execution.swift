@@ -7,7 +7,7 @@
 
 
 import GraphQL
-import NIO
+import protocol NIO.EventLoopGroup
 
 
 /// Execute request-response based GraphQL Operation

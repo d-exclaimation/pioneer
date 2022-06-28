@@ -5,8 +5,7 @@
 //  Created by d-exclaimation on 9:46 PM.
 //
 
-import Foundation
-import Graphiti
+import class Graphiti.Schema
 
 public extension Pioneer where Context == Void {
     /// - Parameters:

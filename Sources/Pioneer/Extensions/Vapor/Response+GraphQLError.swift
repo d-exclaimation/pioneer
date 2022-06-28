@@ -4,9 +4,10 @@
 //  Created by d-exclaimation on 25/06/22.
 //
 
-import Foundation
-import Vapor
-import GraphQL
+import enum Vapor.HTTPResponseStatus
+import class Vapor.Response
+import struct GraphQL.GraphQLError
+import struct GraphQL.GraphQLResult
 
 extension GraphQLError {
     func response(with code: HTTPResponseStatus) throws -> Response {

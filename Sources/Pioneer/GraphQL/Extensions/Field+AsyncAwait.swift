@@ -6,7 +6,7 @@
 //
 
 import Graphiti
-import NIO
+import protocol NIO.EventLoopGroup
 import GraphQL
 
 /// Async-await non-throwing GraphQL resolver function

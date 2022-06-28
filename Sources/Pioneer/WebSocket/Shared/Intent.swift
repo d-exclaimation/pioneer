@@ -5,9 +5,7 @@
 //  Created by d-exclaimation on 10:41 AM.
 //
 
-import Foundation
-import Vapor
-import GraphQL
+import enum GraphQL.Map
 
 extension Pioneer {
     /// Pioneer GraphQL message Intention to static differentiate GraphQL Message types
