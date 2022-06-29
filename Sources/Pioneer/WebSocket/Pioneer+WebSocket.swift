@@ -18,46 +18,54 @@ extension Pioneer {
     
     /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
-        router.get(path) { req async throws -> Response in
-            /// Explicitly handle Websocket upgrade with sub-protocol
-            let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
-            guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
-                return try GraphQLError(
-                    message: "Unrecognized websocket protocol. Specify the 'sec-websocket-protocol' header with '\(websocketProtocol.name)'"
-                )
-                .response(with: .badRequest)
-            }
-
-            let header: HTTPHeaders = ["Sec-WebSocket-Protocol": websocketProtocol.name]
-            func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
-                req.eventLoop.next().makeSucceededFuture(.some(header))
-            }
-            
-            return req.webSocket(shouldUpgrade: shouldUpgrade) { req, ws in
-                let pid = UUID()
-                
-                ws.sendPing()
-                
-                /// Scheduled keep alive message interval
-                let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
-                    if ws.isClosed {
-                        throw Abort(.conflict, reason: "WebSocket closed before any termination")
-                    }
-                    ws.send(msg: websocketProtocol.keepAliveMessage)
-                }
-                
-                ws.onText { _, txt in
-                    Task.init {
-                        await onMessage(pid: pid, ws: ws, req: req, keepAlive: keepAlive, txt: txt)
-                    }
-                }
-                
-                ws.onClose.whenComplete { _ in
-                    onEnd(pid: pid, keepAlive: keepAlive)
-                }
-            }
-
+        router.get(path) { req async throws in
+            try await wsHandler(req: req)
         }
+    }
+
+    /// Upgrade Handler for all GraphQL through Websocket
+    /// - Parameter req: Request made to upgrade to Websocket
+    /// - Returns: Response to upgrade connection to Websocket
+    func wsHandler(req: Request) async throws -> Response {
+        /// Explicitly handle Websocket upgrade with sub-protocol
+        let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
+        guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
+            return try GraphQLError(
+                message: "Unrecognized websocket protocol. Specify the 'sec-websocket-protocol' header with '\(websocketProtocol.name)'"
+            )
+            .response(with: .badRequest)
+        } 
+
+        return req.webSocket(shouldUpgrade: wsShouldUpgrade(req:)) { req, ws in 
+            let pid = UUID()
+                
+            ws.sendPing()
+                
+            /// Scheduled keep alive message interval
+            let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
+                if ws.isClosed {
+                    throw Abort(.conflict, reason: "WebSocket closed before any termination")
+                }
+                ws.send(msg: websocketProtocol.keepAliveMessage)
+            }
+                
+            ws.onText { _, txt in
+                Task {
+                    await onMessage(pid: pid, ws: ws, req: req, keepAlive: keepAlive, txt: txt)
+                }
+            }
+                
+            ws.onClose.whenComplete { _ in
+                onEnd(pid: pid, keepAlive: keepAlive)
+            } 
+        }
+    }
+    
+    /// Handler to send back upgraded connection headers
+    /// - Parameter req: Request being made
+    /// - Returns: The headers for making the upgrade
+    func wsShouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
+        req.eventLoop.next().makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
     }
 
     /// On Websocket message callback

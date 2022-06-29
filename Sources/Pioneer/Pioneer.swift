@@ -94,7 +94,7 @@ public struct Pioneer<Resolver, Context> {
         case .onlyGet:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
 
-        case .queryOnlyGet:
+        case .queryOnlyGet, .csrfPrevention:
             applyGet(on: router, at: path, allowing: [.query])
             applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
 
@@ -106,10 +106,6 @@ public struct Pioneer<Resolver, Context> {
             applyGet(on: router, at: path, allowing: [.query])
             applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
             
-        case .csrfPrevention:
-            applyGet(on: router, at: path, csrf: true, allowing: [.query])
-            applyPost(on: router, at: path, csrf: true, allowing: [.query, .mutation])
-
         case .both:
             applyGet(on: router, at: path, allowing: [.query, .mutation])
             applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
