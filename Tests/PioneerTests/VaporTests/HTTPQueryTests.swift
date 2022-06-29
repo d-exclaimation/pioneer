@@ -95,7 +95,10 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            XCTAssertEqual(res.body.string, #"{"data":{"randomUsers":[{"id":"0","name":"U0"},{"id":"1","name":"U1"},{"id":"2","name":"U2"}]}}"#)
+            for i in 0..<3 {
+                XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
+                XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
+            }
         }
 
         let body1 = ByteBuffer(data: gql1.json ?? .init())
@@ -108,7 +111,10 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            XCTAssertEqual(res.body.string, #"{"data":{"randomUsers":[{"id":"0","name":"U0"}]}}"#)
+            for i in 0..<1 {
+                XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
+                XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
+            }
         }
 
         let body2 = ByteBuffer(data: gql2.json ?? .init())
@@ -121,7 +127,10 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            XCTAssertEqual(res.body.string, #"{"data":{"randomUsers":[{"id":"0","name":"U0"},{"id":"1","name":"U1"}]}}"#)
+            for i in 0..<2 {
+                XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
+                XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
+            }
         }
 
         let body3 = ByteBuffer(data: gql3.json ?? .init())
@@ -132,7 +141,8 @@ final class HTTPQueryTests: XCTestCase {
             body: body3
         ) { res in 
             XCTAssertEqual(res.status, .ok)
-            XCTAssert(res.body.string.contains(#"{"data":{"error":null},"errors":"#))
+            XCTAssert(res.body.string.contains(#""data":{"error":null}"#))
+            XCTAssert(res.body.string.contains(#""errors":"#))
             XCTAssert(res.body.string.contains("\(Abort(.imATeapot, reason: "Expected"))"))
         }
 
@@ -182,7 +192,10 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            XCTAssertEqual(res.body.string, #"{"data":{"randomUsers":[{"id":"0","name":"U0"},{"id":"1","name":"U1"},{"id":"2","name":"U2"}]}}"#)
+            for i in 0..<3 {
+                XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
+                XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
+            }
         }
 
         try app.testable().test(
@@ -191,7 +204,10 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            XCTAssertEqual(res.body.string, #"{"data":{"randomUsers":[{"id":"0","name":"U0"}]}}"#)
+            for i in 0..<1 {
+                XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
+                XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
+            }
         }
 
         try app.testable().test(
@@ -200,14 +216,18 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            XCTAssertEqual(res.body.string, #"{"data":{"randomUsers":[{"id":"0","name":"U0"},{"id":"1","name":"U1"}]}}"#)
+            for i in 0..<2 {
+                XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
+                XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
+            }
         }
 
         try app.testable().test(
             .GET, "/graphql?\(gql3)"
         ) { res in 
             XCTAssertEqual(res.status, .ok)
-            XCTAssert(res.body.string.contains(#"{"data":{"error":null},"errors":"#))
+            XCTAssert(res.body.string.contains(#""data":{"error":null}"#))
+            XCTAssert(res.body.string.contains(#""errors":"#))
             XCTAssert(res.body.string.contains("\(Abort(.imATeapot, reason: "Expected"))"))
         }
 
