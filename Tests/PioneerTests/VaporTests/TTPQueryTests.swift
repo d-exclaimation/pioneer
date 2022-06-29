@@ -1,5 +1,5 @@
 //
-//  QueryTests.swift
+//  HTTPQueryTests.swift
 //  Pioneer
 //
 //  Created by d-exclaimation on 15:56.
@@ -12,7 +12,7 @@ import NIOFoundationCompat
 import XCTVapor
 @testable import Pioneer
 
-final class QueryTests: XCTestCase {
+final class HTTPQueryTests: XCTestCase {
     private let server: Pioneer<Resolver, Void> = Pioneer(
         schema: try! Schema<Resolver, Void> {
             ID.asScalar()
