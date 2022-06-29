@@ -249,6 +249,66 @@ server.applyMiddleware(
 
 ---
 
+### `httpHandler`
+
+Common Handler for GraphQL through HTTP
+
+!!!info Manually handling request
+If you use [`applyMiddleware`](#applymiddleware), this function is already in use and does not need to be called.
+
+However, you can opt out of [`applyMiddleware`](#applymiddleware), manually set your HTTP routes, and use this method to handle GraphQL request
+!!!
+
+=== Example
+
+```swift
+app.post("/manual") { req async throws in
+    try await server.httpHandler(req: req)
+}
+```
+
+===
+
+==- Options
+
+| Name  | Type                                      | Description                 |
+| ----- | ----------------------------------------- | --------------------------- |
+| `req` | [!badge variant="primary" text="Request"] | The HTTP request being made |
+
+===
+
+---
+
+### `webSocketHandler`
+
+Upgrade Handler for all GraphQL through Websocket
+
+!!!info Manually handling request
+If you use [`applyMiddleware`](#applymiddleware), this function is already in use and does not need to be called.
+
+However, you can opt out of [`applyMiddleware`](#applymiddleware), manually set your WebSocket routes, and use this method to handle GraphQL request
+!!!
+
+=== Example
+
+```swift
+app.get("/manual") { req async throws in
+    try await server.webSocketHandler(req: req)
+}
+```
+
+===
+
+==- Options
+
+| Name  | Type                                      | Description                          |
+| ----- | ----------------------------------------- | ------------------------------------ |
+| `req` | [!badge variant="primary" text="Request"] | Request made to upgrade to Websocket |
+
+===
+
+---
+
 !!!success DocC API Reference
 Swift Package Index can now host DocC compatible API documentation taken from the code comments
 

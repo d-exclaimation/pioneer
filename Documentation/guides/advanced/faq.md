@@ -55,24 +55,14 @@ You can get them from the [Request](/guides/advanced/context/#request-http) obje
 
 To get from the [Request](/guides/advanced/context/#request-http), you will have to check if the request is **GET** or **POST**, and parse accordingly.
 
-```swift
+```swift For HTTP Context Builder
 import Vapor
 import Pioneer
 
 @Sendable
 func makeContext(req: Request, _: Response) throws -> Context {
-    let query: String?
-    switch req.method {
-    case .GET:
-        query = req.query["query"]
-    case .POST:
-        let gql = try req.content.decode(Greeting.self)
-        query = gql.query
-    default:
-        query = nil
-    }
-
-    // Do something with query
+    let gql: GraphQLRequest = try req.graphql
+    ...
 }
 ```
 
