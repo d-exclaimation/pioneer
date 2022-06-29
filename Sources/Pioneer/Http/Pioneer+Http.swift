@@ -15,29 +15,23 @@ extension Pioneer {
     func applyPost(
         on router: RoutesBuilder,
         at path: PathComponent = "graphql",
-        bodyStrategy: HTTPBodyStreamStrategy = .collect,
-        allowing: [OperationType]
+        bodyStrategy: HTTPBodyStreamStrategy = .collect
     ) {
-        router.on(.POST, path, body: bodyStrategy) { req async throws in 
-            try await httpHandler(req: req, allowing: allowing)
-        }
+        router.on(.POST, path, body: bodyStrategy, use: httpHandler)
     }
 
     /// Apply middleware for `GET`
     func applyGet(
         on router: RoutesBuilder,
-        at path: PathComponent = "graphql",
-        allowing: [OperationType]
+        at path: PathComponent = "graphql"
     ) {
-        router.get(path) { req async throws in
-            try await httpHandler(req: req, allowing: allowing)
-        }
+        router.get(path, use: httpHandler)
     }
 
     /// Common Handler for GraphQL through HTTP
     /// - Parameter req: The HTTP request being made
     /// - Returns: A response from the GraphQL operation execution properly formatted
-    func httpHandler(req: Request, allowing: [OperationType]) async throws -> Response {
+    func httpHandler(req: Request) async throws -> Response {
         // Check for CSRF Prevention
         guard isCSRFProtected(isActive: httpStrategy == .csrfPrevention, on: req) else {
             return try GraphQLError(
@@ -48,7 +42,7 @@ extension Pioneer {
         }
         do {
             let gql = try req.graphql
-            return try await handle(req: req, from: gql, allowing: allowing)
+            return try await handle(req: req, from: gql, allowing: httpStrategy.allowed(for: req.method))
         } catch let error as Abort {
             return try GraphQLError(message: error.reason).response(with: error.status)
         } catch {

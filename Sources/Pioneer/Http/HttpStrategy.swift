@@ -5,6 +5,9 @@
 //  Created by d-exclaimation on 4:30 PM.
 //
 
+import enum NIOHTTP1.HTTPMethod
+import enum GraphQL.OperationType
+
 extension Pioneer {
     /// HTTP Operation and routing strategy for GraphQL
     public enum HTTPStrategy {
@@ -22,5 +25,37 @@ extension Pioneer {
         case csrfPrevention
         /// Allow all operation through `GET` and `POST`.
         case both
+    
+        /// Get the allowed operation for aa type of HTTPMethod
+        /// - Parameter method: The HTTP Method this operation is executed
+        /// - Returns: A list of allowed GraphQL Operation Type
+        public func allowed(for method: HTTPMethod) -> [OperationType] {
+            switch (method, self) {
+            case (.GET, .onlyPost):
+                return []
+            case (.POST, .onlyPost):
+                return [.query, .mutation]
+            case (.GET, .onlyGet):
+                return [.query, .mutation]
+            case (.POST, .onlyGet):
+                return []
+            case (.GET, .queryOnlyGet), (.GET, .csrfPrevention):
+                return [.query]
+            case (.POST, .queryOnlyGet), (.POST, .csrfPrevention):
+                return [.query, .mutation]
+            case (.GET, .mutationOnlyPost):
+                return [.query, .mutation]
+            case (.POST, .mutationOnlyPost):
+                return [.mutation]
+            case (.GET, .splitQueryAndMutation):
+                return [.query]
+            case (.POST, .splitQueryAndMutation):
+                return [.mutation]
+            case (_, .both):
+                return [.query, .mutation]
+            default:
+                return []
+            }
+        }
     }
 }
