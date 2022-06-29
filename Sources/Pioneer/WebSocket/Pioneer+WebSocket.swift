@@ -24,7 +24,7 @@ extension Pioneer {
     /// Upgrade Handler for all GraphQL through Websocket
     /// - Parameter req: Request made to upgrade to Websocket
     /// - Returns: Response to upgrade connection to Websocket
-    func wsHandler(req: Request) async throws -> Response {
+    public func wsHandler(req: Request) async throws -> Response {
         /// Explicitly handle Websocket upgrade with sub-protocol
         let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
         guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {

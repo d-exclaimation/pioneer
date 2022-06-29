@@ -31,7 +31,7 @@ extension Pioneer {
     /// Common Handler for GraphQL through HTTP
     /// - Parameter req: The HTTP request being made
     /// - Returns: A response from the GraphQL operation execution properly formatted
-    func httpHandler(req: Request) async throws -> Response {
+    public func httpHandler(req: Request) async throws -> Response {
         // Check for CSRF Prevention
         guard isCSRFProtected(isActive: httpStrategy == .csrfPrevention, on: req) else {
             return try GraphQLError(
