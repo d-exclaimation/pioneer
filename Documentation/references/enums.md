@@ -191,6 +191,30 @@ Allow all operation through `GET` and `POST`.
 
 |||
 
+---
+
+### `allowed`
+
+Get the allowed operation for aa type of HTTPMethod
+
+=== Example
+
+```swift
+HTTPStrategy.csrfPrevention.allowed(for: .GET)
+```
+
+===
+
+==- Options
+
+| Name  | Type                                         | Description                                |
+| ----- | -------------------------------------------- | ------------------------------------------ |
+| `for` | [!badge variant="primary" text="HTTPMethod"] | The HTTP Method this operation is executed |
+
+===
+
+---
+
 ## WebsocketProtocol
 
 GraphQL over Websocket sub-protocol
