@@ -31,9 +31,9 @@ struct User: Identifiable, Codable, Sendable {
 Here, we have a couple properties and some computed ones as well. All things should be pretty self-explanatory.
 
 !!!info ID type
-Graphiti cannot diffentiate `String` type from `ID` type by default. Pioneer brought in a custom `ID` struct to tackle.
+Graphiti cannot diffentiate `String` type from `ID` type by default. Pioneer brought in a custom `ID` struct to tackle this issue.
 
-This custom`ID` can be constructed from any string with its regular initializer or from string literal(s)
+This custom`ID` can be constructed from any string with its regular initializer or from string literal(s). It can also come from `UUID` and `String` using the extension `.toID()` method.
 
 <sub>It is also hashable so it can also be used as `id` requirement for `Identifiable`</sub>
 
@@ -42,11 +42,11 @@ import Pioneer
 
 extension User {
     var _id: ID {
-        id.uuidString.toID()
+        id.toID()
     }
 
     var _friendIDs: [ID] {
-        friendIDs.map { $0.uuidString.toID() }
+        friendIDs.map { $0.toID() }
     }
 }
 
@@ -54,7 +54,7 @@ let schema = try Schema<Void, Resolver> {
     // Add as Scalar type, so Graphiti won't get mad
     ID.asScalar()
     // or
-    Scalr(ID.self, as: "ID")
+    Scalar(ID.self, as: "ID")
 }
 ```
 

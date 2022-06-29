@@ -11,6 +11,10 @@ This page is to host all frequently asked / common questions and answers about P
 
 ### Libraries
 
+#### Can Pioneer support schema built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL)?
+
+Yes, you can construct a GraphQLSchema just by using [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) without additional library. However for a better experience, it is recommended to use something like [Graphiti](https://github.com/GraphQLSwift/Graphiti).
+
 #### Does Pioneer support other GraphQL libraries other than Graphiti?
 
 Yes. Pioneer have extensions for Graphiti, but it works with any schema libraries built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). You can use them by passing in the `GraphQLSchema` object.

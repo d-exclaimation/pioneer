@@ -15,7 +15,7 @@ I am going to ignore the error handling portion and assume the schema will be co
 import Pioneer
 import Graphiti
 
-let schema = try? Schema<Resolver, Context> {
+let schema = try! Schema<Resolver, Context> {
     Scalar(ID.self)
 
     Type(User.self) {
