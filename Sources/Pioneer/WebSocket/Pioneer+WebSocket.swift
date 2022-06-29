@@ -18,13 +18,13 @@ extension Pioneer {
     
     /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
-        router.get(path, use: wsHandler)
+        router.get(path, use: webSocketHandler)
     }
 
     /// Upgrade Handler for all GraphQL through Websocket
     /// - Parameter req: Request made to upgrade to Websocket
     /// - Returns: Response to upgrade connection to Websocket
-    public func wsHandler(req: Request) async throws -> Response {
+    public func webSocketHandler(req: Request) async throws -> Response {
         /// Explicitly handle Websocket upgrade with sub-protocol
         let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
         guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
