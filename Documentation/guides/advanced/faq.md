@@ -11,6 +11,10 @@ This page is to host all frequently asked / common questions and answers about P
 
 ### Libraries
 
+#### Can Pioneer support schema built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL)?
+
+Yes, you can construct a GraphQLSchema just by using [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) without additional library. However for a better experience, it is recommended to use something like [Graphiti](https://github.com/GraphQLSwift/Graphiti).
+
 #### Does Pioneer support other GraphQL libraries other than Graphiti?
 
 Yes. Pioneer have extensions for Graphiti, but it works with any schema libraries built from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). You can use them by passing in the `GraphQLSchema` object.
@@ -51,24 +55,14 @@ You can get them from the [Request](/guides/advanced/context/#request-http) obje
 
 To get from the [Request](/guides/advanced/context/#request-http), you will have to check if the request is **GET** or **POST**, and parse accordingly.
 
-```swift
+```swift For HTTP Context Builder
 import Vapor
 import Pioneer
 
 @Sendable
 func makeContext(req: Request, _: Response) throws -> Context {
-    let query: String?
-    switch req.method {
-    case .GET:
-        query = req.query["query"]
-    case .POST:
-        let gql = try req.content.decode(Greeting.self)
-        query = gql.query
-    default:
-        query = nil
-    }
-
-    // Do something with query
+    let gql: GraphQLRequest = try req.graphql
+    ...
 }
 ```
 

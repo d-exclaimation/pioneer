@@ -59,7 +59,7 @@ struct Resolver {
 Pioneer already provided the response object in the context builder that is going to be the one used to respond to the request. You don't need return one, and instead just mutate its properties.
 
 !!!warning Returning custom response
-There is currently no way for a resolver function to return a custom response. Graphiti only take functions that return the type describe in the schema, and Pioneer also have to handle encoding the returned value into a response that follow the proper GraphQL format.
+There is currently no way for a resolver function to return a custom response. [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) only take functions that return the type describe in the schema, and Pioneer also have to handle encoding the returned value into a response that follow the proper GraphQL format.
 !!!
 
 ```swift Setting a cookie example

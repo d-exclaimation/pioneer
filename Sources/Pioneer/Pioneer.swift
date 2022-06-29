@@ -89,30 +89,12 @@ public struct Pioneer<Resolver, Context> {
         // HTTP Portion
         switch httpStrategy {
         case .onlyPost:
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
-
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy)
         case .onlyGet:
-            applyGet(on: router, at: path, allowing: [.query, .mutation])
-
-        case .queryOnlyGet:
-            applyGet(on: router, at: path, allowing: [.query])
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
-
-        case .mutationOnlyPost:
-            applyGet(on: router, at: path, allowing: [.query, .mutation])
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
-
-        case .splitQueryAndMutation:
-            applyGet(on: router, at: path, allowing: [.query])
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.mutation])
-            
-        case .csrfPrevention:
-            applyGet(on: router, at: path, csrf: true, allowing: [.query])
-            applyPost(on: router, at: path, csrf: true, allowing: [.query, .mutation])
-
-        case .both:
-            applyGet(on: router, at: path, allowing: [.query, .mutation])
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy, allowing: [.query, .mutation])
+            applyGet(on: router, at: path)
+        default:
+            applyGet(on: router, at: path)
+            applyPost(on: router, at: path, bodyStrategy: bodyStrategy)
         }
         
         switch playground {
