@@ -33,6 +33,9 @@ let package = Package(
             ]),
         .testTarget(
             name: "PioneerTests",
-            dependencies: ["Pioneer"]),
+            dependencies: [
+                "Pioneer",
+                 .product(name: "XCTVapor", package: "vapor")
+            ]),
     ]
 )

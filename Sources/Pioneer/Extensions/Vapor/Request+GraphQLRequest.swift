@@ -18,7 +18,7 @@ extension Request {
             case .GET:
                 // Query is most important and should always be there, otherwise reject request
                 guard let query: String = self.query[String.self, at: "query"] else {
-                    throw Abort(.badGateway,
+                    throw Abort(.badRequest,
                         reason: "Unable to parse query and identify operation. Specify the 'query' query string parameter with the GraphQL query."
                     )
                 }
