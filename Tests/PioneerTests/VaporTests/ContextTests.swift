@@ -29,7 +29,7 @@ final class ContextTests: XCTestCase {
             guard authorization.contains("Bearer "), let token = authorization.split(separator: " ").last?.description else {
                 throw Abort(.unauthorized, reason: "Cannot authoriza user")
             }
-            return Context(auth: token)
+            return Context(auth: token, res: res)
         },
         httpStrategy: .both,
         introspection: true
@@ -37,11 +37,13 @@ final class ContextTests: XCTestCase {
 
     struct Context {
         var auth: String
+        var res: Response
     }
 
     struct Resolver {
         func test(ctx: Context, _: NoArguments) async -> ID {
-            .init(ctx.auth)
+            ctx.res.headers.add(name: .authorization, value: "Bearer \(ctx.auth)")
+            return ctx.auth.id
         }
     }
 
@@ -54,12 +56,15 @@ final class ContextTests: XCTestCase {
             app.shutdown()
         }
 
+        server.applyMiddleware(on: app)
+
         try app.testable().test(
             .GET, 
             "/graphql?query=\("query { test }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
             headers: .init([("Authorization", "Bearer Hello")])
         ) { res in 
             XCTAssertEqual(res.status, .ok)
+            XCTAssertEqual(res.headers[.authorization].first, .some("Bearer Hello"))
             XCTAssert(res.body.string.contains("Hello"))
         }
 
