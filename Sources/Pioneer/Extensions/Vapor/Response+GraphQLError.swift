@@ -15,11 +15,30 @@ extension GraphQLError {
         try response.content.encode(GraphQLResult(data: nil, errors: [self]))
         return response
     }
+
+    func response(using response: Response, with code: HTTPResponseStatus) throws -> Response {
+        response.status = code
+        try response.content.encode(GraphQLResult(data: nil, errors: [self]))
+        return response
+    }
+
+    func response(using response: Response) throws -> Response {
+        if response.status == .ok {
+            response.status = .internalServerError
+        }
+        try response.content.encode(GraphQLResult(data: nil, errors: [self]))
+        return response
+    }
 }
 
 extension Array where Element == GraphQLError {
     func response(with code: HTTPResponseStatus) throws -> Response {
         let response = Response(status: code)
+        try response.content.encode(GraphQLResult(data: nil, errors: self))
+        return response
+    }
+
+    func response(using response: Response) throws -> Response {
         try response.content.encode(GraphQLResult(data: nil, errors: self))
         return response
     }
