@@ -26,7 +26,7 @@ You can add Pioneer into any existing Vapor application with any GraphQL schema 
 Add this line to add Pioneer as one of your dependencies.
 
 ```swift
-.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.8.4")
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.8.5")
 ```
 
 Go to the `main.swift` or any Swift file where you apply your Vapor routing like your `routes.swift` file.
