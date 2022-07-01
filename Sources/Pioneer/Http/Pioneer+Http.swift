@@ -17,7 +17,7 @@ extension Pioneer {
         at path: PathComponent = "graphql",
         bodyStrategy: HTTPBodyStreamStrategy = .collect
     ) {
-        router.on(.POST, path, body: bodyStrategy, use: httpHandler)
+        router.on(.POST, path, body: bodyStrategy, use: httpHandler(req:))
     }
 
     /// Apply middleware for `GET`
@@ -25,7 +25,7 @@ extension Pioneer {
         on router: RoutesBuilder,
         at path: PathComponent = "graphql"
     ) {
-        router.get(path, use: httpHandler)
+        router.get(path, use: httpHandler(req:))
     }
 
     /// Common Handler for GraphQL through HTTP
