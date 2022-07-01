@@ -195,6 +195,24 @@ Implementation of Redis backed [PubSub](/references/protocols/#pubsub) is availa
 
 [!ref PubSub as a protocol](/guides/advanced/subscriptions/#pubsub-as-protocol)
 
+## Vapor
+
+### HTTP
+
+#### Can I opt out from Pioneer's routing and set my own routes, while still have Pioneer handle all HTTP request?
+
+Yes, you can using the [httpHandler(req:)](/references/pioneer/#httphandler). In which, you can perform code before and after the GraphQL operation by the handler.
+
+[!ref Manual HTTP Routing](/features/graphql-over-http/#manual-http-routing)
+
+### WebSocket
+
+#### Can I opt out from Pioneer's routing and set my own routes, while still have Pioneer handle all WebSocket operations?
+
+Yes, you can using the [webSocketHandler(req:)](/references/pioneer/#websockethandler). However different from HTTP, you can manually set the route only for the upgrade request, but you cannot intercept and manually handle WebSocket messages.
+
+[!ref Manual WebSocket Routing](/features/graphql-over-websocket/#manual-websocket-routing)
+
 ## General
 
 ### Overview

@@ -139,9 +139,9 @@ public struct Pioneer<Resolver, Context> {
             try res.content.encode(result)
             return res
         } catch let error as AbortError {
-            return try GraphQLError(message: error.reason).response(with: error.status)
+            return try GraphQLError(message: error.reason).response(using: res, with: error.status)
         } catch {
-            return try error.graphql.response(with: res.status != .ok ? res.status : .internalServerError)
+            return try error.graphql.response(using: res)
         }
     }
 

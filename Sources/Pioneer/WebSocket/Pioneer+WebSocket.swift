@@ -18,7 +18,7 @@ extension Pioneer {
     
     /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
-        router.get(path, use: webSocketHandler)
+        router.get(path, use: webSocketHandler(req:))
     }
 
     /// Upgrade Handler for all GraphQL through Websocket

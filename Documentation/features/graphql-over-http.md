@@ -184,3 +184,39 @@ It should have no impact on legitimate use of your graph except in these two cas
 - You implemented and have enabled file uploads through your GraphQL server using `multipart/form-data`.
 
 If either of these apply to you and you want to keep the prevention mechanic, you should configure the relevant clients to send a non-empty `Apollo-Require-Preflight` header along with all requests.
+
+## Manual HTTP Routing
+
+In cases where the routing configuration by Pioneer when using [`.applyMiddleware`](/references/pioneer/#applymiddleware) is insufficient to your need, you can opt out and manually set your routes, have Pioneer still handle GraphQL operation, and even execute code on the incoming request before Pioneer handles the GraphQL operation(s).
+
+To do that, you can utilize the newly added [`.httpHandler(req:)`](/references/pioneer/#httphandler) method from Pioneer, which will handle incoming `Request` and return a proper GraphQL formatted`Response`.
+
+!!!success Manual WebSocket Routing
+Pioneer also provide handler to manually setting routes for WebSocket
+
+[!ref Manual WebSocket Routing](/features/graphql-over-websocket/#manual-websocket-routing)
+!!!
+
+```swift
+let app = try Application(.detect())
+let server = try Pioneer(...)
+
+app.group("api") {
+    app.post("graphql") { req async throws in
+        // Do something before the operation start
+        let res = try await server.httpHandler(req: req)
+        // Do something after the operation ended
+        return res
+    }
+}
+```
+
+### Consideration
+
+The [`.httpHandler(req:)`](/references/pioneer/#httphandler) method has some behavior to be aware about. Given that it is a method from the Pioneer struct, it still uses the configuration set when creating the Pioneer server, such as:
+
+1. It will still use the [HTTPStrategy](#http-strategy) and check if the request is valid / allowed to go through.
+   - For example, if you set a **GET** route using this but the httpStrategy is set to `.onlyPost`, this handler won't accept **GET** request for all GraphQL operations and will just throw an error.
+   - On the other hand, if the httpStrategy is set to `.csrfPrevention`, it will still perform checks to make sure the server is safe from CSRF and XS-Search attacks.
+2. While the handler can throw an error, It will encode all errors thrown by any resolver(s) and any context builder(s) into the Response. The error thrown by the handler happened only due to failure in encoding such response.
+   - For example, say your resolver or context builder explicitly throw an error, Pioneer will catch these errors, format them as GraphQLError (in a GraphQLResult), encode them into the Response object content, so handler will not rethrow the error and instead return a response object.
