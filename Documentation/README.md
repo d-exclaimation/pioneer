@@ -5,17 +5,17 @@ title: Welcome
 
 # Welcome to Pioneer
 
-[Pioneer](https://github.com/d-exclaimation/pioneer) is an easy to use Swift GraphQL :unicorn_face: server built for Vapor that works with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
+[Pioneer](https://github.com/d-exclaimation/pioneer) is a simple GraphQL :unicorn_face: server built for Swift and Vapor that works with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
 
 ![Pioneer](pioneer-banner.png)
 
-No complicated setup required to use Pioneer. It is as easy as plugging it into an existing Vapor application.
+No complicated setup required to use Pioneer. It is as easy as plugging it into an existing Vapor application (it might even looked familiar).
 
 Pioneer will configure all the necessary things to build a GraphQL API such as:
 
 - Handling operations through HTTP :incoming_envelope: (**GET** and **POST**).
 - Adding GraphQL IDE like [GraphiQL](https://github.com/graphql/graphiql) with subscriptions support.
-- Handling subscriptions through WebSocket :dove_of_peace:.
+- Handling subscriptions through WebSocket :dove_of_peace:
 
 ## Quick Start
 
@@ -33,22 +33,20 @@ Go to the `main.swift` or any Swift file where you apply your Vapor routing like
 
 Next, contruct an new Pioneer instance with your flavour of configuration and apply it to any `RoutesBuilder`.
 
-+++ main.swift
++++ Barebone Setup
 
-```swift
+```swift main.swift
 import Vapor
-import Pioneer // <- import the package
+import Pioneer
 import Graphiti
 
 let app = try Application(.detect())
 
-let schema: Schema<Void, Resolver> = ... // <- Schema built by Graphiti
-
-let resolver: Resolver = ... // <- Custom resolver struct
-
 let server = Pioneer(
-    schema: schema,
-    resolver: resolver,
+    schema: Schema<Void, Resolver> {
+        ...
+    },
+    resolver: Resolver(),
     websocketProtocol: .graphqlWs
 )
 
@@ -61,14 +59,20 @@ defer {
 try app.run()
 ```
 
-+++ routes.swift
++++ Vapor template setup
 
-```swift
+```swift routes.swift
 import Vapor
-import Pioneer // <- import the package
+import Pioneer
 import Graphiti
 
-let server = Pioneer(...)
+let server = Pioneer(
+    schema: Schema<Void, Resolver> {
+        ...
+    },
+    resolver: Resolver(),
+    websocketProtocol: .graphqlWs
+)
 
 func routes(_ app: Application) throws {
     app.get("hello") { req -> String in
