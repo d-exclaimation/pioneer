@@ -44,7 +44,7 @@ import Pioneer
 
 extension User {
     var gid: ID {
-        id?.uuidString?.toID() ?? .uuid()
+        id?.toID() ?? .uuid()
     }
 }
 ```
