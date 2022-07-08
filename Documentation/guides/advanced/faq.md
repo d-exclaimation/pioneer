@@ -213,6 +213,22 @@ Yes, you can using the [webSocketHandler(req:)](/references/pioneer/#websocketha
 
 [!ref Manual WebSocket Routing](/features/graphql-over-websocket/#manual-websocket-routing)
 
+### Multipart form
+
+#### Can I use Pioneer and GraphQl to perform file upload?
+
+Technically yes, there is an unfficial spec that is commonly used by some server libraries called [GraphQL Multipart Request Spec](https://github.com/jaydenseric/graphql-multipart-request-spec). Using this, you can allow file to be processed properly in by the GraphQL executor. However, there is no package / current implementation for using that with Pioneer and [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
+
+Furthemore, there is currently no plan to add that feature directly into Pioneer package, and there are consideration to be taken account of when trying to add file upload to a GraphQL server, which is better explained [below](#why-does-pioneer-doesnt-have-graphql-file-upload-implemented-as-feature-of-the-library)
+
+#### Why does Pioneer doesn't have `graphql-file-upload` implemented as feature of the library?
+
+This library take many similar approaches and even some intential design decisions to `apollo-server`. GraphQL file upload isn't part of `apollo-server` since `v3` due to some security concerns allowing `multipart/form-data` particularly [CSRF Attacks](/features/graphql-over-http/#csrf-and-xs-search).
+
+In addition, this [blog post](https://www.apollographql.com/blog/backend/file-uploads/file-upload-best-practices/) somewhat explained the flaws in having file upload to be as part of GraphQL server and other better alternatives for doing file uploads with GraphQL.
+
+In short, it is suggested that we [_"Separate the GraphQL Layer from the Service Layer"_](https://principledgraphql.com/operations#10-separate-the-graphql-layer-from-the-service-layer).
+
 ## General
 
 ### Overview
