@@ -120,6 +120,7 @@ extension Pioneer {
         
         // MARK: - Utility methods
 
+        // TODO: - Remove usage of event loop from request if possible
         /// Execute subscription from GraphQL Resolver and Schema, await the future value and catch error into a SubscriptionResult
         private func subscription(gql: GraphQLRequest) async -> SubscriptionResult {
             do {

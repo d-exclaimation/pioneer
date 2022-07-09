@@ -109,7 +109,8 @@ extension Pioneer {
         }
         
         // MARK: - Utility methods
-        
+    
+        // TODO: - Remove the use of event loop from request if possible
         /// Execute short-lived GraphQL Operation
         private func execute(_ gql: GraphQLRequest, payload: ConnectionParams, req: Request) -> Future<GraphQLResult> {
             req.eventLoop.performWithTask {
