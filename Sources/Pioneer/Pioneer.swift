@@ -7,6 +7,7 @@
 
 import Vapor
 import class GraphQL.GraphQLSchema
+import struct GraphQL.GraphQLResult
 import struct GraphQL.GraphQLError
 import enum GraphQL.OperationType
 
@@ -118,6 +119,28 @@ public struct Pioneer<Resolver, Context> {
         }
     }
 
+    /// Execute operation through Pioneer for a GraphQLRequest, context and get aa well formatted GraphQlResult
+    /// - Parameters:
+    ///   - gql: The GraphQL Request for this operation
+    ///   - ctx: The context for the operation
+    ///   - eventLoop: The event loop used to execute the operation asynchronously
+    /// - Returns: A well-formatted GraphQLResult
+    public func executeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async -> GraphQLResult {
+        do {
+            return try await executeGraphQL(
+                schema: schema,
+                request: gql.query,
+                resolver: resolver,
+                context: ctx,
+                eventLoopGroup: eventLoop,
+                variables: gql.variables,
+                operationName: gql.operationName
+            )
+        } catch {
+            return GraphQLResult(data: nil, errors: [error.graphql])
+        }
+    }
+
     /// Handle execution for GraphQL operation
     internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
         guard allowed(from: gql, allowing: allowing) else {
@@ -127,15 +150,7 @@ public struct Pioneer<Resolver, Context> {
         let res = Response()
         do {
             let context = try await contextBuilder(req, res)
-            let result = try await executeGraphQL(
-                schema: schema,
-                request: gql.query,
-                resolver: resolver,
-                context: context,
-                eventLoopGroup: req.eventLoop,
-                variables: gql.variables,
-                operationName: gql.operationName
-            )
+            let result = await executeOperation(for: gql, with: context, using: req.eventLoop)
             try res.content.encode(result)
             return res
         } catch let error as AbortError {
