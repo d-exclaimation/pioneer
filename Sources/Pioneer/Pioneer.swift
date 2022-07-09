@@ -141,24 +141,6 @@ public struct Pioneer<Resolver, Context> {
         }
     }
 
-    /// Handle execution for GraphQL operation
-    internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
-        guard allowed(from: gql, allowing: allowing) else {
-            return try GraphQLError(message: "Operation of this type is not allowed and has been blocked")
-                .response(with: .badRequest)
-        }
-        let res = Response()
-        do {
-            let context = try await contextBuilder(req, res)
-            let result = await executeOperation(for: gql, with: context, using: req.eventLoop)
-            try res.content.encode(result)
-            return res
-        } catch let error as AbortError {
-            return try GraphQLError(message: error.reason).response(using: res, with: error.status)
-        } catch {
-            return try error.graphql.response(using: res)
-        }
-    }
 
     /// Guard for operation allowed
     internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) -> Bool {

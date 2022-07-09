@@ -49,6 +49,30 @@ extension Pioneer {
             return try error.graphql.response(with: .internalServerError)
         }
     }
+
+    /// Handle execution for GraphQL operation
+    /// - Parameters:
+    ///   - req: The HTTP Request
+    ///   - gql: The GraphQL request for the operation
+    ///   - allowing: The allowed operation type
+    /// - Returns: A response with proper http status code and a well formatted body
+    internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
+        guard allowed(from: gql, allowing: allowing) else {
+            return try GraphQLError(message: "Operation of this type is not allowed and has been blocked")
+                .response(with: .badRequest)
+        }
+        let res = Response()
+        do {
+            let context = try await contextBuilder(req, res)
+            let result = await executeOperation(for: gql, with: context, using: req.eventLoop)
+            try res.content.encode(result)
+            return res
+        } catch let error as AbortError {
+            return try GraphQLError(message: error.reason).response(using: res, with: error.status)
+        } catch {
+            return try error.graphql.response(using: res)
+        }
+    }
     
     
     /// Check if request is CSRF protected if prevention is active
