@@ -8,6 +8,7 @@
 import GraphQL
 import class Graphiti.Schema
 import class Vapor.Request
+import protocol NIO.EventLoopGroup
 
 extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions
@@ -120,26 +121,22 @@ extension Pioneer {
         
         // MARK: - Utility methods
 
-        // TODO: - Remove usage of event loop from request if possible
-        /// Execute subscription from GraphQL Resolver and Schema, await the future value and catch error into a SubscriptionResult
+        /// Build context and execute subscription from GraphQL Resolver and Schema, await the future value and catch error into a SubscriptionResult
         private func subscription(gql: GraphQLRequest) async -> SubscriptionResult {
             do {
                 let ctx = try await websocketContextBuilder(process.req, process.payload, gql)
-                return try await subscribeGraphQL(
-                    schema: schema,
-                    request: gql.query,
-                    resolver: resolver,
-                    context: ctx,
-                    eventLoopGroup: process.req.eventLoop,
-                    variables: gql.variables,
-                    operationName: gql.operationName
-                )
+                return try await subscribeOperation(for: gql, with: ctx, using: process.req.eventLoop)
             } catch {
                 return .init(
                     stream: nil,
                     errors: [.init(error)]
                 )
             }
+        }
+
+        /// Execute long lived GraphQL Operation as a subscription
+        private func subscribeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async throws -> SubscriptionResult {
+            try await subscribeGraphQL(schema: schema, request: gql.query, resolver: resolver, context: ctx, eventLoopGroup: eventLoop)
         }
 
         deinit {
