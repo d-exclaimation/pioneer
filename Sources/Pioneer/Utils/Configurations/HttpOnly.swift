@@ -10,7 +10,7 @@ import class Vapor.Response
 import class GraphQL.GraphQLSchema
 
 public extension Pioneer.Config {
-    /// Simple configuration for HTTP GraphQL server
+    /// Simple configuration for HTTP only GraphQL server
     /// - Parameters:
     ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
     ///   - resolver: The top level object
@@ -23,7 +23,7 @@ public extension Pioneer.Config {
         .simpleHttpOnly(using: schema, with: resolver, and: {_, _ in }, allowing: introspection)
     }
 
-    /// Simple configuration for HTTP GraphQL server
+    /// Simple configuration for HTTP only GraphQL server
     /// - Parameters:
     ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
     ///   - resolver: The top level object
@@ -48,6 +48,15 @@ public extension Pioneer.Config {
         )
     }
 
+    /// Configuration for only HTTP only GraphQl server
+    /// - Parameters:
+    ///   - schema: The GraphQL server from GraphQLSwift/GraphQL
+    ///   - resolver: The top level object
+    ///   - context: The context builder
+    ///   - httpStrategy: The routing strategy
+    ///   - playground: The GraphQL IDE used
+    ///   - introspection: Allowing introspection
+    /// - Returns: 
     static func httpOnly(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
@@ -67,6 +76,31 @@ public extension Pioneer.Config {
             websocketProtocol: .disable, 
             introspection: introspection, 
             playground: playground
+        )
+    }
+    /// Configuration for only HTTP only GraphQl server
+    /// - Parameters:
+    ///   - schema: The GraphQL server from GraphQLSwift/GraphQL
+    ///   - resolver: The top level object
+    ///   - context: The context builder
+    ///   - httpStrategy: The routing strategy
+    ///   - playground: The GraphQL IDE used
+    ///   - introspection: Allowing introspection
+    /// - Returns: 
+    static func httpOnly(
+        using schema: GraphQLSchema, 
+        resolver: Resolver, 
+        httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy,
+        playground: Pioneer<Resolver, Context>.IDE,
+        introspection: Bool = true  
+    ) -> Self where Context == Void {
+        .httpOnly(
+            using: schema, 
+            resolver: resolver, 
+            context: { _, _ in }, 
+            httpStrategy: httpStrategy, 
+            playground: playground, 
+            introspection: introspection
         )
     }
 }
