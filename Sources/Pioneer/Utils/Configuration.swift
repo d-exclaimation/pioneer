@@ -10,25 +10,26 @@ import class Vapor.Response
 import class GraphQL.GraphQLSchema
 
 extension Pioneer {
+    /// Configuration for Pioneer
     public struct Config {
         /// Graphiti schema used to execute operations
-        var schema: GraphQLSchema
+        let schema: GraphQLSchema
         /// Resolver used by the GraphQL schema
-        var resolver: Resolver
+        let resolver: Resolver
         /// Context builder from request
-        var contextBuilder: @Sendable (Request, Response) async throws -> Context
+        let contextBuilder: @Sendable (Request, Response) async throws -> Context
         /// HTTP strategy
-        var httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy 
+        let httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy 
         /// Websocket Context builder
-        var websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
         /// Websocket sub-protocol
-        var websocketProtocol: Pioneer<Resolver, Context>.WebsocketProtocol
+        let websocketProtocol: Pioneer<Resolver, Context>.WebsocketProtocol
         /// Allowing introspection
-        var introspection: Bool
+        let introspection: Bool
         /// Allowing GraphQL IDE
-        var playground: Pioneer<Resolver, Context>.IDE 
+        let playground: Pioneer<Resolver, Context>.IDE 
         /// Keep alive period
-        var keepAlive: UInt64?
+        let keepAlive: UInt64?
 
         public init(
             schema: GraphQLSchema,
@@ -51,61 +52,31 @@ extension Pioneer {
             self.playground = !introspection ? .disable : playground
             self.keepAlive = keepAlive
         }
-    }
 
-}
-public extension Pioneer.Config {
-    static func simpleHttpOnly(
-        using schema: GraphQLSchema, 
-        with resolver: Resolver, 
-        allowing introspection: Bool = true
-    ) -> Self where Context == Void {
-        .simpleHttpOnly(using: schema, with: resolver, and: {_, _ in }, allowing: introspection)
-    }
-
-    static func simpleHttpOnly(
-        using schema: GraphQLSchema, 
-        with resolver: Resolver, 
-        and contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
-        allowing introspection: Bool = true
-    ) -> Self {
-        .init(
-            schema: schema, 
-            resolver: resolver, 
-            contextBuilder: contextBuilder, 
-            websocketContextBuilder: { req, params, gql in 
-                try await req.defaultWebsocketContextBuilder(payload: params, gql: gql, contextBuilder: contextBuilder) 
-            },
-            websocketProtocol: .disable,
-            introspection: introspection, 
-            playground: .graphiql
-        )
-    }
-
-    static func simpleWsOnly(
-        using schema: GraphQLSchema, 
-        with resolver: Resolver, 
-        allowing introspection: Bool = true
-    ) -> Self where Context == Void {
-        .simpleWsOnly(using: schema, with: resolver, and: { _, _, _ in }, allowing: introspection)
-    }
-
-    static func simpleWsOnly(
-        using schema: GraphQLSchema, 
-        with resolver: Resolver, 
-        and contextBuilder: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-        allowing introspection: Bool = true
-    ) -> Self {
-        .init(
-            schema: schema, 
-            resolver: resolver, 
-            contextBuilder: { req, res in 
-                try await contextBuilder(req, [:], req.graphql)
-            }, 
-            websocketContextBuilder: contextBuilder,
-            websocketProtocol: .disable,
-            introspection: introspection, 
-            playground: .graphiql
-        )
+        /// Default configuration for Pioneer
+        /// - Parameters:
+        ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
+        ///   - resolver: The top level object
+        ///   - context: The context bbuilder for HTTP
+        ///   - websocketContext: The context builder for WebSocket
+        ///   - introspection: Allowing introspection
+        public static func `default`(
+            using schema: GraphQLSchema, 
+            resolver: Resolver, 
+            context: @escaping @Sendable (Request, Response) async throws -> Context,
+            websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+            introspection: Bool = true
+        ) -> Self {
+            .init(
+                schema: schema, 
+                resolver: resolver, 
+                contextBuilder: context, 
+                httpStrategy: .queryOnlyGet, 
+                websocketContextBuilder: websocketContext,
+                websocketProtocol: .graphqlWs,
+                introspection: introspection,
+                playground: .apolloSandbox
+            )
+        }
     }
 }
