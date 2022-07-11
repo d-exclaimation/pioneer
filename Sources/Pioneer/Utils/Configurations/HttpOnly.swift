@@ -10,6 +10,11 @@ import class Vapor.Response
 import class GraphQL.GraphQLSchema
 
 public extension Pioneer.Config {
+    /// Simple configuration for HTTP GraphQL server
+    /// - Parameters:
+    ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
+    ///   - resolver: The top level object
+    ///   - introspection: Allowing introspection
     static func simpleHttpOnly(
         using schema: GraphQLSchema, 
         with resolver: Resolver, 
@@ -18,6 +23,12 @@ public extension Pioneer.Config {
         .simpleHttpOnly(using: schema, with: resolver, and: {_, _ in }, allowing: introspection)
     }
 
+    /// Simple configuration for HTTP GraphQL server
+    /// - Parameters:
+    ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
+    ///   - resolver: The top level object
+    ///   - contextBuilder: The context builder
+    ///   - introspection: Allowing introspection
     static func simpleHttpOnly(
         using schema: GraphQLSchema, 
         with resolver: Resolver, 
