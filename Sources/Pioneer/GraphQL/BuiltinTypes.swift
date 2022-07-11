@@ -16,10 +16,14 @@ public typealias NoArgs = NoArguments
 /// The ID type is serialized in the same way as a String; however, defining it as an ID signifies that it is not intended to be human‐readable.
 public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible, Hashable, Sendable {
     /// Inner string properties
-    public var id: String
+    private var id: String
 
     public init(_ id: String) {
         self.id = id
+    }
+
+    public init(uuid: UUID) {
+        self.id = uuid.uuidString
     }
 
     public init(stringLiteral value: String) {
@@ -64,6 +68,33 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     /// String value of this ID type
     public var string: String {
         id
+    }
+
+    /// UUID value of this ID if possible
+    public var uuid: UUID? {
+        UUID(id)
+    }
+
+    /// Get a UUID from this ID scalar
+    /// - Returns: The UUID object if possible otherwise throw an error
+    public func toUUID() throws -> UUID {
+        guard let uuid = self.uuid else {
+            throw ConversionError(id: id, reason: "Cannot convert this ID that is not in UUID string format to UUID")
+        }
+        return uuid
+    }
+
+    /// Conversion Error for the ID scalar
+    public struct ConversionError: Error {
+        /// The ID in question as string
+        public var id: String
+
+        /// The detailed reasoning why conversion failed
+        public var reason: String
+
+        public var localizedDescription: String {
+            "ID.ConversionError ('\(id)'): \"\(reason)\""
+        }
     }
 }
 
