@@ -57,7 +57,7 @@ extension Pioneer {
         /// - Parameters:
         ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
         ///   - resolver: The top level object
-        ///   - context: The context bbuilder for HTTP
+        ///   - context: The context builder for HTTP
         ///   - websocketContext: The context builder for WebSocket
         ///   - introspection: Allowing introspection
         public static func `default`(
@@ -73,6 +73,31 @@ extension Pioneer {
                 contextBuilder: context, 
                 httpStrategy: .queryOnlyGet, 
                 websocketContextBuilder: websocketContext,
+                websocketProtocol: .graphqlWs,
+                introspection: introspection,
+                playground: .apolloSandbox
+            )
+        }
+
+
+        /// Default configuration for Pioneer
+        /// - Parameters:
+        ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
+        ///   - resolver: The top level object
+        ///   - context: The shared context builder
+        ///   - introspection: Allowing introspection
+        public static func `default`(
+            using schema: GraphQLSchema, 
+            resolver: Resolver, 
+            context: @escaping @Sendable (Request, Response) async throws -> Context,
+            introspection: Bool = true
+        ) -> Self {
+            .init(
+                schema: schema, 
+                resolver: resolver, 
+                contextBuilder: context, 
+                httpStrategy: .queryOnlyGet, 
+                websocketContextBuilder: { try await $0.defaultWebsocketContextBuilder(payload: $1, gql: $2, contextBuilder: context) },
                 websocketProtocol: .graphqlWs,
                 introspection: introspection,
                 playground: .apolloSandbox
@@ -102,7 +127,7 @@ extension Pioneer {
         /// - Parameters:
         ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
         ///   - resolver: The top level object
-        ///   - context: The context bbuilder for HTTP
+        ///   - context: The context builder for HTTP
         ///   - websocketContext: The context builder for WebSocket
         ///   - introspection: Allowing introspection
         public static func secured(
@@ -118,6 +143,31 @@ extension Pioneer {
                 contextBuilder: context, 
                 httpStrategy: .csrfPrevention, 
                 websocketContextBuilder: websocketContext,
+                websocketProtocol: .graphqlWs,
+                introspection: introspection,
+                playground: .apolloSandbox
+            )
+        }
+
+        /// Default secured configuration for Pioneer
+        /// - Parameters:
+        ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
+        ///   - resolver: The top level object
+        ///   - context: The shared context builder
+        ///   - websocketContext: The context builder for WebSocket
+        ///   - introspection: Allowing introspection
+        public static func secured(
+            using schema: GraphQLSchema, 
+            resolver: Resolver, 
+            context: @escaping @Sendable (Request, Response) async throws -> Context,
+            introspection: Bool = true
+        ) -> Self {
+            .init(
+                schema: schema, 
+                resolver: resolver, 
+                contextBuilder: context, 
+                httpStrategy: .csrfPrevention, 
+                websocketContextBuilder: { try await $0.defaultWebsocketContextBuilder(payload: $1, gql: $2, contextBuilder: context) },
                 websocketProtocol: .graphqlWs,
                 introspection: introspection,
                 playground: .apolloSandbox

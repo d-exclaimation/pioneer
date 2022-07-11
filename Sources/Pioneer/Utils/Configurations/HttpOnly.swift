@@ -47,4 +47,26 @@ public extension Pioneer.Config {
             playground: .graphiql
         )
     }
+
+    static func httpOnly(
+        using schema: GraphQLSchema, 
+        resolver: Resolver, 
+        context: @escaping @Sendable (Request, Response) async throws -> Context,
+        httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy,
+        playground: Pioneer<Resolver, Context>.IDE,
+        introspection: Bool = true  
+    ) -> Self {
+        .init(
+            schema: schema, 
+            resolver: resolver, 
+            contextBuilder: context, 
+            httpStrategy: httpStrategy, 
+            websocketContextBuilder: { 
+                try await $0.defaultWebsocketContextBuilder(payload: $1, gql: $2, contextBuilder: context)
+            }, 
+            websocketProtocol: .disable, 
+            introspection: introspection, 
+            playground: playground
+        )
+    }
 }
