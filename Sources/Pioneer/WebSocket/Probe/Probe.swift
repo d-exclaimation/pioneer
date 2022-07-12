@@ -9,6 +9,7 @@ import GraphQL
 import class Graphiti.Schema
 import class Vapor.Request
 import struct Foundation.UUID
+import protocol NIO.EventLoopGroup
 
 extension Pioneer {
     /// Actor for handling Websocket distribution and dispatching of client specific actor
@@ -109,21 +110,26 @@ extension Pioneer {
         }
         
         // MARK: - Utility methods
-        
-        /// Execute short-lived GraphQL Operation
+    
+        /// Build context and execute short-lived GraphQL Operation inside an event loop 
         private func execute(_ gql: GraphQLRequest, payload: ConnectionParams, req: Request) -> Future<GraphQLResult> {
             req.eventLoop.performWithTask {
                 let ctx = try await self.websocketContextBuilder(req, payload, gql)
-                return try await executeGraphQL(
-                    schema: self.schema,
-                    request: gql.query,
-                    resolver: self.resolver,
-                    context: ctx,
-                    eventLoopGroup: req.eventLoop,
-                    variables: gql.variables ?? [:],
-                    operationName: gql.operationName
-                )
+                return try await self.executeOperation(for: gql, with: ctx, using: req.eventLoop)
             }
+        }
+
+        /// Execute short-lived GraphQL Operation
+        private func executeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async throws -> GraphQLResult {
+            try await executeGraphQL(
+                schema: self.schema,
+                request: gql.query,
+                resolver: self.resolver,
+                context: ctx,
+                eventLoopGroup: eventLoop,
+                variables: gql.variables ?? [:],
+                operationName: gql.operationName
+            ) 
         }
     }
 }

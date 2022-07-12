@@ -7,29 +7,30 @@
 
 import Vapor
 import class GraphQL.GraphQLSchema
+import struct GraphQL.GraphQLResult
 import struct GraphQL.GraphQLError
 import enum GraphQL.OperationType
 
 /// Pioneer GraphQL Vapor Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
     /// Graphiti schema used to execute operations
-    public var schema: GraphQLSchema
+    public private(set) var schema: GraphQLSchema
     /// Resolver used by the GraphQL schema
-    public var resolver: Resolver
+    public private(set) var resolver: Resolver
     /// Context builder from request
-    public var contextBuilder: @Sendable (Request, Response) async throws -> Context
+    public private(set) var contextBuilder: @Sendable (Request, Response) async throws -> Context
     /// HTTP strategy
-    public var httpStrategy: HTTPStrategy
+    public private(set) var httpStrategy: HTTPStrategy
     /// Websocket Context builder
-    public var websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+    public private(set) var websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
     /// Websocket sub-protocol
-    public var websocketProtocol: WebsocketProtocol
+    public private(set) var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
-    public var introspection: Bool
+    public private(set) var introspection: Bool
     /// Allowing GraphQL IDE
-    public var playground: IDE
+    public private(set) var playground: IDE
     /// Keep alive period
-    public var keepAlive: UInt64?
+    public private(set) var keepAlive: UInt64?
 
     /// Internal running WebSocket actor for Pioneer
     internal var probe: Probe
@@ -118,32 +119,28 @@ public struct Pioneer<Resolver, Context> {
         }
     }
 
-    /// Handle execution for GraphQL operation
-    internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
-        guard allowed(from: gql, allowing: allowing) else {
-            return try GraphQLError(message: "Operation of this type is not allowed and has been blocked")
-                .response(with: .badRequest)
-        }
-        let res = Response()
+    /// Execute operation through Pioneer for a GraphQLRequest, context and get aa well formatted GraphQlResult
+    /// - Parameters:
+    ///   - gql: The GraphQL Request for this operation
+    ///   - ctx: The context for the operation
+    ///   - eventLoop: The event loop used to execute the operation asynchronously
+    /// - Returns: A well-formatted GraphQLResult
+    public func executeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async -> GraphQLResult {
         do {
-            let context = try await contextBuilder(req, res)
-            let result = try await executeGraphQL(
+            return try await executeGraphQL(
                 schema: schema,
                 request: gql.query,
                 resolver: resolver,
-                context: context,
-                eventLoopGroup: req.eventLoop,
+                context: ctx,
+                eventLoopGroup: eventLoop,
                 variables: gql.variables,
                 operationName: gql.operationName
             )
-            try res.content.encode(result)
-            return res
-        } catch let error as AbortError {
-            return try GraphQLError(message: error.reason).response(using: res, with: error.status)
         } catch {
-            return try error.graphql.response(using: res)
+            return GraphQLResult(data: nil, errors: [error.graphql])
         }
     }
+
 
     /// Guard for operation allowed
     internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) -> Bool {

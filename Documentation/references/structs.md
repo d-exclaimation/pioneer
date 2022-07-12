@@ -45,6 +45,26 @@ let id = ID("any-string")
 
 ===
 
+### `init` (UUID)
+
+Returns a new [ID](#id) from an UUID.
+
+=== Example
+
+```swift
+let id = ID(UUID())
+```
+
+===
+
+==- Options
+
+| Name | Type                                   | Description                            |
+| ---- | -------------------------------------- | -------------------------------------- |
+| \_   | [!badge variant="primary" text="UUID"] | UUID value to which the ID is built on |
+
+===
+
 ### `description`
 
 Returns the string value to satify `CustomStringConvertible` protocol.
@@ -56,6 +76,14 @@ Returns the length of the string value from this [ID](#id).
 ### `string`
 
 A getter for the string value.
+
+### `uuid`
+
+A getter for the UUID value of this ID if possible
+
+### `toUUID`
+
+Get a UUID from this ID scalar if possible, otherwise throw an Error
 
 ### `uuid` (static)
 
