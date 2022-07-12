@@ -14,23 +14,23 @@ import enum GraphQL.OperationType
 /// Pioneer GraphQL Vapor Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
     /// Graphiti schema used to execute operations
-    public var schema: GraphQLSchema
+    public private(set) var schema: GraphQLSchema
     /// Resolver used by the GraphQL schema
-    public var resolver: Resolver
+    public private(set) var resolver: Resolver
     /// Context builder from request
-    public var contextBuilder: @Sendable (Request, Response) async throws -> Context
+    public private(set) var contextBuilder: @Sendable (Request, Response) async throws -> Context
     /// HTTP strategy
-    public var httpStrategy: HTTPStrategy
+    public private(set) var httpStrategy: HTTPStrategy
     /// Websocket Context builder
-    public var websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+    public private(set) var websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
     /// Websocket sub-protocol
-    public var websocketProtocol: WebsocketProtocol
+    public private(set) var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
-    public var introspection: Bool
+    public private(set) var introspection: Bool
     /// Allowing GraphQL IDE
-    public var playground: IDE
+    public private(set) var playground: IDE
     /// Keep alive period
-    public var keepAlive: UInt64?
+    public private(set) var keepAlive: UInt64?
 
     /// Internal running WebSocket actor for Pioneer
     internal var probe: Probe
