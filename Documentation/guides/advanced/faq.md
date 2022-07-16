@@ -107,7 +107,7 @@ No, there is no custom error from Pioneer (as of now), just use what works best 
 
 Mostly.
 
-- If the error(s) were thrown during context building, Pioneer will use the reason to build a GraphQL formatted error and set the response status code accordingly.
+- If the error(s) were thrown during context building, Pioneer will use the reason to build a GraphQL formatted error, and set the response status and headers code accordingly.
   ==- Example
 
   ```swift Throwing Abort
@@ -136,7 +136,7 @@ Mostly.
 
   ===
 
-- If the error(s) were thrown in the resolver functions, Pioneer will only throw back a GraphQL formatted error with the description of the error thrown but will not set the response status (unless it was set manually into the response object during the resolving function).
+- If the error(s) were thrown in the resolver functions, Pioneer will only throw back a GraphQL formatted error with the description of the error thrown but will not set the response status nor headers (unless it was set manually into the response object during the resolving function).
 
   ==- Example
 
@@ -173,7 +173,7 @@ Mostly.
 
 ### EventStream
 
-#### Why does Pioneer only support `AsyncSequence` (and [AsyncEventStream](/features/async-event-stream/#asynceventstream))?
+#### Why does Pioneer only support `AsyncSequence` (and to some extends [AsyncEventStream](/features/async-event-stream/#asynceventstream))?
 
 This is a limitation when resolving subscription, where there is not much that can be done until the subscription result is casted to another type of `EventStream`. Pioneer uses the `AsyncEventStream` which can be built from any `AsyncSequence` because it is a built-in protocol from Swift Standard Library and other streaming libraries are likely to support it as well.
 
@@ -182,6 +182,10 @@ This is a limitation when resolving subscription, where there is not much that c
 Not directly support [RxSwift](https://github.com/ReactiveX/RxSwift). However since RxSwift 6.5.0, RxSwift's Observables can be converted into an `AsyncThrowingStream` (which is compatible with `AsyncEventStream`, even with automatic termination), which does meant it can be used with Pioneer's [AsyncEventStream](/features/async-event-stream/#asynceventstream).
 
 However, Pioneer is not compatible with [GraphQLRxSwift](https://github.com/GraphQLSwift/GraphQLRxSwift), and all [RxSwift](https://github.com/ReactiveX/RxSwift)'s observable must be converted into an `AsyncSequence`.
+
+#### Does Pioneer support [ConcurrentEventStream](https://github.com/GraphQLSwift/GraphQL/blob/master/Sources/GraphQL/Subscription/EventStream.swift)?
+
+Yes, [ConcurrentEventStream](https://github.com/GraphQLSwift/GraphQL/blob/master/Sources/GraphQL/Subscription/EventStream.swift) worked pratically the same as [AsyncEventStream](/features/async-event-stream/#asynceventstream), but limit itself to only `AsyncThrowingStream`.
 
 ### PubSub
 
