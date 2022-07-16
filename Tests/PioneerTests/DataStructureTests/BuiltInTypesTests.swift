@@ -37,21 +37,21 @@ final class BuiltInTypesTests: XCTestCase {
     func testGraphQLReques() throws {
         let gql0 = Req(query: "query { field1 }")
         XCTAssertFalse(gql0.isIntrospection)
-        guard let type0 = try? gql0.operationType() else {
+        guard let type0 = gql0.operationType else {
             return XCTFail("Cannot idenfity just query")
         }
         XCTAssert(type0 == OperationType.query, "Cannot idenfity just query")
         
         let gql1 = Req(query: "mutation { field1 }")
         XCTAssertFalse(gql1.isIntrospection)
-        guard let type1 = try? gql1.operationType() else {
+        guard let type1 = gql1.operationType else {
             return XCTFail("Cannot idenfity just mutation")
         }
         XCTAssert(type1 == OperationType.mutation, "Cannot idenfity just mutation")
         
         let gql2 = Req(query: "subscription { field1 }")
         XCTAssertFalse(gql2.isIntrospection)
-        guard let type2 = try? gql2.operationType() else {
+        guard let type2 = gql2.operationType else {
             return XCTFail("Cannot idenfity just subscription")
         }
         XCTAssert(type2 == OperationType.subscription, "Cannot idenfity just subscription")
@@ -60,7 +60,7 @@ final class BuiltInTypesTests: XCTestCase {
         for (operationName, optype) in [("Op0", OperationType.subscription), ("Op1", OperationType.mutation), ("Op2", OperationType.query)] {
             let gql3 = Req(query: query, operationName: operationName)
             XCTAssertFalse(gql3.isIntrospection)
-            guard let type3 = try? gql3.operationType() else {
+            guard let type3 = gql3.operationType else {
                 return XCTFail("Cannot idenfity \(operationName)")
             }
             XCTAssert(type3 == optype, "Cannot idenfity just \(operationName)")

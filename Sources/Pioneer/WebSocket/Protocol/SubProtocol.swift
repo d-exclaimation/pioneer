@@ -36,7 +36,7 @@ extension SubProtocol {
         let variables = payload["variables"]?.dictionary?.unordered()
         let gql = GraphQLRequest(query: query, operationName: operationName, variables: variables)
 
-        guard let operation = try? gql.operationType() else {
+        guard let operation = gql.operationType else {
             return .error(oid: oid, message: "Non spec compliant operation type")
         }
         switch operation {
