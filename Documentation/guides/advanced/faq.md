@@ -173,7 +173,7 @@ Mostly.
 
 ### EventStream
 
-#### Why does Pioneer only support `AsyncSequence` (and [AsyncEventStream](/features/async-event-stream/#asynceventstream))?
+#### Why does Pioneer only support `AsyncSequence` (and to some extends [AsyncEventStream](/features/async-event-stream/#asynceventstream))?
 
 This is a limitation when resolving subscription, where there is not much that can be done until the subscription result is casted to another type of `EventStream`. Pioneer uses the `AsyncEventStream` which can be built from any `AsyncSequence` because it is a built-in protocol from Swift Standard Library and other streaming libraries are likely to support it as well.
 
@@ -182,6 +182,10 @@ This is a limitation when resolving subscription, where there is not much that c
 Not directly support [RxSwift](https://github.com/ReactiveX/RxSwift). However since RxSwift 6.5.0, RxSwift's Observables can be converted into an `AsyncThrowingStream` (which is compatible with `AsyncEventStream`, even with automatic termination), which does meant it can be used with Pioneer's [AsyncEventStream](/features/async-event-stream/#asynceventstream).
 
 However, Pioneer is not compatible with [GraphQLRxSwift](https://github.com/GraphQLSwift/GraphQLRxSwift), and all [RxSwift](https://github.com/ReactiveX/RxSwift)'s observable must be converted into an `AsyncSequence`.
+
+#### Does Pioneer support [ConcurrentEventSTream](https://github.com/GraphQLSwift/GraphQL/blob/master/Sources/GraphQL/Subscription/EventStream.swift)?
+
+Yes, [ConcurrentEventSTream](https://github.com/GraphQLSwift/GraphQL/blob/master/Sources/GraphQL/Subscription/EventStream.swift) worked pratically the same as [AsyncEventStream](/features/async-event-stream/#asynceventstream), but limit itself to only `AsyncThrowingStream`.
 
 ### PubSub
 
