@@ -225,8 +225,8 @@ Returning the parsed `operationType` of this request.
 
 ```swift
 let message: GraphQLRequest
-
-switch try message.operationType() {
+guard let operationType = message.operationType else { return }
+switch operationType {
 case .subscription:
     // ...
 case .query:

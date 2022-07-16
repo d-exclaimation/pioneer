@@ -251,3 +251,75 @@ Using this meant no operations nor even a websocket connection is going to be ac
 !!!
 
 |||
+
+## Validations
+
+Validation strategy to add custom rules that is executed before any resolver is executed
+
+||| `none`
+
+No rules, skip validation
+
+|||
+
+||| <code>specified(\_: [[ValidationRule](#validationrule)])</code>
+
+Multiple constant rules
+
+|||
+
+||| <code>computed(\_: @Sendable ([GraphQLRequest](/references/structs/#graphqlrequest)) -> [[ValidationRule](#validationrule)])</code>
+
+Cloud version of Banana Cake Pop
+
+|||
+
+### `init` (Array Literal)
+
+Construct a new Validations from an array of [ValidationRule](#validationrule), equivalent to `.specified`
+
+=== Example
+
+```swift
+let server = Pioneer(
+    schema: schema,
+    resolver: .init(),
+    contextBuilder: { req, res in
+        Context(req: req, res: res, auth: req.headers[.authorization].first)
+    },
+    validationRules: [MyValidationRule()]
+)
+```
+
+===
+
+==- Options
+
+| Name           | Type                                                | Description                |
+| -------------- | --------------------------------------------------- | -------------------------- |
+| `arrayLiteral` | [!badge variant="warning" text="ValidationRule..."] | An array of ValidationRule |
+
+===
+
+### `init` (Nil Literal)
+
+Construct a new Validations from a nil, equivalent to `.none`
+
+=== Example
+
+```swift
+let server = Pioneer(
+    schema: schema,
+    resolver: .init(),
+    contextBuilder: { req, res in
+        Context(req: req, res: res, auth: req.headers[.authorization].first)
+    },
+    validationRules: nil
+)
+```
+
+===
+
+### ValidationRule
+
+Typealias for `@Sendable (ValidationContext) -> Visitor`

@@ -46,6 +46,7 @@ let server = Pioneer(
 | `websocketProtocol`       | [!badge variant="primary" text="WebsocketProtocol"]                                                  | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`           | [!badge variant="primary" text="Bool"]                                                               | Allowing introspection <br/> **Default**: `true`                                       |
 | `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `validationRules`         | [!badge variant="primary" text="Validations"]                                                        | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
@@ -85,6 +86,7 @@ let server = Pioneer(
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]                          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]                                       | Allowing introspection <br/> **Default**: `true`                                       |
 | `playground`        | [!badge variant="primary" text="IDE"]                                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `validationRules`   | [!badge variant="primary" text="Validations"]                                | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
@@ -120,6 +122,7 @@ let server = Pioneer(
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"] | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]              | Allowing introspection <br/> **Default**: `true`                                       |
 | `playground`        | [!badge variant="primary" text="IDE"]               | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `validationRules`   | [!badge variant="primary" text="Validations"]       | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]           | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
@@ -159,6 +162,7 @@ let server = try Pioneer(
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]                       | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]                                    | Allowing introspection <br/> **Default**: `true`                                       |
 | `playground`        | [!badge variant="primary" text="IDE"]                                     | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `validationRules`   | [!badge variant="primary" text="Validations"]                             | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                 | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
@@ -206,6 +210,7 @@ let server = try Pioneer(
 | `websocketProtocol`       | [!badge variant="primary" text="WebsocketProtocol"]                                                  | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`           | [!badge variant="primary" text="Bool"]                                                               | Allowing introspection <br/> **Default**: `true`                                       |
 | `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `validationRules`         | [!badge variant="primary" text="Validations"]                                                        | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 
 ===
