@@ -65,5 +65,47 @@ final class BuiltInTypesTests: XCTestCase {
             }
             XCTAssert(type3 == optype, "Cannot idenfity just \(operationName)")
         }
+
+        let decoded0 = """
+        {
+            "query": "query { field1 }"
+        } 
+        """.data(using: .utf8)?.to(Req.self)
+        XCTAssertEqual(decoded0?.query, "query { field1 }")
+
+
+        let decoded1 = """
+        {
+            "query": "query Name { field1 }",
+            "operationName": "Name"
+        } 
+        """.data(using: .utf8)?.to(Req.self)
+        XCTAssertEqual(decoded1?.query, "query Name { field1 }")
+        XCTAssertEqual(decoded1?.operationName, "Name")
+
+        let decoded2 = """
+        {
+            "query": "query Name($count: 1) { field1(count: $count) }",
+            "operationName": "Name",
+            "variables": { "count": 1 }
+        } 
+        """.data(using: .utf8)?.to(Req.self)
+        XCTAssertEqual(decoded2?.query, "query Name($count: 1) { field1(count: $count) }")
+        XCTAssertEqual(decoded2?.operationName, "Name")
+        XCTAssertEqual(decoded2?.variables?["count"], Map.number(1))
+
+        let decoded3 = """
+        {
+            "query": "query { field1 }",
+            "operationName": null,
+            "variables": null
+        } 
+        """.data(using: .utf8)?.to(Req.self)
+        XCTAssertEqual(decoded3?.query, "query { field1 }")
+
+
+        let encoded = Req(query: "query { field }").jsonString
+        XCTAssertNotEqual("{}", encoded)
+        XCTAssertEqual("{\"query\":\"query { field }\"}", encoded)
     }
 }

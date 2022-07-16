@@ -5,8 +5,7 @@
 //  Created by d-exclaimation on 09:58.
 //
 
-import class GraphQL.ValidationContext
-import struct GraphQL.Visitor
+import GraphQL
 
 /// Function that describe a validation rule for an operation
 public typealias ValidationRule = @Sendable (ValidationContext) -> Visitor
@@ -30,5 +29,17 @@ extension Pioneer {
 
         /// Multiple rules computed from each operation
         case computed(@Sendable (GraphQLRequest) -> [ValidationRule])
+
+        public func callAsFunction(using schema: GraphQLSchema, for gql: GraphQLRequest) throws -> [GraphQLError] {
+            let ast = try parse(source: gql.source)
+            switch (self) {
+            case .none:
+                return []
+            case .specified(let rules):
+                return validate(schema: schema, ast: ast, rules: rules)
+            case .computed(let compute):
+                return validate(schema: schema, ast: ast, rules: compute(gql))
+            }
+        }
     }    
 }
