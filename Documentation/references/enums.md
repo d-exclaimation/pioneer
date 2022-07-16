@@ -322,4 +322,4 @@ let server = Pioneer(
 
 ### ValidationRule
 
-Typealias for `@Sendable (ValidationContext) -> Visitor`
+Typealias for `(ValidationContext) -> Visitor`

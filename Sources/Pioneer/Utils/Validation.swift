@@ -8,11 +8,11 @@
 import GraphQL
 
 /// Function that describe a validation rule for an operation
-public typealias ValidationRule = @Sendable (ValidationContext) -> Visitor
+public typealias ValidationRule = (ValidationContext) -> Visitor
 
 extension Pioneer {
     /// Validation strategy to add custom rules that is executed before any resolver is executed
-    public enum Validations: ExpressibleByArrayLiteral, ExpressibleByNilLiteral, Sendable {
+    public enum Validations: @unchecked Sendable, ExpressibleByArrayLiteral, ExpressibleByNilLiteral {
         public init(nilLiteral: ()) {
             self = .none
         }
