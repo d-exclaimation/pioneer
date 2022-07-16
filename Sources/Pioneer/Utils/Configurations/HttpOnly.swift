@@ -55,6 +55,7 @@ public extension Pioneer.Config {
     ///   - context: The context builder
     ///   - httpStrategy: The routing strategy
     ///   - playground: The GraphQL IDE used
+    ///   - validationRules: Validation rules applied on every operations
     ///   - introspection: Allowing introspection
     /// - Returns: 
     static func httpOnly(
@@ -63,6 +64,7 @@ public extension Pioneer.Config {
         context: @escaping @Sendable (Request, Response) async throws -> Context,
         httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy,
         playground: Pioneer<Resolver, Context>.IDE,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true  
     ) -> Self {
         .init(
@@ -75,9 +77,11 @@ public extension Pioneer.Config {
             }, 
             websocketProtocol: .disable, 
             introspection: introspection, 
-            playground: playground
+            playground: playground,
+            validationRules: validationRules
         )
     }
+    
     /// Configuration for only HTTP only GraphQl server
     /// - Parameters:
     ///   - schema: The GraphQL server from GraphQLSwift/GraphQL
@@ -85,6 +89,7 @@ public extension Pioneer.Config {
     ///   - context: The context builder
     ///   - httpStrategy: The routing strategy
     ///   - playground: The GraphQL IDE used
+    ///   - validationRules: Validation rules applied on every operations
     ///   - introspection: Allowing introspection
     /// - Returns: 
     static func httpOnly(
@@ -92,6 +97,7 @@ public extension Pioneer.Config {
         resolver: Resolver, 
         httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy,
         playground: Pioneer<Resolver, Context>.IDE,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true  
     ) -> Self where Context == Void {
         .httpOnly(
@@ -100,6 +106,7 @@ public extension Pioneer.Config {
             context: { _, _ in }, 
             httpStrategy: httpStrategy, 
             playground: playground, 
+            validationRules: validationRules,
             introspection: introspection
         )
     }

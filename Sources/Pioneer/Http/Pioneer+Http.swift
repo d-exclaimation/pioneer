@@ -61,6 +61,11 @@ extension Pioneer {
             return try GraphQLError(message: "Operation of this type is not allowed and has been blocked")
                 .response(with: .badRequest)
         }
+        let errors = validationRules(using: schema, for: gql)
+        guard errors.isEmpty else {
+            return try errors.response(with: .badRequest)
+        }
+
         let res = Response()
         do {
             let context = try await contextBuilder(req, res)

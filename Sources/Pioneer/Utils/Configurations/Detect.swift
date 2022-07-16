@@ -23,11 +23,19 @@ public extension Pioneer.Config {
     /// - Parameters:
     ///   - schema: The GraphQL schema
     ///   - resolver: The top level object
+    ///   - validationRules: Validation rules applied on every operations
     static func detect(
         using schema: GraphQLSchema, 
-        resolver: Resolver
+        resolver: Resolver,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none
     ) throws -> Self where Context == Void {
-        try .detect(using: schema, resolver: resolver, context: { _, _ in }, websocketContext: { _, _, _ in })
+        try .detect(
+            using: schema, 
+            resolver: resolver, 
+            context: { _, _ in }, 
+            websocketContext: { _, _, _ in },
+            validationRules: validationRules
+        )
     }
 
     /// Detect the configuration from the environment variables
@@ -43,12 +51,14 @@ public extension Pioneer.Config {
     ///   - schema: The GraphQL schema
     ///   - resolver: The top level object
     ///   - context: The context builder for HTTP
-    ///   - websocketContext: The context bbuilder for WebSocket
+    ///   - websocketContext: The context builder for WebSocket
+    ///   - validationRules: Validation rules applied on every operations
     static func detect(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
         context: @escaping @Sendable (Request, Response) async throws -> Context,
-        websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none
     ) throws -> Self {
         guard let strategy = Environment.get("PIONEER_HTTP_STRATEGY") else {
             throw Undetected.noHttpStrategy
@@ -115,6 +125,7 @@ public extension Pioneer.Config {
             websocketProtocol: websocketProtocol, 
             introspection: introspection, 
             playground: playground, 
+            validationRules: validationRules,
             keepAlive: keepAlive
         )
     }

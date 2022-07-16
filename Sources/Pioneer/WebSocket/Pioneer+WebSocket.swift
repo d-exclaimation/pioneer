@@ -104,6 +104,12 @@ extension Pioneer {
                 ])
                 return ws.send(msg: err.jsonString)
             }
+            let errors = validationRules(using: schema, for: gql)
+            guard errors.isEmpty else {
+                let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, errors)
+                return ws.send(msg: err.jsonString)
+            }
+
             await probe.start(
                 for: pid,
                 with: oid,
@@ -119,6 +125,12 @@ extension Pioneer {
                 ])
                 return ws.send(msg: err.jsonString)
             }
+            let errors = validationRules(using: schema, for: gql)
+            guard errors.isEmpty else {
+                let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, errors)
+                return ws.send(msg: err.jsonString)
+            }
+
             await probe.once(
                 for: pid,
                 with: oid,

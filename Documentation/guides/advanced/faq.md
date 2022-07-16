@@ -217,9 +217,9 @@ Yes, you can using the [webSocketHandler(req:)](/references/pioneer/#websocketha
 
 #### Can I use Pioneer and GraphQl to perform file upload?
 
-Technically yes, there is an unfficial spec that is commonly used by some server libraries called [GraphQL Multipart Request Spec](https://github.com/jaydenseric/graphql-multipart-request-spec). Using this, you can allow file to be processed properly in by the GraphQL executor. However, there is no package / current implementation for using that with Pioneer and [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
+Technically yes, there is an unofficial spec that is commonly used by some server libraries called [GraphQL Multipart Request Spec](https://github.com/jaydenseric/graphql-multipart-request-spec). Using this, you can allow file to be processed properly in by the GraphQL executor. However, there is no package / current implementation for using that with Pioneer and [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
 
-Furthemore, there is currently no plan to add that feature directly into Pioneer package, and there are consideration to be taken account of when trying to add file upload to a GraphQL server, which is better explained [below](#why-does-pioneer-doesnt-have-graphql-file-upload-implemented-as-feature-of-the-library)
+Furthemore, there is currently no plan to add that feature directly into Pioneer package, and there are considerations to be taken account of when trying to add file upload to a GraphQL server, which is better explained [below](#why-does-pioneer-doesnt-have-graphql-file-upload-implemented-as-feature-of-the-library)
 
 #### Why does Pioneer doesn't have `graphql-file-upload` implemented as feature of the library?
 

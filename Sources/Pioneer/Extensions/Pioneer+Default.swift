@@ -17,6 +17,7 @@ public extension Pioneer {
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
     ///   - playground: Allowing playground
+    ///   - validationRules: Validation rules to be applied before operation
     ///   - keepAlive: Keep alive internal in nanosecond, default to 12.5 sec, nil for disable
     init(
         schema: GraphQLSchema,
@@ -26,6 +27,7 @@ public extension Pioneer {
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,
+        validationRules: Validations = .none,
         keepAlive: UInt64? = 12_500_000_000
     ) {
         self.init(
@@ -43,6 +45,7 @@ public extension Pioneer {
             websocketProtocol: websocketProtocol,
             introspection: introspection,
             playground: playground,
+            validationRules: validationRules,
             keepAlive: keepAlive
         )
     }

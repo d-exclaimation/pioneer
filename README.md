@@ -34,3 +34,9 @@ It can work with any GraphQL schema built with [GraphQLSwift/GraphQL](https://gi
 ## Feedback
 
 If you have any feedback, feel free reach out at twitter [@d_exclaimation](https://www.twitter.com/d_exclaimation)
+
+### Attribution
+
+This project is heavily inspired by [Apollo Server](https://github.com/apollographql/apollo-server), and it would not have been possible without the work put into [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) and [Vapor](https://github.com/vapor/vapor).
+
+<sub>Logo design inspired by <a src="https://github.com/brightdigit/MistKit">MistKit</a> and <a src="https://developer.apple.com/documentation/arkit">Apple's ARKit</a>. </sub>

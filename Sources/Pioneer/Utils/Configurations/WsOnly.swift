@@ -60,6 +60,7 @@ public extension Pioneer.Config {
     ///   - context: The context builder
     ///   - websocketProtocol: The websocket sub-protocol used
     ///   - playground: The GraphQL IDE
+    ///   - validationRules: Validation rules applied on every operations
     ///   - introspection: Allowing introspection
     static func wsOnly(
         using schema: GraphQLSchema,
@@ -67,6 +68,7 @@ public extension Pioneer.Config {
         context: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         websocketProtocol: Pioneer<Resolver, Context>.WebsocketProtocol,
         playground: Pioneer<Resolver, Context>.IDE,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true
     ) -> Self {
         .init(
@@ -82,7 +84,8 @@ public extension Pioneer.Config {
             websocketContextBuilder: context, 
             websocketProtocol: websocketProtocol, 
             introspection: introspection, 
-            playground: playground
+            playground: playground,
+            validationRules: validationRules
         )
     }
 
@@ -92,12 +95,14 @@ public extension Pioneer.Config {
     ///   - resolver: The top level object
     ///   - websocketProtocol: The websocket sub-protocol used
     ///   - playground: The GraphQL IDE
+    ///   - validationRules: Validation rules applied on every operations
     ///   - introspection: Allowing introspection
     static func wsOnly(
         using schema: GraphQLSchema,
         resolver: Resolver,
         websocketProtocol: Pioneer<Resolver, Context>.WebsocketProtocol,
         playground: Pioneer<Resolver, Context>.IDE,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true
     ) -> Self where Context == Void {
         .init(
@@ -114,7 +119,8 @@ public extension Pioneer.Config {
             websocketContextBuilder: { _, _, _ in }, 
             websocketProtocol: websocketProtocol, 
             introspection: introspection, 
-            playground: playground
+            playground: playground,
+            validationRules: validationRules
         )
     }
 }

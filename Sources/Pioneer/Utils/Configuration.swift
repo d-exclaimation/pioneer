@@ -28,6 +28,8 @@ extension Pioneer {
         let introspection: Bool
         /// Allowing GraphQL IDE
         let playground: Pioneer<Resolver, Context>.IDE 
+        /// Validation rules 
+        let validationRules: Validations
         /// Keep alive period
         let keepAlive: UInt64?
 
@@ -40,6 +42,7 @@ extension Pioneer {
             websocketProtocol: WebsocketProtocol = .graphqlWs,
             introspection: Bool = true,
             playground: IDE = .graphiql,
+            validationRules: Validations = .none,
             keepAlive: UInt64? = 12_500_000_000
         ) {
             self.schema = schema
@@ -50,6 +53,7 @@ extension Pioneer {
             self.websocketProtocol = websocketProtocol
             self.introspection = introspection
             self.playground = !introspection ? .disable : playground
+            self.validationRules = validationRules
             self.keepAlive = keepAlive
         }
     }
@@ -66,6 +70,7 @@ public extension Pioneer {
             websocketProtocol: config.websocketProtocol,
             introspection: config.introspection,
             playground: config.playground,
+            validationRules: config.validationRules,
             keepAlive: config.keepAlive
         )
     }
