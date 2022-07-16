@@ -6,6 +6,7 @@
 //
 
 import struct GraphQL.GraphQLResult
+import class GraphQL.ConcurrentEventStream
 import class GraphQL.Future
 import class GraphQL.SubscriptionEventStream
 
@@ -21,6 +22,9 @@ extension SubscriptionEventStream {
     public func asyncStream() -> AsyncThrowingStream<Future<GraphQL.GraphQLResult>, Error>? {
         if let asyncStream = self as? AsyncGraphQLStream {
             return asyncStream.sequence
+        }
+        if let concurrentStream = self as? ConcurrentEventStream<Future<GraphQL.GraphQLResult>> {
+            return concurrentStream.stream
         }
         return nil
     }
