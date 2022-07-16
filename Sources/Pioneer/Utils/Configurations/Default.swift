@@ -16,12 +16,14 @@ public extension Pioneer.Config {
     ///   - resolver: The top level object
     ///   - context: The context builder for HTTP
     ///   - websocketContext: The context builder for WebSocket
+    ///   - validationRules: Validation rules to be applied for every operations
     ///   - introspection: Allowing introspection
     static func `default`(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
         context: @escaping @Sendable (Request, Response) async throws -> Context,
         websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true
     ) -> Self {
         .init(
@@ -32,7 +34,8 @@ public extension Pioneer.Config {
             websocketContextBuilder: websocketContext,
             websocketProtocol: .graphqlWs,
             introspection: introspection,
-            playground: .apolloSandbox
+            playground: .apolloSandbox,
+            validationRules: validationRules
         )
     }
 
@@ -42,11 +45,13 @@ public extension Pioneer.Config {
     ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
     ///   - resolver: The top level object
     ///   - context: The shared context builder
+    ///   - validationRules: Validation rules to be applied for every operations
     ///   - introspection: Allowing introspection
     static func `default`(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
         context: @escaping @Sendable (Request, Response) async throws -> Context,
+        validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true
     ) -> Self {
         .init(
@@ -57,7 +62,8 @@ public extension Pioneer.Config {
             websocketContextBuilder: { try await $0.defaultWebsocketContextBuilder(payload: $1, gql: $2, contextBuilder: context) },
             websocketProtocol: .graphqlWs,
             introspection: introspection,
-            playground: .apolloSandbox
+            playground: .apolloSandbox,
+            validationRules: validationRules
         )
     }
 
@@ -65,10 +71,12 @@ public extension Pioneer.Config {
     /// - Parameters:
     ///   - schema: The GraphQL schema from GraphQLSwift/GraphQL
     ///   - resolver: The top level object
+    ///   - validationRules: Validation rules to be applied for every operations
     ///   - introspection: Allowing introspection
     static func `default`(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
+        validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true
     ) -> Self where Context == Void {
         .default(
@@ -76,6 +84,7 @@ public extension Pioneer.Config {
             resolver: resolver,
             context: { _, _ in }, 
             websocketContext: { _, _, _ in }, 
+            validationRules: validationRules,
             introspection: introspection
         )
     }
