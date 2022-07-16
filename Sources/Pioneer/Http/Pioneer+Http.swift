@@ -73,7 +73,7 @@ extension Pioneer {
             try res.content.encode(result)
             return res
         } catch let error as AbortError {
-            return try GraphQLError(message: error.reason).response(using: res, with: error.status)
+            return try error.response(using: res)
         } catch {
             return try error.graphql.response(using: res)
         }

@@ -4,10 +4,18 @@
 //  Created by d-exclaimation on 25/06/22.
 //
 
+import protocol Vapor.AbortError
 import enum Vapor.HTTPResponseStatus
 import class Vapor.Response
+import struct NIOHTTP1.HTTPHeaders
 import struct GraphQL.GraphQLError
 import struct GraphQL.GraphQLResult
+
+extension AbortError {
+    func response(using response: Response) throws -> Response {
+        try GraphQLError(message: reason).response(using: response, with: status, and: headers)
+    }
+}
 
 extension GraphQLError {
     func response(with code: HTTPResponseStatus) throws -> Response {
@@ -16,8 +24,11 @@ extension GraphQLError {
         return response
     }
 
-    func response(using response: Response, with code: HTTPResponseStatus) throws -> Response {
+    func response(using response: Response, with code: HTTPResponseStatus, and headers: HTTPHeaders? = nil) throws -> Response {
         response.status = code
+        if let headers = headers {
+            response.headers.add(contentsOf: headers)
+        }
         try response.content.encode(GraphQLResult(data: nil, errors: [self]))
         return response
     }
