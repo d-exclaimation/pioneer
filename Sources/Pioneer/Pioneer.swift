@@ -29,6 +29,8 @@ public struct Pioneer<Resolver, Context> {
     public private(set) var introspection: Bool
     /// Allowing GraphQL IDE
     public private(set) var playground: IDE
+    /// Validation rules 
+    public private(set) var validationRules: Validations
     /// Keep alive period
     public private(set) var keepAlive: UInt64?
 
@@ -44,6 +46,7 @@ public struct Pioneer<Resolver, Context> {
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
     ///   - playground: Allowing playground
+    ///   - validationRules: Validation rules to be applied before operation
     ///   - keepAlive: Keep alive internal in nanosecond, default to 12.5 sec, nil for disable
     public init(
         schema: GraphQLSchema,
@@ -54,6 +57,7 @@ public struct Pioneer<Resolver, Context> {
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,
+        validationRules: Validations = .none,
         keepAlive: UInt64? = 12_500_000_000
     ) {
         self.schema = schema
@@ -64,6 +68,7 @@ public struct Pioneer<Resolver, Context> {
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
         self.playground = !introspection ? .disable : playground
+        self.validationRules = validationRules
         self.keepAlive = keepAlive
 
 
