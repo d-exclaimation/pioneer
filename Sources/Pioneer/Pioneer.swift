@@ -152,13 +152,9 @@ public struct Pioneer<Resolver, Context> {
         guard introspection || !gql.isIntrospection else {
             return false
         }
-        do {
-            guard let operationType = try gql.operationType() else {
-                return false
-            }
-            return allowing.contains(operationType)
-        } catch {
+        guard let operationType = gql.operationType else {
             return false
         }
+        return allowing.contains(operationType)
     }
 }

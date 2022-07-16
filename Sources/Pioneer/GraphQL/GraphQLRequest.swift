@@ -22,7 +22,7 @@ public struct GraphQLRequest: Codable {
     public var variables: [String: Map]?
 
     /// Parsed GraphQL Document from request
-    private var ast: Document?
+    public var ast: Document?
 
     /// Getter a GraphQL AST Source from query
     public var source: Source {
@@ -53,8 +53,8 @@ public struct GraphQLRequest: Codable {
     }   
 
     /// Getting parsed operationType
-    public func operationType() throws -> OperationType? {
-        let ast = try parse(source: source)
+    public var operationType: OperationType? {
+        guard let ast = ast else { return nil }
         let operations = ast.definitions
             .compactMap { def -> OperationDefinition? in
                 def as? OperationDefinition
@@ -74,7 +74,7 @@ public struct GraphQLRequest: Codable {
 
     /// Check if query is any type of introspection
     public var isIntrospection: Bool {
-        guard let ast = try? parse(source: source) else { return false }
+        guard let ast = ast else { return false }
         return ast.definitions.contains { def in
             guard let operation = def as? OperationDefinition else { return false }
             return operation.selectionSet.selections.contains { select in

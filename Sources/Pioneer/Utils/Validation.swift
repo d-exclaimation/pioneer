@@ -30,8 +30,8 @@ extension Pioneer {
         /// Multiple rules computed from each operation
         case computed(@Sendable (GraphQLRequest) -> [ValidationRule])
 
-        public func callAsFunction(using schema: GraphQLSchema, for gql: GraphQLRequest) throws -> [GraphQLError] {
-            let ast = try parse(source: gql.source)
+        public func callAsFunction(using schema: GraphQLSchema, for gql: GraphQLRequest) -> [GraphQLError] {
+            guard let ast = gql.ast else { return [] }
             switch (self) {
             case .none:
                 return []

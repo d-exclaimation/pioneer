@@ -113,7 +113,7 @@ extension Pioneer {
     
         /// Build context and execute short-lived GraphQL Operation inside an event loop 
         private func execute(_ gql: GraphQLRequest, payload: ConnectionParams, req: Request) -> Future<GraphQLResult> {
-            req.eventLoop.performWithTask {
+            req.eventLoop.performWithTask { [unowned self] in
                 let ctx = try await self.websocketContextBuilder(req, payload, gql)
                 return try await self.executeOperation(for: gql, with: ctx, using: req.eventLoop)
             }
