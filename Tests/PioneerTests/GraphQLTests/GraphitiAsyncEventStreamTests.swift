@@ -54,7 +54,7 @@ struct TestResolver {
         return message
     }
 
-    func onMessage(context: Void, arguments: NoArguments) async -> EventStream<Message> {
+    func onMessage(context: Void, arguments: NoArguments) -> EventStream<Message> {
         let stream: AsyncStream<Message> = pubsub.asyncStream(for: "*")
         return stream.toEventStream()
     }
