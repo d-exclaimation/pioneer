@@ -32,7 +32,7 @@ Since `v0.6.0`, Pioneer can accept async and/or throwing context builder, and th
 
 ## Resolver
 
-The resolver will include all the basic CRUD operations. Pioneer comes with extensions to Graphiti to allow the use of `async/await` in queries and/or mutations and also `EventStream` built from `AsyncSequence` for subscriptions in the resolvers.
+The resolver will include all the basic CRUD operations. Both Graphiti and Pioneer comes with extensions to `Field` and `SubscriptionField` to allow the use of `async/await` in queries and/or mutations and also `EventStream` built from `AsyncSequence` for subscriptions in the resolvers.
 
 ```swift
 import Vapor
