@@ -14,7 +14,7 @@ If you are using Graphiti `v1.1` and up, Graphiti should now support `async/awai
 !!!info Async await extensions
 If you are using Graphiti `v1.1` or later, make sure Pioneer is up to date as it will prevent any ambiguity.
 
-If you are using Graphiti before `v1.1` which hasn't added async await support, make sure Pioneer is in the version before `v0.9.2` to get those async await from Pioneer.
+If you are using Graphiti before `v1.1` which hasn't added async await support, make sure Pioneer is in the version before `v0.9.3` to get those async await from Pioneer.
 !!!
 
 You can write your resolver function with `async/await` whether it is throwing or non-throwing, whether is a regular field resolver or even subscription resolver.

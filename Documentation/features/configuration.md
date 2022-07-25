@@ -6,7 +6,7 @@ order: 50
 # Configuration
 
 !!!success Custom Configuration options
-From `0.9.2`, Pioneer brought in a structure that will allow easier configuration, which would only require you to pass in the config object into [Pioneer](/references/pioneer) initializer.
+From `0.9.3`, Pioneer brought in a structure that will allow easier configuration, which would only require you to pass in the config object into [Pioneer](/references/pioneer) initializer.
 !!!
 
 This configuration structure would allow user of the library to create multiple configuration for Pioneer on different environment or situation.
