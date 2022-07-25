@@ -199,7 +199,7 @@ func makeUserLoader(req: Request) -> DataLoader<ID, User> {
 extension User {
     func friends(ctx: Context, _: NoArgs, eventLoopGroup: EventLoopGroup) async -> [User] {
         // Get from the DataLoader preventing N+1 problems
-        try await ctx.userLoader.loadMany(keys: _friendIDs, on: eventLoopGroup).get()
+        try await ctx.userLoader.loadMany(keys: _friendIDs, on: eventLoopGroup)
     }
 }
 

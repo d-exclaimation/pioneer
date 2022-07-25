@@ -206,7 +206,9 @@ This is what's called the N+1 problem which you want to avoid. The solution? [Da
 The GraphQL Foundation provided a specification for solution to the [N+1 problem](#n1-problem) called `dataloader`. Essentially, dataloaders combine the fetching of process across all resolvers for a given GraphQL request into a single query.
 
 !!!success DataLoader with async-await
-Since `v0.5.2`, Pioneer already provide extensions to use DataLoader with async await
+Newest version of DataLoader already provide extensions to use it with async await.
+
+However if you are using older version of DataLoader, Pioneer also provide extensions to use DataLoader with async await since `v0.5.2`.
 !!!
 
 The package [Dataloader](https://github.com/GraphQLSwift/DataLoader) implement that solution for [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/DataLoader).
@@ -226,7 +228,7 @@ struct Context {
 
 extension User {
     func makeLoader(req: Request) -> DataLoader<UUID, User> {
-        .init(on: req.eventLoop) { keys async in
+        .init(on: req) { keys async in
             let users = try? await User.query(on: req.db).filter(\.$id ~~ keys).all()
             return keys.map { key in
                 guard let user = res?.first(where: { $0.id == key }) else {
@@ -253,7 +255,7 @@ extension Item {
         guard let uid = $user.id else {
             return nil
         }
-        return try await ctx.userLoader.load(key: uid, on: ev.next()).get()
+        return try await ctx.userLoader.load(key: uid, on: ev.next())
     }
 }
 ```
