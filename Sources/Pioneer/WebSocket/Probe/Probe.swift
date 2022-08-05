@@ -127,7 +127,7 @@ extension Pioneer {
                 resolver: self.resolver,
                 context: ctx,
                 eventLoopGroup: eventLoop,
-                variables: gql.variables ?? [:],
+                variables: gql.variables,
                 operationName: gql.operationName
             ) 
         }
