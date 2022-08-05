@@ -136,7 +136,15 @@ extension Pioneer {
 
         /// Execute long lived GraphQL Operation as a subscription
         private func subscribeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async throws -> SubscriptionResult {
-            try await subscribeGraphQL(schema: schema, request: gql.query, resolver: resolver, context: ctx, eventLoopGroup: eventLoop)
+            try await subscribeGraphQL(
+                schema: schema, 
+                request: gql.query,
+                resolver: resolver, 
+                context: ctx, 
+                eventLoopGroup: eventLoop,
+                variables: gql.variables,
+                operationName: gql.operationName
+            )
         }
 
         deinit {

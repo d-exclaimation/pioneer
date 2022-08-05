@@ -11,7 +11,7 @@ Pioneer is an open-source Swift GraphQL server for [Vapor](https://github.com/va
 ## Setup
 
 ```swift
-.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.9.3")
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.9.4")
 ```
 
 ## Swift for GraphQL
