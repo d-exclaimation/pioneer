@@ -24,13 +24,14 @@ It can work with any GraphQL schema built with [GraphQLSwift/GraphQL](https://gi
 
 - [Documentation](https://pioneer-graphql.netlify.app)
 - [Getting started](https://pioneer-graphql.netlify.app/guides/getting-started/setup/)
+- [FAQ](https://pioneer-graphql.netlify.app/guides/advanced/faq/)
 - [DocC](https://swiftpackageindex.com/d-exclaimation/pioneer/main/documentation/pioneer)
 - [Server Example](https://github.com/d-exclaimation/pioneer-example)
 
 ### Protocols (WebSocket)
 
-- [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
 - [graphql-ws](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md)
+- [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
 
 ## Feedback
 
