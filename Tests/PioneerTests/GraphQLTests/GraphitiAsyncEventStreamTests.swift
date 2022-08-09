@@ -148,6 +148,7 @@ final class GraphitiTests: XCTestCase {
         // -- End --
         
         Task.init {
+            try await Task.sleep(nanoseconds: 200_000_000)
             await resolver.pubsub.publish(for: "*", payload: Message(id: "bob", content: "Bob"))
             await resolver.pubsub.publish(for: "*", payload: Message(id: "bob2", content: "Bob2"))
         }
