@@ -9,6 +9,7 @@ import Vapor
 import enum GraphQL.OperationType
 import enum GraphQL.Map
 import struct GraphQL.GraphQLError
+import class GraphQL.GraphQLJSONEncoder
 
 extension Pioneer {
     /// Apply middleware for `POST`
@@ -70,7 +71,7 @@ extension Pioneer {
         do {
             let context = try await contextBuilder(req, res)
             let result = await executeOperation(for: gql, with: context, using: req.eventLoop)
-            try res.content.encode(result)
+            try res.content.encode(result, using: GraphQLJSONEncoder())
             return res
         } catch let error as AbortError {
             return try error.response(using: res)
