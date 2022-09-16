@@ -33,7 +33,7 @@ public extension Pioneer.Config {
     static func simpleWsOnly(
         using schema: GraphQLSchema, 
         with resolver: Resolver, 
-        and contextBuilder: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        and contextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         allowing introspection: Bool = true
     ) -> Self {
         .init(
@@ -65,7 +65,8 @@ public extension Pioneer.Config {
     static func wsOnly(
         using schema: GraphQLSchema,
         resolver: Resolver,
-        context: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        context: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        onInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in },
         websocketProtocol: Pioneer<Resolver, Context>.WebsocketProtocol,
         playground: Pioneer<Resolver, Context>.IDE,
         validationRules: Pioneer<Resolver, Context>.Validations = .none,
@@ -82,6 +83,7 @@ public extension Pioneer.Config {
             }, 
             httpStrategy: .onlyPost,
             websocketContextBuilder: context, 
+            websocketOnInit: onInit,
             websocketProtocol: websocketProtocol, 
             introspection: introspection, 
             playground: playground,

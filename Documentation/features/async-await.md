@@ -74,7 +74,7 @@ import NIO
 
 extension EventLoop {
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-    func makeFutureWithTask<Value>(_ body: @escaping @Sendable () async throws -> Value) -> EventLoopFuture<Value> {
+    func makeFutureWithTask<Value>(_ body: @Sendable @escaping () async throws -> Value) -> EventLoopFuture<Value> {
         let promise = eventLoop.makePromise(of: Value.self)
         promise.completeWithTask(body)
         return promise.futureResult

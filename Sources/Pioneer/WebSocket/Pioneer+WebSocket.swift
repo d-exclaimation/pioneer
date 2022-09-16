@@ -175,7 +175,7 @@ extension Pioneer {
 }
 
 
-@discardableResult func setInterval(delay: UInt64?, _ block: @escaping @Sendable () throws -> Void) -> Task<Void, Error>? {
+@discardableResult func setInterval(delay: UInt64?, _ block: @Sendable @escaping () throws -> Void) -> Task<Void, Error>? {
     guard let delay = delay else {
         return nil
     }

@@ -22,6 +22,8 @@ extension Pioneer {
         let httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy 
         /// Websocket Context builder
         let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        /// Websocket handler function for initialization phase
+        let websocketOnInit: @Sendable (ConnectionParams) async throws -> Void
         /// Websocket sub-protocol
         let websocketProtocol: Pioneer<Resolver, Context>.WebsocketProtocol
         /// Allowing introspection
@@ -36,9 +38,10 @@ extension Pioneer {
         public init(
             schema: GraphQLSchema,
             resolver: Resolver,
-            contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
+            contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
             httpStrategy: HTTPStrategy = .queryOnlyGet,
-            websocketContextBuilder: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+            websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in },
             websocketProtocol: WebsocketProtocol = .graphqlWs,
             introspection: Bool = true,
             playground: IDE = .graphiql,
@@ -50,6 +53,7 @@ extension Pioneer {
             self.contextBuilder = contextBuilder
             self.httpStrategy = httpStrategy
             self.websocketContextBuilder = websocketContextBuilder
+            self.websocketOnInit = websocketOnInit
             self.websocketProtocol = websocketProtocol
             self.introspection = introspection
             self.playground = !introspection ? .disable : playground
@@ -67,6 +71,7 @@ public extension Pioneer {
             contextBuilder: config.contextBuilder, 
             httpStrategy: config.httpStrategy,
             websocketContextBuilder: config.websocketContextBuilder,
+            websocketOnInit: config.websocketOnInit,
             websocketProtocol: config.websocketProtocol,
             introspection: config.introspection,
             playground: config.playground,

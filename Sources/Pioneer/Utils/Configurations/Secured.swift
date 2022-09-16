@@ -21,8 +21,8 @@ public extension Pioneer.Config {
     static func secured(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
-        websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
+        websocketContext: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true
     ) -> Self {
@@ -50,7 +50,7 @@ public extension Pioneer.Config {
     static func secured(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
         validationRules: Pioneer<Resolver, Context>.Validations = .none,
         introspection: Bool = true
     ) -> Self {

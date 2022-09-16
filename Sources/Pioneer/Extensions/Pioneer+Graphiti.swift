@@ -23,7 +23,7 @@ public extension Pioneer {
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
+        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
@@ -57,6 +57,7 @@ public extension Pioneer {
     ///   - contextBuilder: Context builder from request
     ///   - httpStrategy: HTTP strategy
     ///   - websocketContextBuilder: Context builder for the websocket
+    ///   - websocketOnInit: Function to intercept websocket connection during the initialization phase
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
     ///   - playground: Allowing playground
@@ -65,9 +66,10 @@ public extension Pioneer {
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
+        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketContextBuilder: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in },
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,

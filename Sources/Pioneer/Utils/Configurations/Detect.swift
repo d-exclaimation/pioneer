@@ -56,8 +56,8 @@ public extension Pioneer.Config {
     static func detect(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
-        websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
+        websocketContext: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         validationRules: Pioneer<Resolver, Context>.Validations = .none
     ) throws -> Self {
         guard let strategy = Environment.get("PIONEER_HTTP_STRATEGY") else {

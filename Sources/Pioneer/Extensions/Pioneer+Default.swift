@@ -22,7 +22,7 @@ public extension Pioneer {
     init(
         schema: GraphQLSchema,
         resolver: Resolver,
-        contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
+        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
