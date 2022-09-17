@@ -46,9 +46,6 @@ extension Pioneer {
 
             /// Scheduled a timeout for any connection
             let timeout = setTimeout(delay: 5_000_000_000) {
-                if ws.isClosed {
-                    throw Abort(.conflict, reason: "WebSocket closed before any termination")
-                }
                 try await ws.close(code: .graphqlInitTimeout)
                 keepAlive?.cancel()
             }
@@ -209,7 +206,7 @@ extension Pioneer {
     } 
     return Task {
         try await Task.sleep(nanoseconds: delay)
-        guard Task.isCancelled else {
+        guard !Task.isCancelled else {
             return
         }
         try await block()
