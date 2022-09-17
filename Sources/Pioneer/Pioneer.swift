@@ -33,6 +33,8 @@ public struct Pioneer<Resolver, Context> {
     public private(set) var validationRules: Validations
     /// Keep alive period
     public private(set) var keepAlive: UInt64?
+    /// Timeout period
+    public private(set) var timeout: UInt64?
 
     /// Internal running WebSocket actor for Pioneer
     internal var probe: Probe
@@ -43,22 +45,26 @@ public struct Pioneer<Resolver, Context> {
     ///   - contextBuilder: Context builder from request
     ///   - httpStrategy: HTTP strategy
     ///   - websocketContextBuilder: Context builder for the websocket
+    ///   - websocketOnInit: Function to intercept websocket connection during the initialization phase
     ///   - websocketProtocol: Websocket sub-protocol
     ///   - introspection: Allowing introspection
     ///   - playground: Allowing playground
     ///   - validationRules: Validation rules to be applied before operation
-    ///   - keepAlive: Keep alive internal in nanosecond, default to 12.5 sec, nil for disable
+    ///   - keepAlive: Keep alive interval in nanosecond, default to 12.5 sec, nil for disable
+    ///   - timeout: Timeout interval in nanosecond, default to 5 sec, nil for disable
     public init(
         schema: GraphQLSchema,
         resolver: Resolver,
-        contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
+        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketContextBuilder: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in },
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .graphiql,
         validationRules: Validations = .none,
-        keepAlive: UInt64? = 12_500_000_000
+        keepAlive: UInt64? = 12_500_000_000,
+        timeout: UInt64? = 5_000_000_000
     ) {
         self.schema = schema
         self.resolver = resolver
@@ -70,6 +76,7 @@ public struct Pioneer<Resolver, Context> {
         self.playground = !introspection ? .disable : playground
         self.validationRules = validationRules
         self.keepAlive = keepAlive
+        self.timeout = timeout
 
 
         let proto: SubProtocol.Type = def {

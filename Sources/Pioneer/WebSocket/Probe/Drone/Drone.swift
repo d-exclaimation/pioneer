@@ -146,13 +146,5 @@ extension Pioneer {
                 operationName: gql.operationName
             )
         }
-
-        deinit {
-            tasks.forEach { (oid, task) in
-                let message = GraphQLMessage(id: oid, type: proto.complete)
-                process.send(message.jsonString)
-                task.cancel()
-            }
-        }
     }
 }

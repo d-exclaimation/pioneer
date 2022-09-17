@@ -32,7 +32,7 @@ public extension Pioneer.Config {
     static func simpleHttpOnly(
         using schema: GraphQLSchema, 
         with resolver: Resolver, 
-        and contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
+        and contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         allowing introspection: Bool = true
     ) -> Self {
         .init(
@@ -61,7 +61,7 @@ public extension Pioneer.Config {
     static func httpOnly(
         using schema: GraphQLSchema, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy,
         playground: Pioneer<Resolver, Context>.IDE,
         validationRules: Pioneer<Resolver, Context>.Validations = .none,

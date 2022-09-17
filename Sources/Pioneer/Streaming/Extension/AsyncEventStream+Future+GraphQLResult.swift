@@ -41,9 +41,9 @@ extension AsyncSequence where Element == Future<GraphQL.GraphQLResult> {
     /// - Returns: The Task used to consume this AsyncSequence
     public func pipe<ActorType: Actor>(
         to sink: ActorType,
-        complete: @escaping @Sendable (ActorType) async -> Void,
-        failure: @escaping @Sendable (ActorType, Error) async -> Void,
-        next: @escaping @Sendable (ActorType, GraphQL.GraphQLResult) async -> Void
+        complete: @Sendable @escaping (ActorType) async -> Void,
+        failure: @Sendable @escaping (ActorType, Error) async -> Void,
+        next: @Sendable @escaping (ActorType, GraphQL.GraphQLResult) async -> Void
     ) -> Task<Void, Error> {
         Task.init {
             do {

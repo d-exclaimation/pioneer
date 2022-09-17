@@ -197,6 +197,10 @@ Pioneer also provide handler to manually setting routes for WebSocket
 [!ref Manual WebSocket Routing](/features/graphql-over-websocket/#manual-websocket-routing)
 !!!
 
+!!!success Custom ContentEncoder
+Since `v0.10.0`, There is `.httpHandler(req:using:)` method that can take a custom `ContentEncoder`
+!!!
+
 ```swift
 let app = try Application(.detect())
 let server = try Pioneer(...)

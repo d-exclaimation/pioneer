@@ -13,7 +13,7 @@ extension Actor {
     /// - Parameters:
     ///   - future: EventLoopFuture value being awaited
     ///   - to: Transforming callback to for the result from the Future.
-    public func pipeToSelf<U>(future: EventLoopFuture<U>, to callback: @escaping @Sendable (Self, Result<U, Error>) async -> Void) {
+    public func pipeToSelf<U>(future: EventLoopFuture<U>, to callback: @Sendable @escaping (Self, Result<U, Error>) async -> Void) {
         Task {
             do {
                 let res = try await future.get()

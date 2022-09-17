@@ -30,8 +30,8 @@ public extension Pioneer.Config {
     static func detect(
         using schema: Schema<Resolver, Context>, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
-        websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
+        websocketContext: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
     ) throws -> Self {
         try .detect(using: schema.schema, resolver: resolver, context: context, websocketContext: websocketContext)
     }
@@ -48,8 +48,8 @@ public extension Pioneer.Config {
     static func secured(
         using schema: Schema<Resolver, Context>, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
-        websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
+        websocketContext: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         introspection: Bool = true
     ) -> Self {
         .secured(
@@ -71,7 +71,7 @@ public extension Pioneer.Config {
     static func secured(
         using schema: Schema<Resolver, Context>, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
         introspection: Bool = true
     ) -> Self {
         .secured(
@@ -94,8 +94,8 @@ public extension Pioneer.Config {
     static func `default`(
         using schema: Schema<Resolver, Context>, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
-        websocketContext: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
+        websocketContext: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         introspection: Bool = true
     ) -> Self {
         .default(
@@ -117,7 +117,7 @@ public extension Pioneer.Config {
     static func `default`(
         using schema: Schema<Resolver, Context>, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
         introspection: Bool = true
     ) -> Self {
         .default(
@@ -142,7 +142,7 @@ public extension Pioneer.Config {
     static func httpOnly(
         using schema: Schema<Resolver, Context>, 
         resolver: Resolver, 
-        context: @escaping @Sendable (Request, Response) async throws -> Context,
+        context: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: Pioneer<Resolver, Context>.HTTPStrategy,
         playground: Pioneer<Resolver, Context>.IDE,
         introspection: Bool = true  
@@ -168,7 +168,7 @@ public extension Pioneer.Config {
     static func simpleHttpOnly(
         using schema: Schema<Resolver, Context>, 
         with resolver: Resolver, 
-        and contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context,
+        and contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         allowing introspection: Bool = true
     ) -> Self {
         .simpleHttpOnly(using: schema.schema, with: resolver, and: contextBuilder, allowing: introspection)
@@ -187,7 +187,7 @@ public extension Pioneer.Config {
     static func wsOnly(
         using schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        context: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        context: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         websocketProtocol: Pioneer<Resolver, Context>.WebsocketProtocol,
         playground: Pioneer<Resolver, Context>.IDE,
         introspection: Bool = true
@@ -213,7 +213,7 @@ public extension Pioneer.Config {
     static func simpleWsOnly(
         using schema: Schema<Resolver, Context>, 
         with resolver: Resolver, 
-        and contextBuilder: @escaping @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+        and contextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
         allowing introspection: Bool = true
     ) -> Self {
         .simpleWsOnly(using: schema.schema, with: resolver, and: contextBuilder, allowing: introspection)

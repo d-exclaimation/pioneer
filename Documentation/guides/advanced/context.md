@@ -209,3 +209,28 @@ struct Resolver {
 ```
 
 [!ref GraphQLRequest API References](/references/structs/#graphqlrequest)
+
+## WebSocket Initialisation Hook and Authorization
+
+There might be times where you want to authorize any incoming WebSocket connection before any operation done, and thus before the context builder is executed. 
+
+Since `v0.10.0`, Pioneer now provide a way to run custom code during the GraphQL over WebSocket initialisation phase that can deny a WebSocket connection by throwing an error. 
+
+```swift
+let server = Pioneer(
+    schema: schema,
+    resolver: Resolver(),
+    contextBuilder: getContext,
+    websocketContextBuilder: getWebsocketContext,
+    websocketOnInit: { payload in 
+        guard .some(.string(let token)) = payload?["Authorization"] {
+            throw Abort(.unauthorized)
+        }
+
+        // do something with the Authorization token
+    },
+    websocketProtocol: .graphqlWs,
+    introspection: true,
+    playground: .graphiql
+)
+```

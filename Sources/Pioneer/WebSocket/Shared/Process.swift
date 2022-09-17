@@ -21,12 +21,21 @@ extension Pioneer {
         var payload: ConnectionParams
         /// Request attached to this process
         var req: Request
+        /// KeepAlive Task
+        var keepAlive: Task<Void, Error>?
 
-        init(id: UUID = UUID(), ws: ProcessingConsumer, payload: ConnectionParams, req: Request) {
+        init(
+            id: UUID = UUID(), 
+            ws: ProcessingConsumer, 
+            payload: ConnectionParams, 
+            req: Request, 
+            keepAlive: Task<Void, Error>? = nil
+        ) {
             self.id = id
             self.ws = ws
             self.payload = payload
             self.req = req
+            self.keepAlive = keepAlive
         }
 
         /// Send a text message

@@ -18,25 +18,30 @@ extension Pioneer {
         private let resolver: Resolver
         private let proto: SubProtocol.Type
         private let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        private let websocketOnInit: @Sendable (ConnectionParams) async throws -> Void
 
         init(
             schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+            websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in }
         ) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
             self.websocketContextBuilder = websocketContextBuilder
+            self.websocketOnInit = websocketOnInit
         }
         
         init(
             schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
+            websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in }
         ) {
             self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
             self.websocketContextBuilder = websocketContextBuilder
+            self.websocketOnInit = websocketOnInit
         }
 
         // MARK: - Private mutable states
@@ -48,7 +53,12 @@ extension Pioneer {
         
         /// Allocate space and save any verified process
         func connect(with process: Process) async {
-            clients.update(process.id, with: process)
+            do {
+                try await websocketOnInit(process.payload)
+                clients.update(process.id, with: process)
+            } catch {
+                await deny(process: process, with: error)
+            }
         }
         
         /// Deallocate the space from a closing process
@@ -60,7 +70,10 @@ extension Pioneer {
         
         /// Long running operation require its own actor, thus initialing one if there were none prior
         func start(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let process = clients[pid] else { return }
+            guard let process = clients[pid] else { 
+                return
+            }
+
             let drone = drones.getOrElse(pid) {
                 .init(process,
                     schema: schema,
@@ -75,7 +88,9 @@ extension Pioneer {
         
         /// Short lived operation is processed immediately and pipe back later
         func once(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let process = clients[pid] else { return }
+            guard let process = clients[pid] else { 
+                return
+            }
 
             let future = execute(gql, payload: process.payload, req: process.req)
             
@@ -131,5 +146,12 @@ extension Pioneer {
                 operationName: gql.operationName
             ) 
         }
+
+        private func deny(process: Process, with error: Error) async {
+            let err = GraphQLMessage.errors(type: proto.error, [error.graphql])
+            process.send(err.jsonString)
+            process.keepAlive?.cancel()
+            await process.close(code: .graphqlNotAuthorized) 
+        } 
     }
 }

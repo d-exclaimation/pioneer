@@ -22,7 +22,7 @@ extension AsyncSequence {
     /// - Parameters:
     ///   - onTermination: onTermination callback
     public func toEventStream(
-        onTermination callback: @escaping @Sendable (Termination) -> Void
+        onTermination callback: @Sendable @escaping (Termination) -> Void
     ) -> EventStream<Element> {
         let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
@@ -56,7 +56,7 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         endValue: @escaping () -> Element,
-        onTermination callback: @escaping @Sendable (Termination) -> Void
+        onTermination callback: @Sendable @escaping (Termination) -> Void
     ) -> EventStream<Element> {
         let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
@@ -91,7 +91,7 @@ extension AsyncSequence {
     ///   - onTermination: onTermination callback
     public func toEventStream(
         initialValue: Element,
-        onTermination callback: @escaping @Sendable (Termination) -> Void
+        onTermination callback: @Sendable @escaping (Termination) -> Void
     ) -> EventStream<Element> {
         let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {
@@ -127,7 +127,7 @@ extension AsyncSequence {
     public func toEventStream(
         initialValue: Element,
         endValue: @escaping () -> Element,
-        onTermination callback: @escaping @Sendable (Termination) -> Void
+        onTermination callback: @Sendable @escaping (Termination) -> Void
     ) -> EventStream<Element> {
         let stream = AsyncThrowingStream<Element, Error> { continuation in
             let task = Task.init {

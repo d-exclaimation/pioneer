@@ -16,7 +16,7 @@ public extension Request {
     func defaultWebsocketContextBuilder<Context>(
         payload: ConnectionParams,
         gql: GraphQLRequest,
-        contextBuilder: @escaping @Sendable (Request, Response) async throws -> Context
+        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context
     ) async throws -> Context  {
         let uri = URI(
             scheme: url.scheme,

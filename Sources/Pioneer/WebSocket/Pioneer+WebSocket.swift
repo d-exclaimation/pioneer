@@ -13,9 +13,6 @@ import enum GraphQL.Map
 public typealias ConnectionParams = [String: Map]?
 
 extension Pioneer {
-    /// KeepAlive Task
-    typealias KeepAlive = Task<Void, Error>?
-    
     /// Apply middleware through websocket
     func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
         router.get(path, use: webSocketHandler(req:))
@@ -40,21 +37,27 @@ extension Pioneer {
             ws.sendPing()
                 
             /// Scheduled keep alive message interval
-            let keepAlive: KeepAlive = setInterval(delay: 12_500_000_000) {
+            let keepAlive = setInterval(delay: keepAlive) {
                 if ws.isClosed {
                     throw Abort(.conflict, reason: "WebSocket closed before any termination")
                 }
                 ws.send(msg: websocketProtocol.keepAliveMessage)
             }
+
+            /// Scheduled a timeout for any connection
+            let timeout = setTimeout(delay: timeout) {
+                try await ws.close(code: .graphqlInitTimeout)
+                keepAlive?.cancel()
+            }
                 
             ws.onText { _, txt in
                 Task {
-                    await onMessage(pid: pid, ws: ws, req: req, keepAlive: keepAlive, txt: txt)
+                    await onMessage(pid: pid, ws: ws, req: req, keepAlive: keepAlive, timeout: timeout, txt: txt)
                 }
             }
                 
             ws.onClose.whenComplete { _ in
-                onEnd(pid: pid, keepAlive: keepAlive)
+                onEnd(pid: pid, keepAlive: keepAlive, timeout: timeout)
             } 
         }
     }
@@ -67,7 +70,14 @@ extension Pioneer {
     }
 
     /// On Websocket message callback
-    func onMessage(pid: UUID, ws: ProcessingConsumer, req: Request, keepAlive: KeepAlive, txt: String) async -> Void {
+    func onMessage(
+        pid: UUID, 
+        ws: ProcessingConsumer, 
+        req: Request, 
+        keepAlive: Task<Void, Error>?,
+        timeout: Task<Void, Error>?, 
+        txt: String
+    ) async -> Void {
         guard let data = txt.data(using: .utf8) else {
             // Shouldn't accept any message that aren't utf8 string
             // -> Close with 1003 code
@@ -84,6 +94,7 @@ extension Pioneer {
             let process = Process(id: pid, ws: ws, payload: payload, req: req)
             await probe.connect(with: process)
             websocketProtocol.initialize(ws: ws)
+            timeout?.cancel()
 
         // Ping is for requesting server to send a keep alive message
         case .ping:
@@ -93,6 +104,7 @@ extension Pioneer {
         case .terminate:
             await probe.disconnect(for: pid)
             keepAlive?.cancel()
+            timeout?.cancel()
             try? await ws.close(code: .goingAway).get()
 
         // Start -> Long running operation
@@ -158,7 +170,7 @@ extension Pioneer {
             // Deallocation of resources
             await probe.disconnect(for: pid)
             keepAlive?.cancel()
-            try? await ws.close(code: .policyViolation).get()
+            try? await ws.close(code: .graphqlInvalid).get()
 
         case .ignore:
             break
@@ -166,16 +178,17 @@ extension Pioneer {
     }
 
     /// On closing connection callback
-    func onEnd(pid: UUID, keepAlive: KeepAlive) -> Void {
+    func onEnd(pid: UUID, keepAlive: Task<Void, Error>?, timeout: Task<Void, Error>?) -> Void {
         Task {
             await probe.disconnect(for: pid)
         }
         keepAlive?.cancel()
+        timeout?.cancel()
     }
 }
 
 
-@discardableResult func setInterval(delay: UInt64?, _ block: @escaping @Sendable () throws -> Void) -> Task<Void, Error>? {
+@discardableResult func setInterval(delay: UInt64?, _ block: @Sendable @escaping () throws -> Void) -> Task<Void, Error>? {
     guard let delay = delay else {
         return nil
     }
@@ -184,5 +197,18 @@ extension Pioneer {
             try await Task.sleep(nanoseconds: delay)
             try block()
         }
+    }
+}
+
+@discardableResult func setTimeout(delay: UInt64?, _ block: @Sendable @escaping () async throws -> Void) -> Task<Void, Error>? {
+    guard let delay = delay else {
+        return nil
+    } 
+    return Task {
+        try await Task.sleep(nanoseconds: delay)
+        guard !Task.isCancelled else {
+            return
+        }
+        try await block()
     }
 }
