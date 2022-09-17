@@ -18,9 +18,7 @@ extension Pioneer {
         at path: PathComponent = "graphql",
         bodyStrategy: HTTPBodyStreamStrategy = .collect
     ) {
-        router.on(.POST, path, body: bodyStrategy) { 
-            try await self.httpHandler(req: $0) 
-        }
+        router.on(.POST, path, body: bodyStrategy, use: httpHandler(req:))
     }
 
     /// Apply middleware for `GET`
@@ -28,15 +26,22 @@ extension Pioneer {
         on router: RoutesBuilder,
         at path: PathComponent = "graphql"
     ) {
-        router.get(path) {
-            try await self.httpHandler(req: $0)
-        }
+        router.get(path, use: httpHandler(req:))
     }
 
     /// Common Handler for GraphQL through HTTP
     /// - Parameter req: The HTTP request being made
     /// - Returns: A response from the GraphQL operation execution properly formatted
-    public func httpHandler(req: Request, using encoder: ContentEncoder = GraphQLJSONEncoder()) async throws -> Response {
+    public func httpHandler(req: Request) async throws -> Response {
+        try await httpHandler(req: req, using: GraphQLJSONEncoder())
+    }
+    
+    /// Common Handler for GraphQL through HTTP
+    /// - Parameters:
+    ///   - req: The HTTP request being made
+    ///   - using: The custom content encoder
+    /// - Returns: A response from the GraphQL operation execution properly formatted
+    public func httpHandler(req: Request, using encoder: ContentEncoder) async throws -> Response {
         // Check for CSRF Prevention
         guard isCSRFProtected(isActive: httpStrategy == .csrfPrevention, on: req) else {
             return try GraphQLError(
