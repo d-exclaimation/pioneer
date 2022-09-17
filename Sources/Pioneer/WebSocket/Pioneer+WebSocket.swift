@@ -107,6 +107,7 @@ extension Pioneer {
         case .terminate:
             await probe.disconnect(for: pid)
             keepAlive?.cancel()
+            timeout?.cancel()
             try? await ws.close(code: .goingAway).get()
 
         // Start -> Long running operation
