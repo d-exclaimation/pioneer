@@ -18,7 +18,9 @@ extension Pioneer {
         at path: PathComponent = "graphql",
         bodyStrategy: HTTPBodyStreamStrategy = .collect
     ) {
-        router.on(.POST, path, body: bodyStrategy, use: httpHandler(req:))
+        router.on(.POST, path, body: bodyStrategy) { 
+            try await self.httpHandler(req: $0) 
+        }
     }
 
     /// Apply middleware for `GET`
@@ -26,13 +28,15 @@ extension Pioneer {
         on router: RoutesBuilder,
         at path: PathComponent = "graphql"
     ) {
-        router.get(path, use: httpHandler(req:))
+        router.get(path) {
+            try await self.httpHandler(req: $0)
+        }
     }
 
     /// Common Handler for GraphQL through HTTP
     /// - Parameter req: The HTTP request being made
     /// - Returns: A response from the GraphQL operation execution properly formatted
-    public func httpHandler(req: Request) async throws -> Response {
+    public func httpHandler(req: Request, using encoder: ContentEncoder = GraphQLJSONEncoder()) async throws -> Response {
         // Check for CSRF Prevention
         guard isCSRFProtected(isActive: httpStrategy == .csrfPrevention, on: req) else {
             return try GraphQLError(
@@ -43,7 +47,7 @@ extension Pioneer {
         }
         do {
             let gql = try req.graphql
-            return try await handle(req: req, from: gql, allowing: httpStrategy.allowed(for: req.method))
+            return try await handle(req: req, from: gql, allowing: httpStrategy.allowed(for: req.method), using: encoder)
         } catch let error as Abort {
             return try GraphQLError(message: error.reason).response(with: error.status)
         } catch {
@@ -57,7 +61,7 @@ extension Pioneer {
     ///   - gql: The GraphQL request for the operation
     ///   - allowing: The allowed operation type
     /// - Returns: A response with proper http status code and a well formatted body
-    internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType]) async throws -> Response {
+    internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType], using encoder: ContentEncoder) async throws -> Response {
         guard allowed(from: gql, allowing: allowing) else {
             return try GraphQLError(message: "Operation of this type is not allowed and has been blocked")
                 .response(with: .badRequest)
