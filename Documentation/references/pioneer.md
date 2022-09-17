@@ -48,6 +48,7 @@ let server = Pioneer(
 | `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `validationRules`         | [!badge variant="primary" text="Validations"]                                                        | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
 
 ===
 
@@ -88,6 +89,7 @@ let server = Pioneer(
 | `playground`        | [!badge variant="primary" text="IDE"]                                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `validationRules`   | [!badge variant="primary" text="Validations"]                                | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
 
 ===
 
@@ -124,6 +126,7 @@ let server = Pioneer(
 | `playground`        | [!badge variant="primary" text="IDE"]               | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `validationRules`   | [!badge variant="primary" text="Validations"]       | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]           | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
 
 ===
 
@@ -164,6 +167,7 @@ let server = try Pioneer(
 | `playground`        | [!badge variant="primary" text="IDE"]                                     | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `validationRules`   | [!badge variant="primary" text="Validations"]                             | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                 | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
 
 ===
 
@@ -212,6 +216,7 @@ let server = try Pioneer(
 | `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
 | `validationRules`         | [!badge variant="primary" text="Validations"]                                                        | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
+| `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
 
 ===
 
@@ -279,6 +284,37 @@ app.post("/manual") { req async throws in
 | Name  | Type                                      | Description                 |
 | ----- | ----------------------------------------- | --------------------------- |
 | `req` | [!badge variant="primary" text="Request"] | The HTTP request being made |
+
+===
+
+---
+
+### `httpHandler`
+
+Common Handler for GraphQL through HTTP using custom `ContentEncoder`
+
+!!!info Manually handling request
+If you use [`applyMiddleware`](#applymiddleware), this function is already in use and does not need to be called.
+
+However, you can opt out of [`applyMiddleware`](#applymiddleware), manually set your HTTP routes, and use this method to handle GraphQL request
+!!!
+
+=== Example
+
+```swift
+app.post("/manual") { req async throws in
+    try await server.httpHandler(req: req, using: JSONEncoder())
+}
+```
+
+===
+
+==- Options
+
+| Name  | Type                                      | Description                 |
+| ----- | ----------------------------------------- | --------------------------- |
+| `req` | [!badge variant="primary" text="Request"] | The HTTP request being made |
+| `encoder` | [!badge variant="warning" text="ContentEncoder"] | The custom content encoder |
 
 ===
 
