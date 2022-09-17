@@ -73,7 +73,6 @@ final class ProbeTests: XCTestCase {
         try? await Task.sleep(nanoseconds: 1_000_000)
         
         let results = await con.waitAll()
-        print(results)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {
             return XCTFail("No completion")
         }

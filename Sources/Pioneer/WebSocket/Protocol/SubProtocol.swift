@@ -57,4 +57,8 @@ extension WebSocketErrorCode {
     static var graphqlInitTimeout: WebSocketErrorCode {
         .init(codeNumber: 4408)
     }
+
+    static var graphqlInvalid: WebSocketErrorCode {
+        .init(codeNumber: 4400)
+    }
 }

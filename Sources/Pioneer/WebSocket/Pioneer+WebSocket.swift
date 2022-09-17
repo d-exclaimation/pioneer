@@ -170,7 +170,7 @@ extension Pioneer {
             // Deallocation of resources
             await probe.disconnect(for: pid)
             keepAlive?.cancel()
-            try? await ws.close(code: .policyViolation).get()
+            try? await ws.close(code: .graphqlInvalid).get()
 
         case .ignore:
             break
