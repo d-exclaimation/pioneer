@@ -80,7 +80,7 @@ extension Pioneer {
         do {
             let context = try await contextBuilder(req, res)
             let result = await executeOperation(for: gql, with: context, using: req.eventLoop)
-            try res.content.encode(result, using: GraphQLJSONEncoder())
+            try res.content.encode(result, using: encoder)
             return res
         } catch let error as AbortError {
             return try error.response(using: res)
