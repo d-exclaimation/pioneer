@@ -37,7 +37,7 @@ extension Pioneer {
             ws.sendPing()
                 
             /// Scheduled keep alive message interval
-            let keepAlive = setInterval(delay: 12_500_000_000) {
+            let keepAlive = setInterval(delay: keepAlive) {
                 if ws.isClosed {
                     throw Abort(.conflict, reason: "WebSocket closed before any termination")
                 }
@@ -45,7 +45,7 @@ extension Pioneer {
             }
 
             /// Scheduled a timeout for any connection
-            let timeout = setTimeout(delay: 5_000_000_000) {
+            let timeout = setTimeout(delay: timeout) {
                 try await ws.close(code: .graphqlInitTimeout)
                 keepAlive?.cancel()
             }

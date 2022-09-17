@@ -34,6 +34,8 @@ extension Pioneer {
         let validationRules: Validations
         /// Keep alive period
         let keepAlive: UInt64?
+        /// Timeout period
+        let timeout: UInt64?
 
         public init(
             schema: GraphQLSchema,
@@ -46,7 +48,8 @@ extension Pioneer {
             introspection: Bool = true,
             playground: IDE = .graphiql,
             validationRules: Validations = .none,
-            keepAlive: UInt64? = 12_500_000_000
+            keepAlive: UInt64? = 12_500_000_000,
+            timeout: UInt64? = 5_000_000_000
         ) {
             self.schema = schema
             self.resolver = resolver
@@ -59,6 +62,7 @@ extension Pioneer {
             self.playground = !introspection ? .disable : playground
             self.validationRules = validationRules
             self.keepAlive = keepAlive
+            self.timeout = timeout
         }
     }
 }
@@ -76,7 +80,8 @@ public extension Pioneer {
             introspection: config.introspection,
             playground: config.playground,
             validationRules: config.validationRules,
-            keepAlive: config.keepAlive
+            keepAlive: config.keepAlive,
+            timeout: config.timeout
         )
     }
 }
