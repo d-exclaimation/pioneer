@@ -71,7 +71,6 @@ extension Pioneer {
         /// Long running operation require its own actor, thus initialing one if there were none prior
         func start(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
             guard let process = clients[pid] else { 
-                await deny(process: process, with: error)
                 return
             }
 
@@ -90,7 +89,6 @@ extension Pioneer {
         /// Short lived operation is processed immediately and pipe back later
         func once(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
             guard let process = clients[pid] else { 
-                await deny(process: process, with: error)
                 return
             }
 
@@ -153,7 +151,7 @@ extension Pioneer {
             let err = GraphQLMessage.errors(type: proto.error, [error.graphql])
             process.send(err.jsonString)
             process.keepAlive?.cancel()
-            await process.close(code: .policyViolation) 
+            await process.close(code: .graphqlNotAuthorized) 
         } 
     }
 }
