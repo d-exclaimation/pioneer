@@ -27,7 +27,7 @@ final class ProbeTests: XCTestCase {
             AsyncStream.just("hello").toEventStream()
         }
     }
-    
+
     /// Setup the GraphQL schema and Probe, then return the Probe
     func setup() throws -> Pioneer<Resolver, Void>.Probe {
         let schema = try Schema<Resolver, Void>.init {
@@ -43,7 +43,12 @@ final class ProbeTests: XCTestCase {
             schema: schema,
             resolver: Resolver(),
             proto: SubscriptionTransportWs.self,
-            websocketContextBuilder: { _, _, _ in }
+            websocketContextBuilder: { _, _, _ in },
+            websocketOnInit: { payload in
+                guard case .some = payload else {
+                    throw Abort(.ok)
+                }
+            }
         )
     }
 
@@ -51,7 +56,7 @@ final class ProbeTests: XCTestCase {
     func consumer() -> (Pioneer<Resolver, Void>.Process, TestConsumer)  {
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
-        return (.init(ws: consumer, payload: nil, req: req), consumer)
+        return (.init(ws: consumer, payload: [:], req: req), consumer)
     }
 
     /// Probe
@@ -143,5 +148,19 @@ final class ProbeTests: XCTestCase {
         }
         XCTAssert(!errors.isEmpty)
         await probe.disconnect(for: process.id)
+    }
+
+    /// Probe
+    /// 1. Should not accept if websocketOnInit throws an error
+    func testOnInit() async throws {
+        let probe = try setup()
+        let req = Request.init(application: app, on: app.eventLoopGroup.next())
+        let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
+        await probe.connect(with: .init(ws: consumer, payload: nil, req: req))
+
+        let results = await consumer.waitAll()
+        guard let _ = results.first(where: { $0.contains("\"error\"") }) else {
+            return XCTFail("No result")
+        }
     }
 }
