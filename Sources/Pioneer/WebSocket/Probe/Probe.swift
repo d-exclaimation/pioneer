@@ -147,6 +147,7 @@ extension Pioneer {
             ) 
         }
 
+        /// Deny a process and close it with an error message
         private func deny(process: Process, with error: Error) async {
             let err = GraphQLMessage.errors(type: proto.error, [error.graphql])
             process.send(err.jsonString)
