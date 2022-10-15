@@ -105,7 +105,7 @@ extension Pioneer {
             await probe.disconnect(for: pid)
             keepAlive?.cancel()
             timeout?.cancel()
-            try? await ws.close(code: .goingAway).get()
+            try? await ws.close(code: .normalClosure).get()
 
         // Start -> Long running operation
         case .start(oid: let oid, gql: let gql):
@@ -184,31 +184,5 @@ extension Pioneer {
         }
         keepAlive?.cancel()
         timeout?.cancel()
-    }
-}
-
-
-@discardableResult func setInterval(delay: UInt64?, _ block: @Sendable @escaping () throws -> Void) -> Task<Void, Error>? {
-    guard let delay = delay else {
-        return nil
-    }
-    return Task {
-        while !Task.isCancelled {
-            try await Task.sleep(nanoseconds: delay)
-            try block()
-        }
-    }
-}
-
-@discardableResult func setTimeout(delay: UInt64?, _ block: @Sendable @escaping () async throws -> Void) -> Task<Void, Error>? {
-    guard let delay = delay else {
-        return nil
-    } 
-    return Task {
-        try await Task.sleep(nanoseconds: delay)
-        guard !Task.isCancelled else {
-            return
-        }
-        try await block()
     }
 }

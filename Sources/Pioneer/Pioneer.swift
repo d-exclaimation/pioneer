@@ -98,6 +98,10 @@ public struct Pioneer<Resolver, Context> {
     }
 
     /// Apply Pioneer GraphQL handlers to a Vapor route
+    /// - Parameters:
+    ///   - router: The router to apply handlers to
+    ///   - path: The path within the route to add handles
+    ///   - bodyStrategy: The strategy to process the request body
     public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql", bodyStrategy: HTTPBodyStreamStrategy = .collect) {
         // HTTP Portion
         switch httpStrategy {
