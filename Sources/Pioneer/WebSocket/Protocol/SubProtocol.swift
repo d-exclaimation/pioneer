@@ -28,6 +28,11 @@ protocol SubProtocol {
 }
 
 extension SubProtocol {
+    /// Parse an operation based on the payload JSON given
+    /// - Parameters:
+    ///   - oid: The operation id decided by the server
+    ///   - payload: The JSON payload
+    /// - Returns: The intent based on the payload
     static func parseOperation<Resolver, Context>(oid: String, payload: [String: Map]) -> Pioneer<Resolver, Context>.Intent {
         guard let query = payload["query"]?.string else {
             return .error(oid: oid, message: "Cannot find query in request")

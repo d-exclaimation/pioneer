@@ -186,29 +186,3 @@ extension Pioneer {
         timeout?.cancel()
     }
 }
-
-
-@discardableResult func setInterval(delay: UInt64?, _ block: @Sendable @escaping () throws -> Void) -> Task<Void, Error>? {
-    guard let delay = delay else {
-        return nil
-    }
-    return Task {
-        while !Task.isCancelled {
-            try await Task.sleep(nanoseconds: delay)
-            try block()
-        }
-    }
-}
-
-@discardableResult func setTimeout(delay: UInt64?, _ block: @Sendable @escaping () async throws -> Void) -> Task<Void, Error>? {
-    guard let delay = delay else {
-        return nil
-    } 
-    return Task {
-        try await Task.sleep(nanoseconds: delay)
-        guard !Task.isCancelled else {
-            return
-        }
-        try await block()
-    }
-}

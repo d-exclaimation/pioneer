@@ -50,8 +50,18 @@ extension Pioneer {
     }
 }
 
+/// Any type of connection consumer
+/// 
+/// Used for:
+/// - Creating a test WebSocket connection
+/// - Making compatibility with other servers (TODO)
 protocol ProcessingConsumer {
+    /// Send a messsage to this websocket consumer
+    /// - Parameter msg: The message to be sent
     func send<S>(msg: S) where S: Collection, S.Element == Character
+
+    /// Close the connection
+    /// - Parameter code: Error code to close the connection
     func close(code: WebSocketErrorCode) -> EventLoopFuture<Void>
 }
 
