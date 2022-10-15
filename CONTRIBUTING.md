@@ -146,22 +146,56 @@ cd pioneer
 git remote add upstream https://github.com/d-exclaimation/pioneer
 ```
 
+- If you cloned a while ago, get the latest changes from upstream, and update your fork:
 
-### Improving The Documentation
-<!-- TODO
-Updating, improving and correcting the documentation
+```sh
+git checkout master
+git pull upstream master
+git push
+```
 
--->
+- Create a new topic branch (off of `main`) to contain your feature, change, or fix. **Avoid** making changes in the `main` branch.
+
+```sh
+git checkout -b <branch-name>
+```
+
+- Commit your changes in logical chunks. Keep the commit message organised and readable. We encourage usage of prefixes such as `feat:`, `fix:`, etc.
+
+```sh
+git commit -m 'fix: made httpHandler response with proper status codes'
+```
+
+- Make sure all the tests are still passing. If you are implementing a new feature, add some test cases as well.
+
+```sh
+swift test
+```
+
+- Push your topic branch up to your fork
+
+```sh
+git push origin <branch-name>
+```
+
+- [Open a Pull Request](https://github.com/d-exclaimation/pioneer/compare) with a clear title and description.
+
+Thank you for your contributions!
+
+#### Improving The Documentation
+
+Updating documentation should go through similar process with any [pull request](#pull-requests). However, passing test is not a requirement (If tests somehow failed, open an [issue](#how-do-i-submit-a-good-bug-report)).
+
+The documentation is built with [Retype](https://retype.com). All you need to see the documentation are:
+
+- Install `retype` CLI
+- Go to the documentation directory
+- Run `retype watch`
+- Run `retype build` to check for compilation errors
 
 ## Styleguides
 
-### Commit Messages
-<!-- TODO
-
--->
-
-## Join The Project Team
-<!-- TODO -->
+Refer to the [Swift API Guidelines](https://www.swift.org/documentation/api-design-guidelines/).
 
 ## Attribution
-This guide is based on the **contributing-gen**.
+This guide is based on the [contributing-gen](https://generator.contributing.md/).
