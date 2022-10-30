@@ -34,9 +34,9 @@ extension Pioneer {
         }
         
         
-        /// Alias for the preferred Apollo Sandbox option (Currently `.redirect(to: .apolloSandbox)`)
+        /// Alias for the preferred Apollo Sandbox option (Currently `.sandbox`)
         public static var apolloSandbox: IDE {
-            .redirect(to: .apolloSandbox)
+            .sandbox
         }
     }
     
