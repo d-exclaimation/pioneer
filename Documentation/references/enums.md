@@ -28,10 +28,10 @@ let server = Pioneer(
 
 ||| `playground`
 
-GraphQL Playground IDE (only for [subscriptions-graphql-ws](https://github.com/apollographql/subscriptions-transport-ws)) |
+GraphQL Playground IDE (only for [subscriptions-graphql-ws](https://github.com/apollographql/subscriptions-transport-ws)) 
 
 !!!warning Deprecated
-[GraphQL Playground](/features/graphql-ide/#graphql-playground) project has been [retired](https://github.com/graphql/graphql-playground/issues/1143), recommended using [GraphiQL](/features/graphql-ide/#graphiql) instead
+[GraphQL Playground](/features/graphql-ide/#graphql-playground) project has been [retired](https://github.com/graphql/graphql-playground/issues/1143), recommended using [Apollo Sandbox](/features/graphql-ide/#apollo-sandbox) or [GraphiQL](/features/graphql-ide/#graphiql) instead
 !!!
 
 |||
@@ -56,7 +56,7 @@ Redirect to a cloud based IDE
 
 ||| `apolloSandbox`
 
-Alias for the preferred Apollo Sandbox option (Currently `.redirect(to: .apolloSandbox)`)
+Alias for the preferred Apollo Sandbox option (Currently `.sandbox`)
 
 |||
 
