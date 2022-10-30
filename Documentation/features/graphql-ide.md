@@ -73,10 +73,7 @@ GET /playground # (For playground)
 
 ## Apollo Sandbox
 
-Apollo Sandbox is a cloud hosted in browser GraphQL IDE developed by Apollo GraphQL and their choice of replacement for [GraphQL Playground](#graphql-playground). Apollo Sandbox provide all features available in [GraphQL Playground](#graphql-playground) and a lot more. However, this is either:
-
-- A cloud based solution that require CORS configuration and cannot be self-hosted, or
-- A locally embedded solution that limited capabilities compared to the cloud version.
+Apollo Sandbox is a cloud hosted in browser GraphQL IDE developed by Apollo GraphQL and their choice of replacement for [GraphQL Playground](#graphql-playground). Apollo Sandbox provide all features available in [GraphQL Playground](#graphql-playground) and a lot more. However, the cloud based solution that require CORS configuration and cannot be self-hosted.
 
 Both solutions is not open source.
 

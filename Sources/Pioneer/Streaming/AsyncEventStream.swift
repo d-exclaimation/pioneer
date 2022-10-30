@@ -45,7 +45,7 @@ public final class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStre
     }
 }
 
-public extension AsyncEventStream {
+public extension AsyncEventStream where Sequence == AsyncThrowingStream<Element, Error> {
     /// Constructs an AsyncEventStream for an element type, using the specified buffering policy and element-producing closure
     /// - Parameters:
     ///   - elementType: The type of element the AsyncEventStream produces
@@ -55,7 +55,7 @@ public extension AsyncEventStream {
         _ elementType: Element.Type = Element.self,
         bufferingPolicy limit: AsyncThrowingStream<Element, Error>.Continuation.BufferingPolicy = .unbounded,
         _ build: (AsyncThrowingStream<Element, Error>.Continuation) -> Void
-    ) where Sequence == AsyncThrowingStream<Element, Error> {
+    ) {
         self.init(from: .init(elementType, bufferingPolicy: limit, build))
     }
 }

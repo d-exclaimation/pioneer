@@ -27,7 +27,7 @@ let server = Pioneer(
     },
     websocketProtocol: .graphqlWs,
     introspection: true,
-    playground: .graphiql
+    playground: .sandbox
 )
 
 defer {

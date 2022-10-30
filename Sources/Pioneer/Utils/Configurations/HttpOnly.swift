@@ -44,7 +44,7 @@ public extension Pioneer.Config {
             },
             websocketProtocol: .disable,
             introspection: introspection, 
-            playground: .graphiql
+            playground: .sandbox
         )
     }
 

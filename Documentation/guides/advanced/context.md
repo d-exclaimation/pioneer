@@ -33,7 +33,7 @@ let server = Pioneer(
     contextBuilder: getContext,
     websocketProtocol: .graphqlWs,
     introspection: true,
-    playground: .graphiql
+    playground: .sandbox
 )
 ```
 
@@ -107,7 +107,7 @@ let server = Pioneer(
     websocketContextBuilder: getWebsocketContext,
     websocketProtocol: .graphqlWs,
     introspection: true,
-    playground: .graphiql
+    playground: .sandbox
 )
 ```
 
@@ -231,6 +231,6 @@ let server = Pioneer(
     },
     websocketProtocol: .graphqlWs,
     introspection: true,
-    playground: .graphiql
+    playground: .sandbox
 )
 ```

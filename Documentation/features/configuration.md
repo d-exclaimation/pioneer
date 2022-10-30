@@ -147,7 +147,7 @@ let server = Pioneer(
             Context(req, res)
         },
         httpStrategy: .csrfPrevention,
-        playground: .graphiql
+        playground: .sandbox
     )
 )
 ```
@@ -210,7 +210,7 @@ let server = Pioneer(
             Context(req, payload, gql)
         },
         websocketProtocol: .graphqlWs,
-        playground: .graphiql
+        playground: .sandbox
     )
 )
 ```

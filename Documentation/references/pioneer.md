@@ -45,7 +45,7 @@ let server = Pioneer(
 | `websocketContextBuilder` | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                                      |
 | `websocketProtocol`       | [!badge variant="primary" text="WebsocketProtocol"]                                                  | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`           | [!badge variant="primary" text="Bool"]                                                               | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.sandbox`                                     |
 | `validationRules`         | [!badge variant="primary" text="Validations"]                                                        | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 | `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
@@ -86,7 +86,7 @@ let server = Pioneer(
 | `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]                               | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]                          | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]                                       | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`        | [!badge variant="primary" text="IDE"]                                        | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `playground`        | [!badge variant="primary" text="IDE"]                                        | Allowing playground <br/> **Default**: `.sandbox`                                     |
 | `validationRules`   | [!badge variant="primary" text="Validations"]                                | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                    | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 | `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
@@ -123,7 +123,7 @@ let server = Pioneer(
 | `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]      | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"] | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]              | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`        | [!badge variant="primary" text="IDE"]               | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `playground`        | [!badge variant="primary" text="IDE"]               | Allowing playground <br/> **Default**: `.sandbox`                                     |
 | `validationRules`   | [!badge variant="primary" text="Validations"]       | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]           | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 | `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
@@ -164,7 +164,7 @@ let server = try Pioneer(
 | `httpStrategy`      | [!badge variant="primary" text="HTTPStrategy"]                            | HTTP strategy <br/> **Default**: `.queryOnlyGet`                                       |
 | `websocketProtocol` | [!badge variant="primary" text="WebsocketProtocol"]                       | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`     | [!badge variant="primary" text="Bool"]                                    | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`        | [!badge variant="primary" text="IDE"]                                     | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `playground`        | [!badge variant="primary" text="IDE"]                                     | Allowing playground <br/> **Default**: `.sandbox`                                     |
 | `validationRules`   | [!badge variant="primary" text="Validations"]                             | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`         | [!badge variant="warning" text="UInt64?"]                                 | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 | `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
@@ -213,7 +213,7 @@ let server = try Pioneer(
 | `websocketContextBuilder` | [!badge variant="danger" text="(Request, ConnectionParams, GraphQLRequest) async throws -> Context"] | Context builder for the websocket                                                      |
 | `websocketProtocol`       | [!badge variant="primary" text="WebsocketProtocol"]                                                  | Websocket sub-protocol <br/> **Default**: `.subscriptionsTransportws`                  |
 | `introspection`           | [!badge variant="primary" text="Bool"]                                                               | Allowing introspection <br/> **Default**: `true`                                       |
-| `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.graphiql`                                     |
+| `playground`              | [!badge variant="primary" text="IDE"]                                                                | Allowing playground <br/> **Default**: `.sandbox`                                     |
 | `validationRules`         | [!badge variant="primary" text="Validations"]                                                        | Validation rules to be applied before operation <br/> **Default**: `.none`             |
 | `keepAlive`               | [!badge variant="warning" text="UInt64?"]                                                            | Keep alive internal in nanosecond, `nil` for disabling <br/> **Default**: 12.5 seconds |
 | `timeout`               | [!badge variant="warning" text="UInt64?"]                                                            | Timeout interval in nanosecond, `nil` for disabling <br/> **Default**: 5 seconds |
