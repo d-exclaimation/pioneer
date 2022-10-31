@@ -89,9 +89,9 @@ Any operation going through websocket uses the websocket context builder instead
 
 ## Manual WebSocket Routing
 
-In cases where the routing configuration by Pioneer when using [`.applyMiddleware`](/references/pioneer/#applymiddleware) is insufficient to your need, you can opt out and manually set your routes, have Pioneer still handle GraphQL operation, and even execute code on the incoming request before Pioneer handles the GraphQL operation(s).
+In cases where the routing configuration by Pioneer when using [`.applyMiddleware`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/applymiddleware(on:at:bodystrategy:)) is insufficient to your need, you can opt out and manually set your routes, have Pioneer still handle GraphQL operation, and even execute code on the incoming request before Pioneer handles the GraphQL operation(s).
 
-To do that, you can utilize the newly added [`.webSocketHandler(req:)`](/references/pioneer/#websockethandler) method from Pioneer, which will handle incoming `Request`, upgrade to WebSocket, and handle WebSocket messages as well.
+To do that, you can utilize the newly added [`.webSocketHandler(req:)`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/websockethandler(req:)) method from Pioneer, which will handle incoming `Request`, upgrade to WebSocket, and handle WebSocket messages as well.
 
 !!!success Manual HTTP Routing
 Pioneer also provide handler to manually setting routes for HTTP
@@ -119,7 +119,7 @@ app.group("api") {
 
 ### Consideration
 
-The [`.webSocketHandler(req:)`](/references/pioneer/#websockethandler) method has some behavior to be aware about. Given that it is a method from the Pioneer struct, it still uses the configuration set when creating the Pioneer server, such as:
+The [`.webSocketHandler(req:)`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/websockethandler(req:)) method has some behavior to be aware about. Given that it is a method from the Pioneer struct, it still uses the configuration set when creating the Pioneer server, such as:
 
 - It will still use the [WebsocketProtocol](#websocket-subprotocol) and check if the upgrade request is valid / allowed to go through.
   - For example, this handler won't accept **GET** request and perform the upgrade to WebSocket if the provided `Sec-Websocket-Protocol` header value does not match the required value for each websocket subprotocol.

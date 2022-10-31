@@ -10,7 +10,7 @@ extension Pioneer {
     /// GraphQL Hosted IDE
     public enum IDE {
         /// GraphQL Playground IDE (only for `subscriptions-graphql-ws`)
-        @available(*, deprecated, message: "Use `GraphiQL instead`")
+        @available(*, deprecated, message: "Use `GraphiQL or Apollo Sandbox instead`")
         case playground
         
         /// GraphiQL Browser IDE
@@ -34,9 +34,9 @@ extension Pioneer {
         }
         
         
-        /// Alias for the preferred Apollo Sandbox option (Currently `.redirect(to: .apolloSandbox)`)
+        /// Alias for the preferred Apollo Sandbox option (Currently `.sandbox`)
         public static var apolloSandbox: IDE {
-            .redirect(to: .apolloSandbox)
+            .sandbox
         }
     }
     
@@ -209,11 +209,11 @@ extension Pioneer {
             -->
             <script
               crossorigin
-              src="https://unpkg.com/react@16/umd/react.development.js"
+              src="https://unpkg.com/react@17/umd/react.development.js"
             ></script>
             <script
               crossorigin
-              src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+              src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
             ></script>
             <!--
               These two files can be found in the npm module, however you may wish to

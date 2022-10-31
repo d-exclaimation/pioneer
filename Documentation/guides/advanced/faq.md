@@ -21,15 +21,15 @@ Yes. Pioneer have extensions for Graphiti, but it works with any schema librarie
 
 ### Scalars
 
-#### Does the [ID](/references/structs/#id) field worked with `UUID` and/or Fluent?
+#### Does the [ID](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/id) field worked with `UUID` and/or Fluent?
 
-Yes. The [ID](/references/structs/#id) is just a wrapper around string used to help Graphiti differentiate between `String` to an `ID` from GraphQL built in scalars.
+Yes. The [ID](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/id) is just a wrapper around string used to help Graphiti differentiate between `String` to an `ID` from GraphQL built in scalars.
 
 !!!success UUID to ID extension
-Since `0.8.3`, you can call the method `.toID()` or use the computed property `.id` to turn any `UUID` or `String` into an [ID](/references/structs/#id).
+Since `0.8.3`, you can call the method `.toID()` or use the computed property `.id` to turn any `UUID` or `String` into an [ID](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/id).
 !!!
 
-`UUID` can be easily parsed back into a string and used for making [ID](/references/structs/#id).
+`UUID` can be easily parsed back into a string and used for making [ID](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/id).
 
 [!ref ID and UUID](/guides/advanced/fluent/#graphql-id)
 
@@ -189,12 +189,12 @@ Yes, [ConcurrentEventStream](https://github.com/GraphQLSwift/GraphQL/blob/master
 
 ### PubSub
 
-#### Does Pioneer provide an [AsyncPubSub](/references/async-pubsub.md) that is backed by Redis?
+#### Does Pioneer provide an [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub.md) that is backed by Redis?
 
-No, Pioneer only provide [AsyncPubSub](/references/async-pubsub.md), the in-memory implementation [PubSub](/references/protocols/#pubsub). However, Pioneer does export the [PubSub](/references/protocols/#pubsub) protocol to allow custom implemenation that have similar API with [AsyncPubSub](/references/async-pubsub.md).
+No, Pioneer only provide [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub.md), the in-memory implementation [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub). However, Pioneer does export the [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) protocol to allow custom implemenation that have similar API with [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub.md).
 
 !!!success RedisPubSub
-Implementation of Redis backed [PubSub](/references/protocols/#pubsub) is available under the package [PioneerRedisPubSub](https://github.com/d-exclaimation/pioneer-redis-pubsub). Alternatively, you could build your own implementation using this [example](/guides/advanced/subscriptions/#redis-example) as a starting point.
+Implementation of Redis backed [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) is available under the package [PioneerRedisPubSub](https://github.com/d-exclaimation/pioneer-redis-pubsub). Alternatively, you could build your own implementation using this [example](/guides/advanced/subscriptions/#redis-example) as a starting point.
 !!!
 
 [!ref PubSub as a protocol](/guides/advanced/subscriptions/#pubsub-as-protocol)
@@ -205,7 +205,7 @@ Implementation of Redis backed [PubSub](/references/protocols/#pubsub) is availa
 
 #### Can I opt out from Pioneer's routing and set my own routes, while still have Pioneer handle all HTTP request?
 
-Yes, you can using the [httpHandler(req:)](/references/pioneer/#httphandler). In which, you can perform code before and after the GraphQL operation by the handler.
+Yes, you can using the [httpHandler(req:)](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httphandler(req:)). In which, you can perform code before and after the GraphQL operation by the handler.
 
 [!ref Manual HTTP Routing](/features/graphql-over-http/#manual-http-routing)
 
@@ -213,7 +213,7 @@ Yes, you can using the [httpHandler(req:)](/references/pioneer/#httphandler). In
 
 #### Can I opt out from Pioneer's routing and set my own routes, while still have Pioneer handle all WebSocket operations?
 
-Yes, you can using the [webSocketHandler(req:)](/references/pioneer/#websockethandler). However different from HTTP, you can manually set the route only for the upgrade request, but you cannot intercept and manually handle WebSocket messages.
+Yes, you can using the [webSocketHandler(req:)](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/websockethandler(req:)). However different from HTTP, you can manually set the route only for the upgrade request, but you cannot intercept and manually handle WebSocket messages.
 
 [!ref Manual WebSocket Routing](/features/graphql-over-websocket/#manual-websocket-routing)
 

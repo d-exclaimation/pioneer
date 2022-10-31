@@ -12,6 +12,18 @@ public actor Broadcast<MessageType: Sendable> {
     
     private var consumers: [UUID: Consumer] = [:]
     
+    /// Pipe an AsyncSequence to this broadcast and return the task is used to consume it
+    /// - Parameter stream: The AsyncSequence used to push messages
+    /// - Returns: The Task used to consumed it
+    public func pipe<Sequence: AsyncSequence>(_ stream: Sequence) -> Task<Void, Error> where Sequence.Element == MessageType {
+        Task { [unowned self] in
+            for try await each in stream {
+                await self.publish(each)
+            }
+            await self.close()
+        }
+    }
+    
     /// Creates a new downstream with an id
     /// - Returns: The async stream and its id
     public func downstream() async -> Downstream<MessageType> {

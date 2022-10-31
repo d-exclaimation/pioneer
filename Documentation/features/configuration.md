@@ -6,14 +6,14 @@ order: 50
 # Configuration
 
 !!!success Custom Configuration options
-From `0.9.3`, Pioneer brought in a structure that will allow easier configuration, which would only require you to pass in the config object into [Pioneer](/references/pioneer) initializer.
+From `0.9.3`, Pioneer brought in a structure that will allow easier configuration, which would only require you to pass in the config object into [Pioneer](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) initializer.
 !!!
 
 This configuration structure would allow user of the library to create multiple configuration for Pioneer on different environment or situation.
 
 ## Config
 
-The Config object takes in all the parameters required to initialized a [Pioneer](/references/pioneer) server instance.
+The Config object takes in all the parameters required to initialized a [Pioneer](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) server instance.
 
 ```swift
 let server = Pioneer(
@@ -21,7 +21,7 @@ let server = Pioneer(
 )
 ```
 
-_You are still allowed to directly passed in the required parameters for [Pioneer](/references/pioneer) into its initializer without the use of configs._
+_You are still allowed to directly passed in the required parameters for [Pioneer](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) into its initializer without the use of configs._
 
 ## Built-in configs
 
@@ -147,7 +147,7 @@ let server = Pioneer(
             Context(req, res)
         },
         httpStrategy: .csrfPrevention,
-        playground: .graphiql
+        playground: .sandbox
     )
 )
 ```
@@ -210,7 +210,7 @@ let server = Pioneer(
             Context(req, payload, gql)
         },
         websocketProtocol: .graphqlWs,
-        playground: .graphiql
+        playground: .sandbox
     )
 )
 ```

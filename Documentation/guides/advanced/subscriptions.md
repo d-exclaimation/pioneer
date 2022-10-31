@@ -41,9 +41,9 @@ The resolver function must return an `EventStream` built from [`AsyncEventStream
 
 ## AsyncPubSub
 
-Pioneer provide an in memory publish-subscribe (**Pub/Sub**) model named, [AsyncPubSub](/references/async-pubsub), to concurrent safely track events and update all active subscribers.
+Pioneer provide an in memory publish-subscribe (**Pub/Sub**) model named, [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub), to concurrent safely track events and update all active subscribers.
 
-[AsyncPubSub](/references/async-pubsub) conforms to [PubSub](/references/protocols/#pubsub) which enables your server code to both publish events to a particular topic/trigger/trigger and listen for events associated with a particular topic.
+[AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub) conforms to [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) which enables your server code to both publish events to a particular topic/trigger/trigger and listen for events associated with a particular topic.
 
 ```swift
 import Pioneer
@@ -53,7 +53,7 @@ let pubsub = AsyncPubSub()
 
 ### Publishing an event
 
-You can publish an event using the [`publish`](/references/async-pubsub/#publish) method:
+You can publish an event using the [`publish`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub/publish(for:payload:))) method:
 
 ```swift
 await pubsub.publish("POST_CREATED", Post(by: "Jeff Bezos", content: "How much many do I have"))
@@ -122,9 +122,9 @@ Next, we can listen for this event in our `Subscription` resolver.
 
 ### Listening for events
 
-An AsyncStream asynchronously iterate over events, and if that stream comes from a [PubSub](/references/protocols/#pubsub), it will be associated with a particular trigger and will receive the events published under that trigger.
+An AsyncStream asynchronously iterate over events, and if that stream comes from a [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub), it will be associated with a particular trigger and will receive the events published under that trigger.
 
-You can create an AsyncStream by calling the [asyncStream](/references/protocols/#asyncstream) method of [PubSub](/references/protocols/#pubsub) and passing in a the event trigger that this stream should listen for and the type.
+You can create an AsyncStream by calling the [asyncStream](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub/asyncstream(_:for:)) method of [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) and passing in a the event trigger that this stream should listen for and the type.
 
 ```swift
 pubsub.asyncStream(Post.self, for: "POST_CREATED");
@@ -144,21 +144,21 @@ struct Resolver {
 
 ## Custom Pub/Sub
 
-As mentioned before, [AsyncPubSub](/references/async-pubsub) is an in memory pub-sub implementation that is limited to a single server instance, which may become an issue on production environments where there are multiple distributed server instances.
+As mentioned before, [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub) is an in memory pub-sub implementation that is limited to a single server instance, which may become an issue on production environments where there are multiple distributed server instances.
 
 In which case, you likely want to either use or implement a custom pub-sub system that is backed by an external datastore.
 
 ### PubSub as protocol
 
 !!!success Integration
-Pub/Sub implementation conform to this protocol is enforced to have the same API to [AsyncPubSub](/references/async-pubsub), which make easy to switch between.
+Pub/Sub implementation conform to this protocol is enforced to have the same API to [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub), which make easy to switch between.
 
 However, it is **not necessary** to use PubSub for your subscription resolver and to build a custom Pub/Sub implementation.
 !!!
 
-Pioneer exported the [PubSub](/references/protocols/#pubsub) protocol which allow different implementation with the same API [AsyncPubSub](/references/async-pubsub) notably implementation backed by popular event-publishing systems (i.e. Redis) with similar API which allow user of this library to prototype with the in memory AsyncPubSub and easily migrate to a distributed PubSub implementation without very little changes.
+Pioneer exported the [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) protocol which allow different implementation with the same API [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub) notably implementation backed by popular event-publishing systems (i.e. Redis) with similar API which allow user of this library to prototype with the in memory AsyncPubSub and easily migrate to a distributed PubSub implementation without very little changes.
 
-The basic rules to implement A [PubSub](/references/protocols/#pubsub) are as follow:
+The basic rules to implement A [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) are as follow:
 
 ||| Conformance
 
@@ -184,7 +184,7 @@ The implementation should be free of data races and be working safely under asyn
 
 |||
 
-[!ref PubSub specification](/references/protocols/#pubsub)
+[!ref PubSub specification](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub)
 
 ### Broadcast
 
@@ -194,7 +194,7 @@ Additionally, common client libraries for popular event-publishing systems usual
 - Only allow 1 subscriber for each publisher / channel
   - Usually because subscription is its own new network connection and multiple of those can be resource intensive.
 
-In this case, the actor, [Broadcast](/references/actors/#broadcast), is provided which can broadcast any events from a publisher to multiple different downstream where each downstream share the same upstream and can be unsubscribed / disposed (to prevent leaks) without closing the upstream and publisher.
+In this case, the actor, [Broadcast](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/broadcast), is provided which can broadcast any events from a publisher to multiple different downstream where each downstream share the same upstream and can be unsubscribed / disposed (to prevent leaks) without closing the upstream and publisher.
 
 ```mermaid
 %%{init: { 'theme': 'base' } }%%
@@ -206,7 +206,7 @@ graph LR
     B -->|Broadcasted Events| L[4th Downstream]
 ```
 
-[Broadcast](/references/actors/#broadcast) provide the methods:
+[Broadcast](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/broadcast) provide the methods:
 
 - `downstream` to create a new subscriber stream that will receive events broadcasted
 - `publish` to broadcast the events to all subscriber
@@ -216,10 +216,10 @@ Essentially, it will be applied on a event publisher to create multiple downstre
 
 - Different consumer can subscribe to the same upstream and all of them get the same messages
   - Usually to prevent making multiple subscription might be resource intensive
-- [Downstream(s)](/references/structs/#downstream) can be disposed, stopped, or cancelled individually to prevent leaks
+- [Downstream(s)](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/downstream) can be disposed, stopped, or cancelled individually to prevent leaks
   - Disposed by cancelling `Task` used to consume it
-- Closing any [downstream(s)](/references/structs/#downstream) does not close other downstream(s), broadcast, and upstream
-  - Other [downstream(s)](/references/structs/#downstream) will continue receiving broadcasted events
+- Closing any [downstream(s)](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/downstream) does not close other downstream(s), broadcast, and upstream
+  - Other [downstream(s)](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/downstream) will continue receiving broadcasted events
 - Closing broadcast dispose all downstream(s), but not necessarily the upstream
 
 ==- Example
@@ -262,11 +262,11 @@ await broadcast.close()
 
 ===
 
-[!ref Broadcast specification](/references/actors/#broadcast)
+[!ref Broadcast specification](https://swiftpackageindex.com/d-exclaimation/pioneer/main/documentation/pioneer/broadcast)
 
 ### Redis Example
 
-As an example, say we want to build a redis backed [PubSub](/references/protocols/#pubsub).
+As an example, say we want to build a redis backed [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub).
 
 !!!warning Basic Example
 This is only meant to be an example to give a better idea on how to implement a custom implementation that conform to [PubSub](#pubsub-as-protocol) and utilize [Broadcast](#broadcast).
@@ -387,7 +387,7 @@ struct RedisPubSub: PubSub {
 }
 ```
 
-Now we can have the Resolver to have a property `pubsub` of type [PubSub](/references/protocols/#pubsub) instead of [AsyncPubSub](/references/async-pubsub), while still being able to use [AsyncPubSub](/references/async-pubsub) during development.
+Now we can have the Resolver to have a property `pubsub` of type [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) instead of [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub), while still being able to use [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/async-pubsub) during development.
 
 ```swift Message.swift
 struct Message: Sendable, Codable { ... }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GraphQL
 import XCTest
 @testable import Pioneer
 
@@ -84,5 +85,25 @@ final class AsyncPubSubTests: XCTestCase {
         
         task.cancel()
         task1.cancel()
+    }
+
+    func testAsyncStream() async throws {
+        let stream1 = EventStream<Int>.async(Int.self) { con in 
+            con.yield(1)
+            con.finish()
+        }
+
+        for try await each in stream1.sequence {
+            XCTAssertEqual(each, 1)
+        }
+
+        let stream2 = AsyncEventStream<Int, AsyncThrowingStream<Int, Error>>(Int.self) { con in 
+            con.yield(1)
+            con.finish()
+        }
+
+        for try await each in stream2.sequence {
+            XCTAssertEqual(each, 1)
+        }
     }
 }

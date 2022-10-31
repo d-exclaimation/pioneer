@@ -24,10 +24,10 @@ public extension Pioneer where Context == Void {
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
-        playground: IDE = .graphiql,
+        playground: IDE = .sandbox,
         validationRules: Validations = .none,
-        keepAlive: UInt64? = 12_500_000_000,
-        timeout: UInt64? = 5_000_000_000
+        keepAlive: UInt64? = .seconds(30),
+        timeout: UInt64? = .seconds(5)
     ) {
         self.init(
             schema: schema.schema,
