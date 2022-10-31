@@ -209,11 +209,11 @@ extension Pioneer {
             -->
             <script
               crossorigin
-              src="https://unpkg.com/react@16/umd/react.development.js"
+              src="https://unpkg.com/react@17/umd/react.development.js"
             ></script>
             <script
               crossorigin
-              src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+              src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
             ></script>
             <!--
               These two files can be found in the npm module, however you may wish to
