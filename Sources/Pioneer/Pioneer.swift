@@ -63,8 +63,8 @@ public struct Pioneer<Resolver, Context> {
         introspection: Bool = true,
         playground: IDE = .sandbox,
         validationRules: Validations = .none,
-        keepAlive: UInt64? = 12_500_000_000,
-        timeout: UInt64? = 5_000_000_000
+        keepAlive: UInt64? = .seconds(12),
+        timeout: UInt64? = .seconds(5)
     ) {
         self.schema = schema
         self.resolver = resolver
