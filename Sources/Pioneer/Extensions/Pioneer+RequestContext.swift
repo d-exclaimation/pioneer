@@ -26,7 +26,7 @@ public extension Pioneer where Context == Void {
         introspection: Bool = true,
         playground: IDE = .sandbox,
         validationRules: Validations = .none,
-        keepAlive: UInt64? = .seconds(12),
+        keepAlive: UInt64? = .seconds(30),
         timeout: UInt64? = .seconds(5)
     ) {
         self.init(

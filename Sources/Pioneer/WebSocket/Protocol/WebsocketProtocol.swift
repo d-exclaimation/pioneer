@@ -11,6 +11,7 @@ public extension Pioneer {
     /// Websocket sub-protocol
     enum WebsocketProtocol {
         /// `subscriptions-transport-ws/graphql-ws`
+        @available(*, deprecated, message: "Legacy protocol: Use `.graphqlWs` instead")
         case subscriptionsTransportWs
         /// `graphql-ws/graphql-transport-ws`
         case graphqlWs
