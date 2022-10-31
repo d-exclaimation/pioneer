@@ -10,7 +10,7 @@ extension Pioneer {
     /// GraphQL Hosted IDE
     public enum IDE {
         /// GraphQL Playground IDE (only for `subscriptions-graphql-ws`)
-        @available(*, deprecated, message: "Use `GraphiQL instead`")
+        @available(*, deprecated, message: "Use `GraphiQL or Apollo Sandbox instead`")
         case playground
         
         /// GraphiQL Browser IDE
