@@ -187,9 +187,9 @@ If either of these apply to you and you want to keep the prevention mechanic, yo
 
 ## Manual HTTP Routing
 
-In cases where the routing configuration by Pioneer when using [`.applyMiddleware`](/references/pioneer/#applymiddleware) is insufficient to your need, you can opt out and manually set your routes, have Pioneer still handle GraphQL operation, and even execute code on the incoming request before Pioneer handles the GraphQL operation(s).
+In cases where the routing configuration by Pioneer when using [`.applyMiddleware`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/applymiddleware(on:at:bodystrategy:)) is insufficient to your need, you can opt out and manually set your routes, have Pioneer still handle GraphQL operation, and even execute code on the incoming request before Pioneer handles the GraphQL operation(s).
 
-To do that, you can utilize the newly added [`.httpHandler(req:)`](/references/pioneer/#httphandler) method from Pioneer, which will handle incoming `Request` and return a proper GraphQL formatted`Response`.
+To do that, you can utilize the newly added [`.httpHandler(req:)`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httphandler(req:)) method from Pioneer, which will handle incoming `Request` and return a proper GraphQL formatted`Response`.
 
 !!!success Manual WebSocket Routing
 Pioneer also provide handler to manually setting routes for WebSocket
@@ -217,7 +217,7 @@ app.group("api") {
 
 ### Consideration
 
-The [`.httpHandler(req:)`](/references/pioneer/#httphandler) method has some behavior to be aware about. Given that it is a method from the Pioneer struct, it still uses the configuration set when creating the Pioneer server, such as:
+The [`.httpHandler(req:)`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httphandler(req:)) method has some behavior to be aware about. Given that it is a method from the Pioneer struct, it still uses the configuration set when creating the Pioneer server, such as:
 
 1. It will still use the [HTTPStrategy](#http-strategy) and check if the request is valid / allowed to go through.
    - For example, if you set a **GET** route using this but the httpStrategy is set to `.onlyPost`, this handler won't accept **GET** request for all GraphQL operations and will just throw an error.

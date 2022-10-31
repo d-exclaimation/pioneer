@@ -208,7 +208,7 @@ struct Resolver {
 }
 ```
 
-[!ref GraphQLRequest API References](/references/structs/#graphqlrequest)
+[!ref GraphQLRequest API References](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest)
 
 ## WebSocket Initialisation Hook and Authorization
 
