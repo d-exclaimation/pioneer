@@ -18,7 +18,7 @@ extension Pioneer {
         /// Websocket connection for this process
         var ws: ProcessingConsumer
         /// Context from request attached to this context
-        var payload: ConnectionParams
+        var payload: Payload
         /// Request attached to this process
         var req: Request
         /// KeepAlive Task
@@ -27,7 +27,7 @@ extension Pioneer {
         init(
             id: UUID = UUID(), 
             ws: ProcessingConsumer, 
-            payload: ConnectionParams, 
+            payload: Payload, 
             req: Request, 
             keepAlive: Task<Void, Error>? = nil
         ) {

@@ -14,7 +14,7 @@ public extension Request {
     ///   - contextBuilder: The HTTP context builder
     /// - Returns: The context from the builder
     func defaultWebsocketContextBuilder<Context>(
-        payload: ConnectionParams,
+        payload: Payload,
         gql: GraphQLRequest,
         contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context
     ) async throws -> Context  {
@@ -41,7 +41,7 @@ public extension Request {
 
 extension GraphQLRequest: Content {}
 
-public extension ConnectionParams {
+public extension Payload {
     /// Query string from the connection parameter
     var queries: String {
         guard let payload = self else { return "" }

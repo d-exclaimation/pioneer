@@ -17,13 +17,13 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
-        private let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
-        private let websocketOnInit: @Sendable (ConnectionParams) async throws -> Void
+        private let websocketContextBuilder: @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
+        private let websocketOnInit: @Sendable (Payload) async throws -> Void
 
         init(
             schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-            websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in }
+            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context,
+            websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in }
         ) {
             self.schema = schema
             self.resolver = resolver
@@ -34,8 +34,8 @@ extension Pioneer {
         
         init(
             schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-            websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in }
+            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context,
+            websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in }
         ) {
             self.schema = schema.schema
             self.resolver = resolver
@@ -127,7 +127,7 @@ extension Pioneer {
         // MARK: - Utility methods
     
         /// Build context and execute short-lived GraphQL Operation inside an event loop 
-        private func execute(_ gql: GraphQLRequest, payload: ConnectionParams, req: Request) -> Future<GraphQLResult> {
+        private func execute(_ gql: GraphQLRequest, payload: Payload, req: Request) -> Future<GraphQLResult> {
             req.eventLoop.performWithTask { [unowned self] in
                 let ctx = try await self.websocketContextBuilder(req, payload, gql)
                 return try await self.executeOperation(for: gql, with: ctx, using: req.eventLoop)

@@ -22,7 +22,7 @@ public struct Pioneer<Resolver, Context> {
     /// HTTP strategy
     public private(set) var httpStrategy: HTTPStrategy
     /// Websocket Context builder
-    public private(set) var websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+    public private(set) var websocketContextBuilder: @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
     /// Websocket sub-protocol
     public private(set) var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
@@ -57,8 +57,8 @@ public struct Pioneer<Resolver, Context> {
         resolver: Resolver,
         contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-        websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in },
+        websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context,
+        websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in },
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .sandbox,

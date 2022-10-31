@@ -10,7 +10,12 @@ import struct Foundation.UUID
 import struct GraphQL.GraphQLError
 import enum GraphQL.Map
 
+/// WebSocket Payload
+@available(*, deprecated, message: "Use `Payload` instead")
 public typealias ConnectionParams = [String: Map]?
+
+/// WebSocket Payload
+public typealias Payload = [String: Map]?
 
 extension Pioneer {
     /// Apply middleware through websocket

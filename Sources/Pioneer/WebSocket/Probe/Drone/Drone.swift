@@ -17,11 +17,11 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
-        private let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+        private let websocketContextBuilder: @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
 
         init(
             _ process: Process, schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context
         ) {
             self.schema = schema
             self.resolver = resolver
@@ -32,7 +32,7 @@ extension Pioneer {
 
         init(
             _ process: Process, schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context
+            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context
         ) {
             self.schema = schema.schema
             self.resolver = resolver
