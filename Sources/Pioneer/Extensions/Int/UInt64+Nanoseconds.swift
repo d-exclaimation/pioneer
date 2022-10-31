@@ -5,7 +5,7 @@
 //  Created by d-exclaimation on 14:19.
 //
 
-public extension UInt64? {
+public extension Optional where WrappedType == UInt64 {
     /// Convert the given value in seconds into nanoseconds
     /// - Parameter s: The value in seconds
     /// - Returns: The nanoseconds result
