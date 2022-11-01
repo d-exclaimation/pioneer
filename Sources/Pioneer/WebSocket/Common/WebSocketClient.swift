@@ -1,5 +1,5 @@
 //
-//  SocketClient.swift
+//  WebSocketClient.swift
 //  pioneer
 //
 //  Created by d-exclaimation on 14:40.
@@ -15,14 +15,14 @@ extension Pioneer {
 
     public typealias WebSocketContext = @Sendable (Payload, GraphQLRequest) async throws -> Context
 
-    public struct SocketClient {
+    public struct WebSocketClient {
         var id: UUID
-        var io: SocketIO
+        var io: WebSocketIO
         var payload: Payload
         var ev: EventLoopGroup
         var contextBuilder: WebSocketContext
 
-        init(id: UUID, io: SocketIO, payload: Payload, ev: EventLoopGroup, context: @escaping WebSocketContext) {
+        init(id: UUID, io: WebSocketIO, payload: Payload, ev: EventLoopGroup, context: @escaping WebSocketContext) {
             self.id = id
             self.io = io
             self.payload = payload

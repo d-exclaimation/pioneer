@@ -35,14 +35,14 @@ extension Pioneer {
         }
 
         // MARK: - Private mutable states
-        private var clients: [UUID: SocketClient] = [:]
+        private var clients: [UUID: WebSocketClient] = [:]
         private var drones: [UUID: Drone] = [:]
         
         
         // MARK: - Event callbacks
         
         /// Allocate space and save any verified process
-        func connect(with client: SocketClient) async {
+        func connect(with client: WebSocketClient) async {
             clients.update(client.id, with: client)
         }
         
@@ -103,7 +103,7 @@ extension Pioneer {
         }
         
         /// Message for pipe to self result after processing short lived operation
-        func outgoing(with oid: String, to client: SocketClient, given msg: GraphQLMessage) async {
+        func outgoing(with oid: String, to client: WebSocketClient, given msg: GraphQLMessage) async {
             client.out(msg.jsonString)
             client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
         }
@@ -111,7 +111,7 @@ extension Pioneer {
         // MARK: - Utility methods
     
         /// Build context and execute short-lived GraphQL Operation inside an event loop 
-        private func execute(_ gql: GraphQLRequest, client: SocketClient) -> Task<GraphQLResult, Error> {
+        private func execute(_ gql: GraphQLRequest, client: WebSocketClient) -> Task<GraphQLResult, Error> {
             Task { [unowned self] in
                 let ctx = try await client.context(gql)
                 return try await self.executeOperation(for: gql, with: ctx, using: client.ev)

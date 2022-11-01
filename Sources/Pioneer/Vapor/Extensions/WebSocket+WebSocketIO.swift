@@ -1,5 +1,5 @@
 //
-//  WebSocket+SocketIO.swift
+//  WebSocket+WebSocketIO.swift
 //  pioneer
 //
 //  Created by d-exclaimation on 14:35.
@@ -8,7 +8,7 @@
 import enum NIOWebSocket.WebSocketErrorCode
 import class Vapor.WebSocket
 
-extension WebSocket: SocketIO {
+extension WebSocket: WebSocketIO {
     public func out<S>(_ msg: S) where S: Collection, S.Element == Character {
         send(msg)
     }

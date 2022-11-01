@@ -15,7 +15,7 @@ protocol SubProtocol {
     static func decode<Resolver, Context>(_ data: Data) -> Pioneer<Resolver, Context>.Intent
 
     /// Protocol specific initialization after acknowledgement message
-    static func initialize(_ io: SocketIO)
+    static func initialize(_ io: WebSocketIO)
 
     /// Next data typename for this sub-protocol
     static var next: String { get }

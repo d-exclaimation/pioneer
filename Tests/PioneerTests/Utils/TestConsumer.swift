@@ -11,7 +11,7 @@ import NIO
 import NIOWebSocket
 @testable import Pioneer
 
-struct TestConsumer: SocketIO {
+struct TestConsumer: WebSocketIO {
     var buffer: Buffer = .init()
     var group: EventLoopGroup
     actor Buffer {

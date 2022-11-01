@@ -13,13 +13,13 @@ import protocol NIO.EventLoopGroup
 extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions
     actor Drone {
-        private let client: SocketClient
+        private let client: WebSocketClient
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
 
         init(
-            _ client: SocketClient, 
+            _ client: WebSocketClient, 
             schema: GraphQLSchema, 
             resolver: Resolver, 
             proto: SubProtocol.Type
@@ -31,7 +31,7 @@ extension Pioneer {
         }
 
         init(
-            _ client: SocketClient, 
+            _ client: WebSocketClient, 
             schema: Schema<Resolver, Context>, 
             resolver: Resolver, 
             proto: SubProtocol.Type

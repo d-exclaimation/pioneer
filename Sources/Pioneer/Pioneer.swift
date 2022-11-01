@@ -133,7 +133,7 @@ public struct Pioneer<Resolver, Context> {
     ///   - context: The context builder for the client
     public func receiveMessage(
         pid: UUID, 
-        io: SocketIO,
+        io: WebSocketIO,
         keepAlive: Task<Void, Error>?,
         timeout: Task<Void, Error>?, 
         ev: EventLoopGroup,
@@ -231,13 +231,13 @@ public struct Pioneer<Resolver, Context> {
     ///   - context: The context builder for the client
     public func initialiseClient(
         pid: UUID, 
-        io: SocketIO, 
+        io: WebSocketIO, 
         payload: Payload, 
         timeout: Task<Void, Error>?, 
         ev: EventLoopGroup,
         context: @escaping WebSocketContext
     ) async {
-        let client = SocketClient(id: pid, io: io, payload: payload, ev: ev, context: context)
+        let client = WebSocketClient(id: pid, io: io, payload: payload, ev: ev, context: context)
         await probe.connect(with: client)
         websocketProtocol.initialize(io)
         timeout?.cancel()
@@ -262,7 +262,7 @@ public struct Pioneer<Resolver, Context> {
     ///   - io: The client IO for outputting errors
     ///   - oid: The key for this operation
     ///   - gql: The GraphQL Request for this operation
-    public func executeLongOperation(pid: UUID, io: SocketIO, oid: String, gql: GraphQLRequest) async {
+    public func executeLongOperation(pid: UUID, io: WebSocketIO, oid: String, gql: GraphQLRequest) async {
         // Introspection guard
         guard allowed(from: gql) else {
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
@@ -289,7 +289,7 @@ public struct Pioneer<Resolver, Context> {
     ///   - io: The client IO for outputting errors
     ///   - oid: The key for this operation
     ///   - gql: The GraphQL Request for this operation
-    public func executeShortOperation(pid: UUID, io: SocketIO, oid: String, gql: GraphQLRequest) async {
+    public func executeShortOperation(pid: UUID, io: WebSocketIO, oid: String, gql: GraphQLRequest) async {
         // Introspection guard
         guard allowed(from: gql) else {
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
