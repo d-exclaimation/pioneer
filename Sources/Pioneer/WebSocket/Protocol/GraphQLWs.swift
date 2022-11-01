@@ -51,9 +51,9 @@ enum GraphQLWs: SubProtocol {
         }
     }
 
-    static func initialize(ws: ProcessingConsumer) {
+    static func initialize(_ io: SocketIO) {
         let ack = GraphQLMessage(type: ConnectionAck)
-        ws.send(msg: ack.jsonString)
+        io.out(ack.jsonString)
     }
 
     static var next: String { Next }

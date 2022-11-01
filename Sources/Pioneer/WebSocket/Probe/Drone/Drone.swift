@@ -13,32 +13,33 @@ import protocol NIO.EventLoopGroup
 extension Pioneer {
     /// Drone acting as concurrent safe actor for each client managing operations and subscriptions
     actor Drone {
-        private let process: Process
+        private let client: SocketClient
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
-        private let websocketContextBuilder: @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
 
         init(
-            _ process: Process, schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context
+            _ client: SocketClient, 
+            schema: GraphQLSchema, 
+            resolver: Resolver, 
+            proto: SubProtocol.Type
         ) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
-            self.process = process
-            self.websocketContextBuilder = websocketContextBuilder
+            self.client = client
         }
 
         init(
-            _ process: Process, schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context
+            _ client: SocketClient, 
+            schema: Schema<Resolver, Context>, 
+            resolver: Resolver, 
+            proto: SubProtocol.Type
         ) {
             self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
-            self.process = process
-            self.websocketContextBuilder = websocketContextBuilder
+            self.client = client
         }
 
         // MARK: - Private mutable states
@@ -54,8 +55,8 @@ extension Pioneer {
             // Guard for getting the required subscriptions stream, if not send `next` with errors, and end subscription
             guard let subscription = subscriptionResult.stream else {
                 let res = GraphQL.GraphQLResult(errors: subscriptionResult.errors)
-                process.send(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
-                process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
+                client.out(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
+                client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
                 return
             }
             
@@ -64,8 +65,8 @@ extension Pioneer {
                 let res = GraphQL.GraphQLResult(errors: [
                     .init(message: "Internal server error, failed to fetch AsyncThrowingStream")
                 ])
-                process.send(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
-                process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
+                client.out(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
+                client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
                 return
             }
 
@@ -102,7 +103,7 @@ extension Pioneer {
             guard tasks.has(oid) else { return }
             tasks.delete(oid)
             let message = GraphQLMessage(id: oid, type: proto.complete)
-            process.send(message.jsonString)
+            client.out(message.jsonString)
         }
         
         /// Push message to websocket connection
@@ -110,7 +111,7 @@ extension Pioneer {
         /// e.g: - Shutdown-ed operation
         func next(for oid: String, given msg: GraphQLMessage) {
             guard tasks.has(oid) else { return }
-            process.send(msg.jsonString)
+            client.out(msg.jsonString)
         }
         
         /// Kill actor by cancelling and deallocating all stored task
@@ -124,8 +125,8 @@ extension Pioneer {
         /// Build context and execute subscription from GraphQL Resolver and Schema, await the future value and catch error into a SubscriptionResult
         private func subscription(gql: GraphQLRequest) async -> SubscriptionResult {
             do {
-                let ctx = try await websocketContextBuilder(process.req, process.payload, gql)
-                return try await subscribeOperation(for: gql, with: ctx, using: process.req.eventLoop)
+                let ctx = try await client.context(gql)
+                return try await subscribeOperation(for: gql, with: ctx, using: client.ev)
             } catch {
                 return .init(
                     stream: nil,

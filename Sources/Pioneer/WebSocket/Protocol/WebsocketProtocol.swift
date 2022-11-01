@@ -48,8 +48,8 @@ public extension Pioneer {
             innerProtocol.decode(data)
         }
 
-        func initialize(ws: ProcessingConsumer) {
-            innerProtocol.initialize(ws: ws)
+        func initialize(_ io: SocketIO) {
+            innerProtocol.initialize(io)
         }
 
         /// Inner protocol namespace

@@ -47,11 +47,11 @@ enum SubscriptionTransportWs: SubProtocol {
         }
     }
 
-    static func initialize(ws: ProcessingConsumer) {
+    static func initialize(_ io: SocketIO) {
         let ack = GraphQLMessage(type: GQL_CONNECTION_ACK)
         let ka = GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)
-        ws.send(msg: ack.jsonString)
-        ws.send(msg: ka.jsonString)
+        io.out(ack.jsonString)
+        io.out(ka.jsonString)
     }
     
     static var next: String { GQL_DATA }

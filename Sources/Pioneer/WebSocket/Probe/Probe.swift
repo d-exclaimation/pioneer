@@ -17,47 +17,42 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
-        private let websocketContextBuilder: @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
         private let websocketOnInit: @Sendable (Payload) async throws -> Void
 
         init(
             schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context,
             websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in }
         ) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
-            self.websocketContextBuilder = websocketContextBuilder
             self.websocketOnInit = websocketOnInit
         }
         
         init(
             schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context,
             websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in }
         ) {
             self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
-            self.websocketContextBuilder = websocketContextBuilder
             self.websocketOnInit = websocketOnInit
         }
 
         // MARK: - Private mutable states
-        private var clients: [UUID: Process] = [:]
+        private var clients: [UUID: SocketClient] = [:]
         private var drones: [UUID: Drone] = [:]
         
         
         // MARK: - Event callbacks
         
         /// Allocate space and save any verified process
-        func connect(with process: Process) async {
+        func connect(with client: SocketClient) async {
             do {
-                try await websocketOnInit(process.payload)
-                clients.update(process.id, with: process)
+                try await websocketOnInit(client.payload)
+                clients.update(client.id, with: client)
             } catch {
-                await deny(process: process, with: error)
+                await deny(client: client, with: error)
             }
         }
         
@@ -70,16 +65,15 @@ extension Pioneer {
         
         /// Long running operation require its own actor, thus initialing one if there were none prior
         func start(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let process = clients[pid] else { 
+            guard let client = clients[pid] else { 
                 return
             }
 
             let drone = drones.getOrElse(pid) {
-                .init(process,
+                .init(client,
                     schema: schema,
                     resolver: resolver,
-                    proto: proto,
-                    websocketContextBuilder: websocketContextBuilder
+                    proto: proto
                 )
             }
             drones.update(pid, with: drone)
@@ -88,25 +82,25 @@ extension Pioneer {
         
         /// Short lived operation is processed immediately and pipe back later
         func once(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let process = clients[pid] else { 
+            guard let client = clients[pid] else { 
                 return
             }
 
-            let future = execute(gql, payload: process.payload, req: process.req)
+            let future = execute(gql, client: client)
             
             pipeToSelf(future: future) { sink, res in
                 switch res {
                 case .success(let value):
                     await sink.outgoing(
                         with: oid,
-                        to: process,
+                        to: client,
                         given: .from(type: self.proto.next, id: oid, value)
                     )
                 case .failure(let error):
                     let result: GraphQLResult = .init(data: nil, errors: [error.graphql])
                     await sink.outgoing(
                         with: oid,
-                        to: process,
+                        to: client,
                         given: .from(type: self.proto.next, id: oid, result)
                     )
                 }
@@ -119,18 +113,18 @@ extension Pioneer {
         }
         
         /// Message for pipe to self result after processing short lived operation
-        func outgoing(with oid: String, to process: Process, given msg: GraphQLMessage) async {
-            process.send(msg.jsonString)
-            process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
+        func outgoing(with oid: String, to client: SocketClient, given msg: GraphQLMessage) async {
+            client.out(msg.jsonString)
+            client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
         }
         
         // MARK: - Utility methods
     
         /// Build context and execute short-lived GraphQL Operation inside an event loop 
-        private func execute(_ gql: GraphQLRequest, payload: Payload, req: Request) -> Future<GraphQLResult> {
-            req.eventLoop.performWithTask { [unowned self] in
-                let ctx = try await self.websocketContextBuilder(req, payload, gql)
-                return try await self.executeOperation(for: gql, with: ctx, using: req.eventLoop)
+        private func execute(_ gql: GraphQLRequest, client: SocketClient) -> Task<GraphQLResult, Error> {
+            Task { [unowned self] in
+                let ctx = try await client.context(gql)
+                return try await self.executeOperation(for: gql, with: ctx, using: client.ev)
             }
         }
 
@@ -148,11 +142,10 @@ extension Pioneer {
         }
 
         /// Deny a process and close it with an error message
-        private func deny(process: Process, with error: Error) async {
+        private func deny(client: SocketClient, with error: Error) async {
             let err = GraphQLMessage.errors(type: proto.error, [error.graphql])
-            process.send(err.jsonString)
-            process.keepAlive?.cancel()
-            await process.close(code: .graphqlNotAuthorized) 
+            client.out(err.jsonString)
+            await client.terminate(code: .graphqlNotAuthorized) 
         } 
     }
 }
