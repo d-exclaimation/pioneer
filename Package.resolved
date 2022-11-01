@@ -29,15 +29,6 @@
         }
       },
       {
-        "package": "DataLoader",
-        "repositoryURL": "https://github.com/GraphQLSwift/DataLoader.git",
-        "state": {
-          "branch": null,
-          "revision": "b235b88da58d733e9c56ca694225e63be447a590",
-          "version": "2.1.0"
-        }
-      },
-      {
         "package": "Graphiti",
         "repositoryURL": "https://github.com/GraphQLSwift/Graphiti.git",
         "state": {
