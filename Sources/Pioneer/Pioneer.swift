@@ -52,7 +52,7 @@ public struct Pioneer<Resolver, Context> {
     public init(
         schema: GraphQLSchema,
         resolver: Resolver,
-        httpStrategy: HTTPStrategy = .queryOnlyGet,
+        httpStrategy: HTTPStrategy = .csrfPrevention,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .sandbox,
