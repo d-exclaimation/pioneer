@@ -76,13 +76,12 @@ final class DroneTests: XCTestCase {
         }.schema
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
-        let process = Pioneer<Resolver, Void>.Process(ws: consumer, payload: nil, req: req)
+        let process = Pioneer<Resolver, Void>.SocketClient(id: UUID(), io: consumer, payload: nil, ev: req.eventLoop, context: { _, _ in })
         let drone: Pioneer<Resolver, Void>.Drone = .init(
             process,
             schema: schema,
             resolver: Resolver(),
-            proto: SubscriptionTransportWs.self,
-            websocketContextBuilder: {_, _, _ in }
+            proto: SubscriptionTransportWs.self
         )
         return (consumer, drone)
     }

@@ -17,12 +17,8 @@ public struct Pioneer<Resolver, Context> {
     public private(set) var schema: GraphQLSchema
     /// Resolver used by the GraphQL schema
     public private(set) var resolver: Resolver
-    /// Context builder from request
-    public private(set) var contextBuilder: @Sendable (Request, Response) async throws -> Context
     /// HTTP strategy
     public private(set) var httpStrategy: HTTPStrategy
-    /// Websocket Context builder
-    public private(set) var websocketContextBuilder: @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
     /// Websocket sub-protocol
     public private(set) var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
@@ -55,10 +51,7 @@ public struct Pioneer<Resolver, Context> {
     public init(
         schema: GraphQLSchema,
         resolver: Resolver,
-        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context,
-        websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in },
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .sandbox,
@@ -68,9 +61,7 @@ public struct Pioneer<Resolver, Context> {
     ) {
         self.schema = schema
         self.resolver = resolver
-        self.contextBuilder = contextBuilder
         self.httpStrategy = httpStrategy
-        self.websocketContextBuilder = websocketContextBuilder
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
         self.playground = !introspection ? .disable : playground
@@ -146,7 +137,8 @@ public struct Pioneer<Resolver, Context> {
         timeout: Task<Void, Error>?, 
         ev: EventLoopGroup,
         txt: String,
-        context: @escaping WebSocketContext
+        context: @escaping WebSocketContext,
+        check: @escaping WebSocketGuard
     ) async  {
         guard let data = txt.data(using: .utf8) else {
             // Shouldn't accept any message that aren't utf8 string
@@ -161,7 +153,25 @@ public struct Pioneer<Resolver, Context> {
         // Dispatch process to probe so it can start accepting operations
         // Timer fired here to keep connection alive by sub-protocol standard
         case .initial(let payload):
-            await initialiseClient(pid: pid, io: io, payload: payload, timeout: timeout, ev: ev, context: context)
+            do {
+                try await check(payload)
+                await initialiseClient(
+                    pid: pid, 
+                    io: io, 
+                    payload: payload, 
+                    timeout: timeout, 
+                    ev: ev,
+                    context: context
+                )
+            } catch {
+                let err = GraphQLMessage.errors(type: websocketProtocol.error, [error.graphql])
+                io.out(err.jsonString)
+
+                // Deallocation of resources
+                await probe.disconnect(for: pid)
+                keepAlive?.cancel()
+                try? await io.terminate(code: .graphqlInvalid) 
+            }
 
         // Ping is for requesting server to send a keep alive message
         case .ping:

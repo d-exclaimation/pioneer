@@ -11,6 +11,8 @@ import class NIO.EventLoopFuture
 import protocol NIO.EventLoopGroup
 
 extension Pioneer {
+    public typealias WebSocketGuard = @Sendable (Payload) async throws -> Void
+
     public typealias WebSocketContext = @Sendable (Payload, GraphQLRequest) async throws -> Context
 
     public struct SocketClient {

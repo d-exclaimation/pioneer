@@ -23,7 +23,6 @@ public extension Pioneer {
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
@@ -34,15 +33,7 @@ public extension Pioneer {
         self.init(
             schema: schema.schema,
             resolver: resolver,
-            contextBuilder: contextBuilder,
             httpStrategy: httpStrategy,
-            websocketContextBuilder: { @Sendable req, payload, gql async throws in
-                try await req.defaultWebsocketContextBuilder(
-                    payload: payload,
-                    gql: gql,
-                    contextBuilder: contextBuilder
-                )
-            },
             websocketProtocol: websocketProtocol,
             introspection: introspection,
             playground: playground,
@@ -67,10 +58,7 @@ public extension Pioneer {
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
         httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketContextBuilder: @Sendable @escaping (Request, Payload, GraphQLRequest) async throws -> Context,
-        websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in },
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .sandbox,
@@ -81,9 +69,7 @@ public extension Pioneer {
         self.init(
             schema: schema.schema,
             resolver: resolver,
-            contextBuilder: contextBuilder,
             httpStrategy: httpStrategy,
-            websocketContextBuilder: websocketContextBuilder,
             websocketProtocol: websocketProtocol,
             introspection: introspection,
             playground: playground,

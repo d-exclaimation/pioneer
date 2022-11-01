@@ -22,15 +22,6 @@ final class ContextTests: XCTestCase {
             }
         }, 
         resolver: .init(),
-        contextBuilder: { req, res in 
-            guard let authorization = req.headers[.authorization].first else {
-                throw Abort(.unauthorized, reason: "Cannot authoriza user")
-            }
-            guard authorization.contains("Bearer "), let token = authorization.split(separator: " ").last?.description else {
-                throw Abort(.unauthorized, reason: "Cannot authoriza user")
-            }
-            return Context(auth: token, res: res)
-        },
         httpStrategy: .both,
         introspection: true
     )
@@ -57,7 +48,18 @@ final class ContextTests: XCTestCase {
         }
 
         app.middleware.use(
-            server.vaporMiddleware(at: "graphql")
+            server.vaporMiddleware(
+                at: "graphql",
+                context: { req, res in 
+                    guard let authorization = req.headers[.authorization].first else {
+                        throw Abort(.unauthorized, reason: "Cannot authoriza user")
+                    }
+                    guard authorization.contains("Bearer "), let token = authorization.split(separator: " ").last?.description else {
+                        throw Abort(.unauthorized, reason: "Cannot authoriza user")
+                    }
+                    return Context(auth: token, res: res)
+                }
+            )
         )
 
         try app.testable().test(

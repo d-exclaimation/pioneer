@@ -9,10 +9,16 @@ import Vapor
 import struct GraphQL.GraphQLError
 
 extension Pioneer {
+    /// Vapor-based WebSocket Context builder
+    public typealias VaporWebSocketContext = @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
+
+    /// Vapor-based WebSocket Guard
+    public typealias VaporWebSocketGuard = @Sendable (Request, Payload) async throws -> Void
+
     /// Upgrade Handler for all GraphQL through Websocket
     /// - Parameter req: Request made to upgrade to Websocket
     /// - Returns: Response to upgrade connection to Websocket
-    public func webSocketHandler(req: Request) async throws -> Response {
+    public func webSocketHandler(req: Request, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) async throws -> Response {
         /// Explicitly handle Websocket upgrade with sub-protocol
         let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
         guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
@@ -22,7 +28,9 @@ extension Pioneer {
             .response(with: .badRequest)
         } 
 
-        return req.webSocket(shouldUpgrade: shouldUpgrade(req:), onUpgrade: onUpgrade(req:ws:))
+        return req.webSocket(shouldUpgrade: shouldUpgrade(req:), onUpgrade: { 
+            onUpgrade(req: $0, ws: $1, context: context, guard: `guard`) 
+        })
     }
     
     /// Should upgrade callback
@@ -31,7 +39,7 @@ extension Pioneer {
     }
 
     /// On upgrade callback
-    func onUpgrade(req: Request, ws: WebSocket) -> Void {
+    func onUpgrade(req: Request, ws: WebSocket, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) -> Void {
         let pid = UUID()
 
         let keepAlive = setInterval(delay: keepAlive) {
@@ -48,21 +56,24 @@ extension Pioneer {
 
         ws.onText { _, txt in
             Task {
-                await onMessage(
+                await receiveMessage(
                     pid: pid, io: ws, 
                     keepAlive: keepAlive, 
                     timeout: timeout,
                     ev: req.eventLoop, 
                     txt: txt,
                     context: {
-                        try await self.websocketContextBuilder(req, $0, $1)
+                        try await context(req, $0, $1)
+                    },
+                    check: {
+                        try await `guard`(req, $0)
                     }
                 )
             }
         }
                 
         ws.onClose.whenComplete { _ in
-            onClose(pid: pid, keepAlive: keepAlive, timeout: timeout)
+            closeClient(pid: pid, keepAlive: keepAlive, timeout: timeout)
         } 
     }
 }

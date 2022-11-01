@@ -16,7 +16,6 @@ import Vapor
 
 final class ExtensionsTests: XCTestCase {
     private let app = Application(.testing)
-    private let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 4)
 
     /// Tester Actor
     private actor Tester {
@@ -26,7 +25,7 @@ final class ExtensionsTests: XCTestCase {
             case none
         }
         
-        func call(expect: EventLoopFuture<XCTestExpectation>) {
+        func call(expect: Task<XCTestExpectation, Error>) {
             pipeToSelf(future: expect) { sink, res in
                 guard case .success(let ex) = res else { return }
                 await sink.outcome(expect: ex)
@@ -44,7 +43,7 @@ final class ExtensionsTests: XCTestCase {
     func testActorAndNIOFuture() async {
         let expectation = XCTestExpectation()
         let tester = Tester()
-        let future = eventLoopGroup.task { () async -> XCTestExpectation in
+        let future = Task { () async throws in
             try? await Task.sleep(nanoseconds: 1000 * 1000 * 1000)
             return expectation
         }

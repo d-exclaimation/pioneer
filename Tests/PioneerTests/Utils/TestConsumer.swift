@@ -11,7 +11,7 @@ import NIO
 import NIOWebSocket
 @testable import Pioneer
 
-struct TestConsumer: ProcessingConsumer {
+struct TestConsumer: SocketIO {
     var buffer: Buffer = .init()
     var group: EventLoopGroup
     actor Buffer {
@@ -31,15 +31,15 @@ struct TestConsumer: ProcessingConsumer {
             store
         }
     }
-    func send<S>(msg: S) where S: Collection, S.Element == Character {
+
+     func out<S>(_ msg: S) where S: Collection, S.Element == Character {
         guard let str = msg as? String else { return }
         Task.init {
             await buffer.set(str)
         }
     }
 
-    func close(code: WebSocketErrorCode) -> EventLoopFuture<Void> {
-        group.next().makeSucceededVoidFuture()
+    func terminate(code: WebSocketErrorCode) async throws {
     }
 
     func wait() async -> String {

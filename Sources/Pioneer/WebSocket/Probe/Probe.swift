@@ -17,26 +17,21 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
-        private let websocketOnInit: @Sendable (Payload) async throws -> Void
 
         init(
-            schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in }
+            schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type
         ) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
-            self.websocketOnInit = websocketOnInit
         }
         
         init(
-            schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketOnInit: @Sendable @escaping (Payload) async throws -> Void = { _ in }
+            schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type
         ) {
             self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
-            self.websocketOnInit = websocketOnInit
         }
 
         // MARK: - Private mutable states
@@ -48,12 +43,7 @@ extension Pioneer {
         
         /// Allocate space and save any verified process
         func connect(with client: SocketClient) async {
-            do {
-                try await websocketOnInit(client.payload)
-                clients.update(client.id, with: client)
-            } catch {
-                await deny(client: client, with: error)
-            }
+            clients.update(client.id, with: client)
         }
         
         /// Deallocate the space from a closing process
@@ -140,12 +130,5 @@ extension Pioneer {
                 operationName: gql.operationName
             ) 
         }
-
-        /// Deny a process and close it with an error message
-        private func deny(client: SocketClient, with error: Error) async {
-            let err = GraphQLMessage.errors(type: proto.error, [error.graphql])
-            client.out(err.jsonString)
-            await client.terminate(code: .graphqlNotAuthorized) 
-        } 
     }
 }

@@ -1,5 +1,5 @@
 //
-//  GraphQLIDE.swift
+//  IDE.swift
 //  pioneer
 //
 //  Created by d-exclaimation on 14:17.

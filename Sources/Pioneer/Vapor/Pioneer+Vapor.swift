@@ -8,7 +8,6 @@
 import protocol Vapor.AsyncMiddleware
 import class Vapor.Request
 import class Vapor.Response
-import class Vapor.Route
 import enum Vapor.PathComponent
 import enum Vapor.HTTPMethod
 import enum Vapor.HTTPBodyStreamStrategy
@@ -23,11 +22,41 @@ extension Pioneer {
         private let server: Pioneer
         private let path: [PathComponent] 
         private let body: HTTPBodyStreamStrategy
+        private let context: VaporHTTPContext
+        private let websocketContext: VaporWebSocketContext
+        private let websocketGuard: VaporWebSocketGuard
 
-        internal init(server: Pioneer, path: [PathComponent], body: HTTPBodyStreamStrategy) {
+        internal init(
+            server: Pioneer, 
+            path: [PathComponent],
+            body: HTTPBodyStreamStrategy,
+            context: @escaping VaporHTTPContext,
+            websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
+        ) {
             self.server = server
             self.path = path
             self.body = body
+            self.context = context
+            self.websocketContext = { 
+                try await $0.defaultWebsocketContextBuilder(payload: $1, gql: $2, contextBuilder: context)
+            }
+            self.websocketGuard = websocketGuard
+        }
+
+        internal init(
+            server: Pioneer, 
+            path: [PathComponent],
+            body: HTTPBodyStreamStrategy,
+            context: @escaping VaporHTTPContext,
+            websocketContext: @escaping VaporWebSocketContext,
+            websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
+        ) {
+            self.server = server
+            self.path = path
+            self.body = body
+            self.context = context
+            self.websocketContext = websocketContext
+            self.websocketGuard = websocketGuard
         }
 
         private func isGraphQLPath(to request: Request) -> Bool {
@@ -88,9 +117,9 @@ extension Pioneer {
 
             switch try await direction(to: request) {
                 case .operation:
-                    return try await server.httpHandler(req: collect(request))
+                    return try await server.httpHandler(req: collect(request), context: context)
                 case .upgrade:
-                    return try await server.webSocketHandler(req: collect(request))
+                    return try await server.webSocketHandler(req: collect(request), context: websocketContext, guard: websocketGuard)
                 case .playground:
                     return server.ideHandler(req: request)
                 case .ignore:
@@ -98,18 +127,72 @@ extension Pioneer {
             }
         }
     }
-    
+
     /// Pioneer GraphQL handlers for Vapor
-    /// - Returns: Middleware to handle GraphQL specific request
-    public func vaporMiddleware(body: HTTPBodyStreamStrategy = .collect) -> VaporGraphQLMiddleware {
-        vaporMiddleware(body: body, at: "graphql")
+    /// - Parameters:
+    ///   - body: The body streaming strategy
+    ///   - path: The path component where GraphQL should be operated
+    ///   - context: HTTP context builder
+    ///   - websocketGuard: WebSocket connection guard
+    /// - Returns: Middleware for handling GraphQL operation
+    public func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect, 
+        at path: PathComponent = "graphql",
+        context: @escaping VaporHTTPContext,
+        websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
+    ) -> VaporGraphQLMiddleware {
+        VaporGraphQLMiddleware(server: self, path: [path], body: body, context: context, websocketGuard: websocketGuard)
     }
 
     /// Pioneer GraphQL handlers for Vapor
     /// - Parameters:
-    ///   - path: The path within the route to add handles
-    /// - Returns: Middleware to handle GraphQL specific request
-    public func vaporMiddleware(body: HTTPBodyStreamStrategy = .collect, at path: PathComponent...) -> VaporGraphQLMiddleware {
-        VaporGraphQLMiddleware(server: self, path: path, body: body)
+    ///   - body: The body streaming strategy
+    ///   - path: The path component where GraphQL should be operated
+    ///   - context: HTTP context builder
+    ///   - websocketContext: WebSocket context builder
+    ///   - websocketGuard: WebSocket connection guard
+    /// - Returns: Middleware for handling GraphQL operation
+    public func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect, 
+        at path: PathComponent = "graphql",
+        context: @escaping VaporHTTPContext,
+        websocketContext: @escaping VaporWebSocketContext,
+        websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
+    ) -> VaporGraphQLMiddleware {
+        VaporGraphQLMiddleware(server: self, path: [path], body: body, context: context, websocketContext: websocketContext, websocketGuard: websocketGuard)
+    }
+
+    /// Pioneer GraphQL handlers for Vapor
+    /// - Parameters:
+    ///   - body: The body streaming strategy
+    ///   - path: The path components where GraphQL should be operated
+    ///   - context: HTTP context builder
+    ///   - websocketGuard: WebSocket connection guard
+    /// - Returns: Middleware for handling GraphQL operation
+    public func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect, 
+        at path: [PathComponent],
+        context: @escaping VaporHTTPContext,
+        websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
+    ) -> VaporGraphQLMiddleware {
+        VaporGraphQLMiddleware(server: self, path: path, body: body, context: context, websocketGuard: websocketGuard)
+    }
+
+    /// Pioneer GraphQL handlers for Vapor
+    /// - Parameters:
+    ///   - body: The body streaming strategy
+    ///   - path: The path components where GraphQL should be operated
+    ///   - context: HTTP context builder
+    ///   - websocketContext: WebSocket context builder
+    ///   - websocketGuard: WebSocket connection guard
+    /// - Returns: Middleware for handling GraphQL operation
+    public func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect, 
+        at path: [PathComponent],
+        context: @escaping VaporHTTPContext,
+        websocketContext: @escaping VaporWebSocketContext,
+        websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
+    ) -> VaporGraphQLMiddleware {
+        VaporGraphQLMiddleware(server: self, path: path, body: body, context: context, websocketContext: websocketContext, websocketGuard: websocketGuard)
     }
 }
