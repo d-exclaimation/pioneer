@@ -14,16 +14,40 @@ import enum Vapor.HTTPBodyStreamStrategy
 import protocol Vapor.AsyncResponder
 
 extension Pioneer {
-    enum Direction {
-        case operation, upgrade, playground, ignore
-    }    
 
+    /// Pioneer Integration for Vapor as a Middleware
     public struct VaporGraphQLMiddleware: AsyncMiddleware {
+        /// Service to serve by the middleware
+        enum Serve {
+            /// GraphQL over HTTP operation should be served
+            case operation
+
+            /// GraphQL over WebSocket upgrade should be served
+            case upgrade
+
+            /// GraphQL IDE should be served
+            case playground
+            
+            /// No service, skip this middleware
+            case ignore
+        }
+
+        /// Pioneer GraphQL server
         private let server: Pioneer
+
+        /// The path to be served
         private let path: [PathComponent] 
+
+        /// The body stream strategy used
         private let body: HTTPBodyStreamStrategy
+
+        /// HTTP Context Builder
         private let context: VaporHTTPContext
+
+        /// WebSocket Context Builder
         private let websocketContext: VaporWebSocketContext
+
+        /// WebSocket Initialisation Guard
         private let websocketGuard: VaporWebSocketGuard
 
         internal init(
@@ -59,7 +83,14 @@ extension Pioneer {
             self.websocketGuard = websocketGuard
         }
 
-        private func isGraphQLPath(to request: Request) -> Bool {
+        /// Check whether request should be served by Pioneer
+        /// - Parameter request: The incoming request
+        /// - Returns: True if should be served
+        private func shouldServe(to request: Request) -> Bool {
+            guard request.method == .POST || request.method == .GET else {
+                return false
+            }
+
             let components = request
                 .url.path
                 .split(separator: "/", omittingEmptySubsequences: true)
@@ -81,11 +112,10 @@ extension Pioneer {
             return components.count == path.count
         }
 
-        private func isGraphQLMethod(to request: Request) -> Bool {
-            request.method == .POST || request.method == .GET
-        }
-
-        private func direction(to request: Request) async throws -> Direction {
+        /// What type of service should Pioneer serve for this request
+        /// - Parameter request: The incoming request
+        /// - Returns: A service to be done
+        private func serving(to request: Request) async throws -> Serve {
             if request.method == .POST {
                 return .operation
             }
@@ -100,6 +130,9 @@ extension Pioneer {
             return server.playground == .disable ? .ignore : .playground
         }
 
+        /// Collect the body to avoid issue with asynchronous body collection if strategy is `.collect`
+        /// - Parameter request: The incoming request
+        /// - Returns: The request after the body is collected if necessary
         private func collect(_ request: Request) async throws -> Request {
             if case .collect(let max) = body, request.body.data == nil {
                 let _ = try await request.body
@@ -111,11 +144,11 @@ extension Pioneer {
         }
 
         public func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
-            guard isGraphQLMethod(to: request) && isGraphQLPath(to: request) else {
+            guard shouldServe(to: request) else {
                 return try await next.respond(to: request)
             }
 
-            switch try await direction(to: request) {
+            switch try await serving(to: request) {
                 case .operation:
                     return try await server.httpHandler(req: collect(request), context: context)
                 case .upgrade:

@@ -68,7 +68,7 @@ public extension Pioneer {
                     If you are seeing this failure, try enabling Pioneer Websocket feature or using a guard to make sure it is not disabled
                     ```
                     // Enabling Websocket 
-                    Pioneer(..., websocketProtocol: .subscriptionTransportWs)
+                    Pioneer(..., websocketProtocol: .graphqlWs)
 
                     // or use guards
                     if case .disable = pioneer.wsProtocol { return }
