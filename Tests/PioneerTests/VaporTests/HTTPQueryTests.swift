@@ -158,7 +158,7 @@ final class HTTPQueryTests: XCTestCase {
         }
 
         try app.testable().test(.POST, "/graphql") { res in
-            XCTAssertEqual(res.status, .unsupportedMediaType)
+            XCTAssertEqual(res.status, .badRequest)
         }
     }
 

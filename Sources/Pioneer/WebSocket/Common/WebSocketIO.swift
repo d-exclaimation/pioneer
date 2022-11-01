@@ -7,6 +7,7 @@
 
 import enum NIOWebSocket.WebSocketErrorCode
 
+/// Any WebSocket output that can send messages and be terminated 
 public protocol WebSocketIO {
     /// Send a messsage to this websocket consumer
     /// - Parameter msg: The message to be sent
