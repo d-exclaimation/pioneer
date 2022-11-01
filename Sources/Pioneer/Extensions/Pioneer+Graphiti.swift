@@ -6,8 +6,6 @@
 //
 
 import class Graphiti.Schema
-import class Vapor.Request
-import class Vapor.Response
 
 public extension Pioneer {
     /// - Parameters:

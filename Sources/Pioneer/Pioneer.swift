@@ -12,7 +12,7 @@ import struct GraphQL.GraphQLResult
 import struct GraphQL.GraphQLError
 import enum GraphQL.OperationType
 
-/// Pioneer GraphQL Vapor Server for handling all GraphQL operations
+/// Pioneer GraphQL Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
     /// Graphiti schema used to execute operations
     public private(set) var schema: GraphQLSchema

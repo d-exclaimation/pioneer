@@ -7,7 +7,6 @@
 
 import GraphQL
 import class Graphiti.Schema
-import class Vapor.Request
 import struct Foundation.UUID
 import protocol NIO.EventLoopGroup
 

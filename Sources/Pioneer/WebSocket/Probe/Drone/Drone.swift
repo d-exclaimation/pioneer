@@ -7,7 +7,6 @@
 
 import GraphQL
 import class Graphiti.Schema
-import class Vapor.Request
 import protocol NIO.EventLoopGroup
 
 extension Pioneer {
