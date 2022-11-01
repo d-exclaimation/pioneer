@@ -43,11 +43,10 @@ final class ExtensionsTests: XCTestCase {
     func testActorAndNIOFuture() async {
         let expectation = XCTestExpectation()
         let tester = Tester()
-        let future = Task { () async throws in
+        await tester.call(expect: .init {
             try? await Task.sleep(nanoseconds: 1000 * 1000 * 1000)
             return expectation
-        }
-        await tester.call(expect: future)
+        })
 
         wait(for: [expectation], timeout: 2)
     }
