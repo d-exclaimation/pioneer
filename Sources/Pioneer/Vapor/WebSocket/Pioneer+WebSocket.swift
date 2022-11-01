@@ -54,14 +54,24 @@ extension Pioneer {
             keepAlive?.cancel()
         }
 
-        ws.onText { _, txt in
-            Task {
+        // Task for consuming WebSocket messages to avoid cyclic references and provide cleaner code
+        let task = Task {
+            let stream = AsyncStream(String.self) { con in 
+                ws.onText { con.yield($1) }
+
+                con.onTermination = { _ in 
+                    guard ws.isClosed else { return }
+                    _ = ws.close()
+                }
+            }
+
+            for await message in stream {
                 await receiveMessage(
                     pid: pid, io: ws, 
                     keepAlive: keepAlive, 
                     timeout: timeout,
                     ev: req.eventLoop, 
-                    txt: txt,
+                    txt: message,
                     context: {
                         try await context(req, $0, $1)
                     },
@@ -71,9 +81,12 @@ extension Pioneer {
                 )
             }
         }
-                
-        ws.onClose.whenComplete { _ in
+
+        // Task for closing websocket and disposing any references
+        Task {
+            try await ws.onClose.get()
+            task.cancel()
             closeClient(pid: pid, keepAlive: keepAlive, timeout: timeout)
-        } 
+        }
     }
 }
