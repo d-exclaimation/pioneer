@@ -28,7 +28,13 @@ extension Request {
                 return GraphQLRequest(query: query, operationName: operationName, variables: variables)
 
             case .POST:
-                return try self.content.decode(GraphQLRequest.self)
+                do {
+                    return try self.content.decode(GraphQLRequest.self)
+                } catch {
+                    throw Abort(.badRequest,
+                        reason: "Unable to parse query and identify operation"
+                    )
+                }
 
             default:
                 throw Abort(.badRequest, reason: "Invalid operation method for GraphQL request")
