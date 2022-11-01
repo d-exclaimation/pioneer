@@ -59,7 +59,7 @@ extension Pioneer {
             let stream = AsyncStream(String.self) { con in 
                 ws.onText { con.yield($1) }
 
-                con.onTermination = { _ in 
+                con.onTermination = { @Sendable _ in 
                     guard ws.isClosed else { return }
                     _ = ws.close()
                 }
