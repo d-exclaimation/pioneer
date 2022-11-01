@@ -5,7 +5,8 @@
 //  Created by d-exclaimation on 12:18 AM.
 //
 
-import Vapor
+import NIO
+import Foundation
 import class GraphQL.GraphQLSchema
 import struct GraphQL.GraphQLResult
 import struct GraphQL.GraphQLError
