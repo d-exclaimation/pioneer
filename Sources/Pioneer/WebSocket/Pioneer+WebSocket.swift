@@ -18,11 +18,6 @@ public typealias ConnectionParams = [String: Map]?
 public typealias Payload = [String: Map]?
 
 extension Pioneer {
-    /// Apply middleware through websocket
-    func applyWebSocket(on router: RoutesBuilder, at path: [PathComponent] = ["graphql", "websocket"]) {
-        router.get(path, use: webSocketHandler(req:))
-    }
-
     /// Upgrade Handler for all GraphQL through Websocket
     /// - Parameter req: Request made to upgrade to Websocket
     /// - Returns: Response to upgrade connection to Websocket
@@ -36,42 +31,39 @@ extension Pioneer {
             .response(with: .badRequest)
         } 
 
-        return req.webSocket(shouldUpgrade: wsShouldUpgrade(req:)) { req, ws in 
-            let pid = UUID()
-                
-            ws.sendPing()
-                
-            /// Scheduled keep alive message interval
-            let keepAlive = setInterval(delay: keepAlive) {
-                if ws.isClosed {
-                    throw Abort(.conflict, reason: "WebSocket closed before any termination")
-                }
-                ws.send(msg: websocketProtocol.keepAliveMessage)
-            }
-
-            /// Scheduled a timeout for any connection
-            let timeout = setTimeout(delay: timeout) {
-                try await ws.close(code: .graphqlInitTimeout)
-                keepAlive?.cancel()
-            }
-                
-            ws.onText { _, txt in
-                Task {
-                    await onMessage(pid: pid, ws: ws, req: req, keepAlive: keepAlive, timeout: timeout, txt: txt)
-                }
-            }
-                
-            ws.onClose.whenComplete { _ in
-                onEnd(pid: pid, keepAlive: keepAlive, timeout: timeout)
-            } 
-        }
+        return req.webSocket(shouldUpgrade: shouldUpgrade(req:), onUpgrade: onUpgrade(req:ws:))
     }
     
-    /// Handler to send back upgraded connection headers
-    /// - Parameter req: Request being made
-    /// - Returns: The headers for making the upgrade
-    func wsShouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
+    /// Should upgrade callback
+    func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
         req.eventLoop.next().makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
+    }
+
+    /// On upgrade callback
+    func onUpgrade(req: Request, ws: WebSocket) -> Void {
+        let pid = UUID()
+
+        let keepAlive = setInterval(delay: keepAlive) {
+            if ws.isClosed {
+                throw Abort(.conflict, reason: "WebSocket closed before termination")
+            }
+            ws.send(msg: websocketProtocol.keepAliveMessage)
+        }
+
+        let timeout = setTimeout(delay: timeout) {
+            try await ws.close(code: .graphqlInitTimeout)
+            keepAlive?.cancel()
+        }
+
+        ws.onText { _, txt in
+            Task {
+                await onMessage(pid: pid, ws: ws, req: req, keepAlive: keepAlive, timeout: timeout, txt: txt)
+            }
+        }
+                
+        ws.onClose.whenComplete { _ in
+            onClose(pid: pid, keepAlive: keepAlive, timeout: timeout)
+        } 
     }
 
     /// On Websocket message callback
@@ -82,7 +74,7 @@ extension Pioneer {
         keepAlive: Task<Void, Error>?,
         timeout: Task<Void, Error>?, 
         txt: String
-    ) async -> Void {
+    ) async  {
         guard let data = txt.data(using: .utf8) else {
             // Shouldn't accept any message that aren't utf8 string
             // -> Close with 1003 code
@@ -96,10 +88,7 @@ extension Pioneer {
         // Dispatch process to probe so it can start accepting operations
         // Timer fired here to keep connection alive by sub-protocol standard
         case .initial(let payload):
-            let process = Process(id: pid, ws: ws, payload: payload, req: req)
-            await probe.connect(with: process)
-            websocketProtocol.initialize(ws: ws)
-            timeout?.cancel()
+            await onInitial(pid: pid, ws: ws, payload: payload, req: req, timeout: timeout)
 
         // Ping is for requesting server to send a keep alive message
         case .ping:
@@ -182,8 +171,16 @@ extension Pioneer {
         }
     }
 
+    // On initial connection callback
+    func onInitial(pid: UUID, ws: ProcessingConsumer, payload: Payload, req: Request, timeout: Task<Void, Error>?) async {
+        let process = Process(id: pid, ws: ws, payload: payload, req: req)
+        await probe.connect(with: process)
+        websocketProtocol.initialize(ws: ws)
+        timeout?.cancel()
+    }
+
     /// On closing connection callback
-    func onEnd(pid: UUID, keepAlive: Task<Void, Error>?, timeout: Task<Void, Error>?) -> Void {
+    func onClose(pid: UUID, keepAlive: Task<Void, Error>?, timeout: Task<Void, Error>?) {
         Task {
             await probe.disconnect(for: pid)
         }

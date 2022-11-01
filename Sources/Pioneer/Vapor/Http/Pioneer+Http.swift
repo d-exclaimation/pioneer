@@ -12,23 +12,6 @@ import struct GraphQL.GraphQLError
 import class GraphQL.GraphQLJSONEncoder
 
 extension Pioneer {
-    /// Apply middleware for `POST`
-    func applyPost(
-        on router: RoutesBuilder,
-        at path: PathComponent = "graphql",
-        bodyStrategy: HTTPBodyStreamStrategy = .collect
-    ) {
-        router.on(.POST, path, body: bodyStrategy, use: httpHandler(req:))
-    }
-
-    /// Apply middleware for `GET`
-    func applyGet(
-        on router: RoutesBuilder,
-        at path: PathComponent = "graphql"
-    ) {
-        router.get(path, use: httpHandler(req:))
-    }
-
     /// Common Handler for GraphQL through HTTP
     /// - Parameter req: The HTTP request being made
     /// - Returns: A response from the GraphQL operation execution properly formatted

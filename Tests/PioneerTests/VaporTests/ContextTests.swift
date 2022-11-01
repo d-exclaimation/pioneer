@@ -56,7 +56,9 @@ final class ContextTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(
+            server.vaporMiddleware(at: "graphql")
+        )
 
         try app.testable().test(
             .GET, 

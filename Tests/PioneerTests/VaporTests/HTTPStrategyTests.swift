@@ -44,20 +44,20 @@ final class HTTPStrategyTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
             .GET, 
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
-            XCTAssertEqual(res.status, .notFound)
+            XCTAssertEqual(res.status, .badRequest)
         }
 
         try app.testable().test(
             .GET, 
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
-            XCTAssertEqual(res.status, .notFound)
+            XCTAssertEqual(res.status, .badRequest)
         }
         
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
@@ -90,7 +90,7 @@ final class HTTPStrategyTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
             .GET, 
@@ -114,7 +114,7 @@ final class HTTPStrategyTests: XCTestCase {
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
         ) { res in
-            XCTAssertEqual(res.status, .notFound)
+            XCTAssertEqual(res.status, .badRequest)
         }
 
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
@@ -125,7 +125,7 @@ final class HTTPStrategyTests: XCTestCase {
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
         ) { res in
-            XCTAssertEqual(res.status, .notFound)
+            XCTAssertEqual(res.status, .badRequest)
         }
     }
 
@@ -136,7 +136,7 @@ final class HTTPStrategyTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
             .GET, 
@@ -182,7 +182,7 @@ final class HTTPStrategyTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
             .GET, 
@@ -228,7 +228,7 @@ final class HTTPStrategyTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
             .GET, 
@@ -274,7 +274,7 @@ final class HTTPStrategyTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
             .GET, 
@@ -320,7 +320,7 @@ final class HTTPStrategyTests: XCTestCase {
             app.shutdown()
         }
 
-        server.applyMiddleware(on: app)
+        app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
             .GET, 

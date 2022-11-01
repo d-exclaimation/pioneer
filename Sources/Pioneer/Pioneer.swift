@@ -97,45 +97,7 @@ public struct Pioneer<Resolver, Context> {
         self.probe = probe
     }
 
-    /// Apply Pioneer GraphQL handlers to a Vapor route
-    /// - Parameters:
-    ///   - router: The router to apply handlers to
-    ///   - path: The path within the route to add handles
-    ///   - bodyStrategy: The strategy to process the request body
-    public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql", bodyStrategy: HTTPBodyStreamStrategy = .collect) {
-        // HTTP Portion
-        switch httpStrategy {
-        case .onlyPost:
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy)
-        case .onlyGet:
-            applyGet(on: router, at: path)
-        default:
-            applyGet(on: router, at: path)
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy)
-        }
-        
-        switch playground {
-        case .playground:
-            applyPlayground(on: router, at: path)
-        case .graphiql:
-            applyGraphiQL(on: router, at: path)
-        case .sandbox:
-            applyEmbeddedSandbox(on: router, at: path)
-        case .redirect(to: .apolloSandbox):
-            applySandboxRedirect(on: router, with: "https://studio.apollographql.com/sandbox/explorer")
-        case .redirect(to: .bananaCakePop):
-            applySandboxRedirect(on: router, with: "https://eat.bananacakepop.com")
-        case .disable:
-            break
-        }
-        
-        // Websocket portion
-        if websocketProtocol.isAccepting {
-            applyWebSocket(on: router, at: [path, "websocket"])
-        }
-    }
-
-    /// Execute operation through Pioneer for a GraphQLRequest, context and get aa well formatted GraphQlResult
+    /// Execute operation through Pioneer for a GraphQLRequest, context and get a well formatted GraphQlResult
     /// - Parameters:
     ///   - gql: The GraphQL Request for this operation
     ///   - ctx: The context for the operation
