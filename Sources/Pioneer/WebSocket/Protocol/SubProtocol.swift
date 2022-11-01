@@ -23,6 +23,8 @@ protocol SubProtocol {
     static var complete: String { get }
     /// Error typename for this sub-protocol
     static var error: String { get }
+    /// Pong type namefor this sub-protocol
+    static var pong: String { get }
     /// Keep alive message being sent on an interval to keep connection going
     static var keepAliveMessage: String { get }
 }

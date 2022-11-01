@@ -92,6 +92,10 @@ public extension Pioneer {
             innerProtocol.complete
         }
 
+        var pong: String {
+            innerProtocol.pong
+        }
+
         var keepAliveMessage: String {
             innerProtocol.keepAliveMessage
         }

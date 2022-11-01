@@ -59,6 +59,8 @@ enum SubscriptionTransportWs: SubProtocol {
     static var complete: String { GQL_COMPLETE }
 
     static var error: String { GQL_ERROR }
+    
+    static var pong: String { GQL_CONNECTION_KEEP_ALIVE }
 
     static var keepAliveMessage: String {
         GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)

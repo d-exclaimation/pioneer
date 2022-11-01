@@ -176,7 +176,7 @@ public struct Pioneer<Resolver, Context> {
 
         // Ping is for requesting server to send a keep alive message
         case .ping:
-            io.out(websocketProtocol.keepAliveMessage)
+            io.out(GraphQLMessage(type: websocketProtocol.pong).jsonString)
 
         // Explicit message to terminate connection to deallocate resources, stop timer, and close connection
         case .terminate:
