@@ -40,7 +40,7 @@ extension Pioneer {
         do {
             let gql = try req.graphql
             return try await handle(req: req, from: gql, allowing: httpStrategy.allowed(for: req.method), using: encoder, context: context)
-        } catch let error as Abort {
+        } catch let error as AbortError {
             return try GraphQLError(message: error.reason).response(with: error.status)
         } catch {
             return try error.graphql.response(with: .internalServerError)
