@@ -98,13 +98,14 @@ extension Pioneer {
                 return .operation
             }
 
-            if server.websocketProtocol.isAccepting, let connection = request.headers.first(name: .connection), connection.lowercased() == "upgrade" {
+            if server.websocketProtocol.isAccepting && request.isWebSocketUpgrade {
                 return .upgrade
             }
 
             if case .some = request.query[String.self, at: "query"] {
                 return .operation
             }
+
             return server.playground == .disable ? .ignore : .playground
         }
 

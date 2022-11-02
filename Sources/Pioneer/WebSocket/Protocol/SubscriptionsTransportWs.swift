@@ -47,7 +47,7 @@ enum SubscriptionTransportWs: SubProtocol {
         }
     }
 
-    static func initialize(_ io: WebSocketIO) {
+    static func initialize(_ io: WebSocketable) {
         let ack = GraphQLMessage(type: GQL_CONNECTION_ACK)
         let ka = GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)
         io.out(ack.jsonString)

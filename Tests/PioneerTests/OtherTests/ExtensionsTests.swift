@@ -8,10 +8,10 @@
 
 import Foundation
 import XCTest
-import GraphQL
 import OrderedCollections
 import NIO
 import Vapor
+import enum GraphQL.Map
 @testable import Pioneer
 
 final class ExtensionsTests: XCTestCase {
@@ -116,7 +116,7 @@ final class ExtensionsTests: XCTestCase {
                 "auth":  "token"
             ])
         ]
-        let originalGql = Pioneer<Void, Void>.GraphQLRequest(query: "query { someField }")
+        let originalGql = GraphQLRequest(query: "query { someField }")
         do {
             let req = try await originalReq.defaultWebsocketContextBuilder(
                 payload: connectionParams, gql: originalGql,
@@ -130,7 +130,7 @@ final class ExtensionsTests: XCTestCase {
                 return XCTFail("No headers")
             }
             XCTAssert(token == "token")
-            guard let gql = try? req.content.decode(Pioneer<Void, Void>.GraphQLRequest.self) else {
+            guard let gql = try? req.content.decode(GraphQLRequest.self) else {
                 return XCTFail("cannot parse body")
             }
             XCTAssert(gql.query == originalGql.query)

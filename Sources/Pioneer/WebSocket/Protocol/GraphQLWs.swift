@@ -51,7 +51,7 @@ enum GraphQLWs: SubProtocol {
         }
     }
 
-    static func initialize(_ io: WebSocketIO) {
+    static func initialize(_ io: WebSocketable) {
         let ack = GraphQLMessage(type: ConnectionAck)
         io.out(ack.jsonString)
     }

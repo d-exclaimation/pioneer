@@ -23,7 +23,7 @@ extension Pioneer {
         var id: UUID
 
         /// The WebSocket output
-        var io: WebSocketIO
+        var io: WebSocketable
 
         /// The payload given during initialisation
         var payload: Payload
@@ -41,7 +41,7 @@ extension Pioneer {
         ///   - payload: The payload given during initialisation
         ///   - ev: Any event loop
         ///   - context: Context builder for this client
-        init(id: UUID, io: WebSocketIO, payload: Payload, ev: EventLoopGroup, context: @escaping WebSocketContext) {
+        init(id: UUID, io: WebSocketable, payload: Payload, ev: EventLoopGroup, context: @escaping WebSocketContext) {
             self.id = id
             self.io = io
             self.payload = payload
