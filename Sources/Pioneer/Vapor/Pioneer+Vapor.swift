@@ -106,6 +106,7 @@ extension Pioneer {
                         return false
                 }
             }
+
             return components.count == path.count
         }
 

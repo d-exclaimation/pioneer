@@ -138,4 +138,31 @@ final class ExtensionsTests: XCTestCase {
             return XCTFail(error.localizedDescription)
         }
     }
+
+    func testPathComponent() {
+        let req0 = Request(
+            application: app, 
+            method: .GET, 
+            url: "/graphql/nested1/nested2", 
+            on: app.eventLoopGroup.next()
+        )
+        XCTAssert(req0.pathComponents.elementsEqual(["graphql", "nested1", "nested2"]))
+
+
+        let req1 = Request(
+            application: app, 
+            method: .GET, 
+            url: "/graphql/nested1/nested2?query=1234&fake=1245", 
+            on: app.eventLoopGroup.next()
+        )
+        XCTAssert(req1.pathComponents.elementsEqual(["graphql", "nested1", "nested2"]))
+
+        let req2 = Request(
+            application: app, 
+            method: .GET, 
+            url: "/graphql%20nested1%20nested2", 
+            on: app.eventLoopGroup.next()
+        )
+        XCTAssert(req2.pathComponents.elementsEqual(["graphql nested1 nested2"]))
+    }
 }
