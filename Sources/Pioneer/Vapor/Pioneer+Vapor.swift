@@ -87,27 +87,7 @@ extension Pioneer {
         /// - Parameter request: The incoming request
         /// - Returns: True if should be served
         private func shouldServe(to request: Request) -> Bool {
-            guard request.method == .POST || request.method == .GET else {
-                return false
-            }
-
-            let components = request.pathComponents
-
-            for i in path.indices {
-                if i >= components.count {
-                    return false
-                }
-                switch (path[i]) {
-                    case .catchall:
-                        return true
-                    case .anything, .constant(components[i]):
-                        continue
-                    case .constant, .parameter:
-                        return false
-                }
-            }
-
-            return components.count == path.count
+            (request.method == .POST || request.method == .GET) && request.matching(path: path)
         }
 
         /// What type of service should Pioneer serve for this request

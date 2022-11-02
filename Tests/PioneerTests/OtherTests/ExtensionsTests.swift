@@ -139,6 +139,10 @@ final class ExtensionsTests: XCTestCase {
         }
     }
 
+    /// Testing path component parsing
+    /// - Parsing ignore all query parameters
+    /// - Should omit empty components
+    /// - Should decode % to its utf-8 characters
     func testPathComponent() {
         let req0 = Request(
             application: app, 
@@ -164,5 +168,61 @@ final class ExtensionsTests: XCTestCase {
             on: app.eventLoopGroup.next()
         )
         XCTAssert(req2.pathComponents.elementsEqual(["graphql nested1 nested2"]))
+    }
+
+    /// Testing path component matching
+    /// - Parsing ignore all query parameters
+    /// - Should be able to matching with .anything and .catchall
+    func testPathMatching() {
+        let req0 = Request(
+            application: app, 
+            method: .GET, 
+            url: "/graphql/nested1/nested2", 
+            on: app.eventLoopGroup.next()
+        )
+        XCTAssertFalse(req0.matching(path: ["graphql"]))
+        XCTAssert(req0.matching(path: ["graphql", "nested1", "nested2"]))
+        XCTAssert(req0.matching(path: ["graphql", "nested1", .anything]))
+        XCTAssert(req0.matching(path: ["graphql", .anything, "nested2"]))
+        XCTAssert(req0.matching(path: ["graphql", .anything, .anything]))
+        XCTAssert(req0.matching(path: ["graphql", .catchall]))
+        XCTAssert(req0.matching(path: [.catchall]))
+
+
+        let req1 = Request(
+            application: app, 
+            method: .GET, 
+            url: "/graphql/nested1/nested2?query=1234&fake=1245", 
+            on: app.eventLoopGroup.next()
+        )
+        XCTAssertFalse(req1.matching(path: ["graphql"]))
+        XCTAssert(req1.matching(path: ["graphql", "nested1", .anything]))
+        XCTAssert(req1.matching(path: ["graphql", .anything, "nested2"]))
+        XCTAssert(req1.matching(path: ["graphql", .anything, .anything]))
+        XCTAssert(req1.matching(path: ["graphql", .catchall]))
+        XCTAssert(req1.matching(path: [.catchall]))
+
+        let req2 = Request(
+            application: app, 
+            method: .GET, 
+            url: "/graphql%20nested1%20nested2", 
+            on: app.eventLoopGroup.next()
+        )
+        XCTAssert(req2.matching(path: ["graphql nested1 nested2"]))
+        XCTAssert(req2.matching(path: [.anything]))
+        XCTAssert(req2.matching(path: [.catchall]))
+        XCTAssertFalse(req2.matching(path: ["graphql", "nested1", .anything]))
+        XCTAssertFalse(req2.matching(path: ["graphql", .anything, "nested2"]))
+        XCTAssertFalse(req2.matching(path: ["graphql", .anything, .anything]))
+        XCTAssertFalse(req2.matching(path: ["graphql", .catchall]))
+        
+        let req3 = Request(
+            application: app, 
+            method: .GET, 
+            url: "/", 
+            on: app.eventLoopGroup.next()
+        )
+        XCTAssert(req3.matching(path: [.catchall]))
+        XCTAssertFalse(req3.matching(path: ["graphql", .catchall]))
     }
 }
