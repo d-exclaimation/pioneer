@@ -21,7 +21,14 @@ extension Pioneer {
         at path: PathComponent = "graphql",
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
     ) -> VaporGraphQLMiddleware where Context == Void {
-        VaporGraphQLMiddleware(server: self, path: [path], body: body, context: { _, _ in }, websocketContext: { _, _, _ in}, websocketGuard: websocketGuard)
+        VaporGraphQLMiddleware(
+            server: self,
+            path: [path],
+            body: body, 
+            context: { _, _ in },
+            websocketContext: { _, _, _ in }, 
+            websocketGuard: websocketGuard
+        )
     }
 
     /// Pioneer GraphQL handlers for Vapor
@@ -35,6 +42,13 @@ extension Pioneer {
         at path: [PathComponent],
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
     ) -> VaporGraphQLMiddleware where Context == Void {
-        VaporGraphQLMiddleware(server: self, path: path, body: body, context: { _, _ in }, websocketContext: { _, _, _ in}, websocketGuard: websocketGuard)
+        VaporGraphQLMiddleware(
+            server: self,
+            path: path,
+            body: body,
+            context: { _, _ in },
+            websocketContext: { _, _, _ in },
+            websocketGuard: websocketGuard
+        )
     }
 }

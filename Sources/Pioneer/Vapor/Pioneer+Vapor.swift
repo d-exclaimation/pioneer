@@ -153,7 +153,13 @@ extension Pioneer {
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
     ) -> VaporGraphQLMiddleware {
-        VaporGraphQLMiddleware(server: self, path: [path], body: body, context: context, websocketGuard: websocketGuard)
+        VaporGraphQLMiddleware(
+            server: self, 
+            path: [path], 
+            body: body, 
+            context: context, 
+            websocketGuard: websocketGuard
+        )
     }
 
     /// Pioneer GraphQL handlers for Vapor
@@ -171,7 +177,14 @@ extension Pioneer {
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
     ) -> VaporGraphQLMiddleware {
-        VaporGraphQLMiddleware(server: self, path: [path], body: body, context: context, websocketContext: websocketContext, websocketGuard: websocketGuard)
+        VaporGraphQLMiddleware(
+            server: self,
+            path: [path],
+            body: body,
+            context: context,
+            websocketContext: websocketContext,
+            websocketGuard: websocketGuard
+        )
     }
 
     /// Pioneer GraphQL handlers for Vapor
@@ -187,7 +200,13 @@ extension Pioneer {
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
     ) -> VaporGraphQLMiddleware {
-        VaporGraphQLMiddleware(server: self, path: path, body: body, context: context, websocketGuard: websocketGuard)
+        VaporGraphQLMiddleware(
+            server: self,
+            path: path,
+            body: body,
+            context: context,
+            websocketGuard: websocketGuard
+        )
     }
 
     /// Pioneer GraphQL handlers for Vapor
@@ -205,6 +224,13 @@ extension Pioneer {
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
     ) -> VaporGraphQLMiddleware {
-        VaporGraphQLMiddleware(server: self, path: path, body: body, context: context, websocketContext: websocketContext, websocketGuard: websocketGuard)
+        VaporGraphQLMiddleware(
+            server: self,
+            path: path,
+            body: body,
+            context: context,
+            websocketContext: websocketContext,
+            websocketGuard: websocketGuard
+        )
     }
 }

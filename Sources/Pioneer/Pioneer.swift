@@ -124,7 +124,7 @@ public struct Pioneer<Resolver, Context> {
 
     /// Handle messages that follow the websocket protocol for a specific client using Pioneer.Probe 
     /// - Parameters:
-    ///   - pid: The client key
+    ///   - cid: The client key
     ///   - io: The client IO
     ///   - keepAlive: The keepAlive interval for the client
     ///   - timeout: The timeout interval for the client
@@ -132,7 +132,7 @@ public struct Pioneer<Resolver, Context> {
     ///   - txt: The message received
     ///   - context: The context builder for the client
     public func receiveMessage(
-        pid: UUID, 
+        cid: UUID, 
         io: WebSocketable,
         keepAlive: Task<Void, Error>?,
         timeout: Task<Void, Error>?, 
@@ -157,7 +157,7 @@ public struct Pioneer<Resolver, Context> {
             do {
                 try await check(payload)
                 await initialiseClient(
-                    pid: pid, 
+                    cid: cid, 
                     io: io, 
                     payload: payload, 
                     timeout: timeout, 
@@ -169,7 +169,7 @@ public struct Pioneer<Resolver, Context> {
                 io.out(err.jsonString)
 
                 // Deallocation of resources
-                await probe.disconnect(for: pid)
+                await probe.disconnect(for: cid)
                 keepAlive?.cancel()
                 try? await io.terminate(code: .graphqlInvalid) 
             }
@@ -180,23 +180,23 @@ public struct Pioneer<Resolver, Context> {
 
         // Explicit message to terminate connection to deallocate resources, stop timer, and close connection
         case .terminate:
-            await probe.disconnect(for: pid)
+            await probe.disconnect(for: cid)
             keepAlive?.cancel()
             timeout?.cancel()
             try? await io.terminate(code: .normalClosure)
 
         // Start -> Long running operation
         case .start(oid: let oid, gql: let gql):
-            await executeLongOperation(pid: pid, io: io, oid: oid, gql: gql)
+            await executeLongOperation(cid: cid, io: io, oid: oid, gql: gql)
 
         // Once -> Short lived operation
         case .once(oid: let oid, gql: let gql):
-            await executeShortOperation(pid: pid, io: io, oid: oid, gql: gql)
+            await executeShortOperation(cid: cid, io: io, oid: oid, gql: gql)
 
         // Stop -> End any running operation
         case .stop(oid: let oid):
             await probe.stop(
-                for: pid,
+                for: cid,
                 with: oid
             )
 
@@ -212,7 +212,7 @@ public struct Pioneer<Resolver, Context> {
             io.out(err.jsonString)
 
             // Deallocation of resources
-            await probe.disconnect(for: pid)
+            await probe.disconnect(for: cid)
             keepAlive?.cancel()
             try? await io.terminate(code: .graphqlInvalid)
 
@@ -223,21 +223,21 @@ public struct Pioneer<Resolver, Context> {
 
     /// Initialise a client and connect it to Pioneer.Probe
     /// - Parameters:
-    ///   - pid: The client key
+    ///   - cid: The client key
     ///   - io: The client IO
     ///   - payload: The initial connectionpayload 
     ///   - timeout: The timeout interval for the client
     ///   - ev: Any event loop
     ///   - context: The context builder for the client
     public func initialiseClient(
-        pid: UUID, 
+        cid: UUID, 
         io: WebSocketable, 
         payload: Payload, 
         timeout: Task<Void, Error>?, 
         ev: EventLoopGroup,
         context: @escaping WebSocketContext
     ) async {
-        let client = WebSocketClient(id: pid, io: io, payload: payload, ev: ev, context: context)
+        let client = WebSocketClient(id: cid, io: io, payload: payload, ev: ev, context: context)
         await probe.connect(with: client)
         websocketProtocol.initialize(io)
         timeout?.cancel()
@@ -245,12 +245,12 @@ public struct Pioneer<Resolver, Context> {
 
     /// Close a client connected through Pioneer.Probe
     /// - Parameters:
-    ///   - pid: The client key
+    ///   - cid: The client key
     ///   - keepAlive: The client's keepAlive interval
     ///   - timeout: The client's timeout interval
-    public func closeClient(pid: UUID, keepAlive: Task<Void, Error>?, timeout: Task<Void, Error>?) {
+    public func closeClient(cid: UUID, keepAlive: Task<Void, Error>?, timeout: Task<Void, Error>?) {
         Task {
-            await probe.disconnect(for: pid)
+            await probe.disconnect(for: cid)
         }
         keepAlive?.cancel()
         timeout?.cancel()
@@ -258,11 +258,11 @@ public struct Pioneer<Resolver, Context> {
 
     /// Execute long-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult 
     /// - Parameters:
-    ///   - pid: The client key
+    ///   - cid: The client key
     ///   - io: The client IO for outputting errors
     ///   - oid: The key for this operation
     ///   - gql: The GraphQL Request for this operation
-    public func executeLongOperation(pid: UUID, io: WebSocketable, oid: String, gql: GraphQLRequest) async {
+    public func executeLongOperation(cid: UUID, io: WebSocketable, oid: String, gql: GraphQLRequest) async {
         // Introspection guard
         guard allowed(from: gql) else {
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
@@ -277,7 +277,7 @@ public struct Pioneer<Resolver, Context> {
         }
 
         await probe.start(
-            for: pid,
+            for: cid,
             with: oid,
             given: gql
         )
@@ -285,11 +285,11 @@ public struct Pioneer<Resolver, Context> {
 
     /// Execute short-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult 
     /// - Parameters:
-    ///   - pid: The client key
+    ///   - cid: The client key
     ///   - io: The client IO for outputting errors
     ///   - oid: The key for this operation
     ///   - gql: The GraphQL Request for this operation
-    public func executeShortOperation(pid: UUID, io: WebSocketable, oid: String, gql: GraphQLRequest) async {
+    public func executeShortOperation(cid: UUID, io: WebSocketable, oid: String, gql: GraphQLRequest) async {
         // Introspection guard
         guard allowed(from: gql) else {
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
@@ -304,7 +304,7 @@ public struct Pioneer<Resolver, Context> {
         }
 
         await probe.once(
-            for: pid,
+            for: cid,
             with: oid,
             given: gql
         )

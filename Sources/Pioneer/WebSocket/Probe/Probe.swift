@@ -46,32 +46,32 @@ extension Pioneer {
         }
         
         /// Deallocate the space from a closing process
-        func disconnect(for pid: UUID) async {
-            await drones[pid]?.acid()
-            clients.delete(pid)
-            drones.delete(pid)
+        func disconnect(for cid: UUID) async {
+            await drones[cid]?.acid()
+            clients.delete(cid)
+            drones.delete(cid)
         }
         
         /// Long running operation require its own actor, thus initialing one if there were none prior
-        func start(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let client = clients[pid] else { 
+        func start(for cid: UUID, with oid: String, given gql: GraphQLRequest) async {
+            guard let client = clients[cid] else { 
                 return
             }
 
-            let drone = drones.getOrElse(pid) {
+            let drone = drones.getOrElse(cid) {
                 .init(client,
                     schema: schema,
                     resolver: resolver,
                     proto: proto
                 )
             }
-            drones.update(pid, with: drone)
+            drones.update(cid, with: drone)
             await drone.start(for: oid, given: gql)
         }
         
         /// Short lived operation is processed immediately and pipe back later
-        func once(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let client = clients[pid] else { 
+        func once(for cid: UUID, with oid: String, given gql: GraphQLRequest) async {
+            guard let client = clients[cid] else { 
                 return
             }
 
@@ -97,8 +97,8 @@ extension Pioneer {
         }
 
         /// Stopping any operation to client specific actor
-        func stop(for pid: UUID, with oid: String) async {
-            await drones[pid]?.stop(for: oid)
+        func stop(for cid: UUID, with oid: String) async {
+            await drones[cid]?.stop(for: oid)
         }
         
         /// Message for pipe to self result after processing short lived operation

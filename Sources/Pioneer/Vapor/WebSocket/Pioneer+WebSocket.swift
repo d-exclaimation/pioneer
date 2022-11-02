@@ -40,7 +40,7 @@ extension Pioneer {
 
     /// On upgrade callback
     func onUpgrade(req: Request, ws: WebSocket, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) -> Void {
-        let pid = UUID()
+        let cid = UUID()
 
         let keepAlive = setInterval(delay: keepAlive) {
             if ws.isClosed {
@@ -67,7 +67,7 @@ extension Pioneer {
 
             for await message in stream {
                 await receiveMessage(
-                    pid: pid, io: ws, 
+                    cid: cid, io: ws, 
                     keepAlive: keepAlive, 
                     timeout: timeout,
                     ev: req.eventLoop, 
@@ -86,7 +86,7 @@ extension Pioneer {
         Task {
             try await ws.onClose.get()
             task.cancel()
-            closeClient(pid: pid, keepAlive: keepAlive, timeout: timeout)
+            closeClient(cid: cid, keepAlive: keepAlive, timeout: timeout)
         }
     }
 }
