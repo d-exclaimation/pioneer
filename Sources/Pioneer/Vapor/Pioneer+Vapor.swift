@@ -91,10 +91,7 @@ extension Pioneer {
                 return false
             }
 
-            let components = request
-                .url.path
-                .split(separator: "/", omittingEmptySubsequences: true)
-                .map { String($0) }
+            let components = request.pathComponents
 
             for i in path.indices {
                 if i >= components.count {
