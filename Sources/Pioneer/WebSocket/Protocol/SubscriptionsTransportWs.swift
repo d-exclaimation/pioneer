@@ -47,11 +47,11 @@ enum SubscriptionTransportWs: SubProtocol {
         }
     }
 
-    static func initialize(ws: ProcessingConsumer) {
+    static func initialize(_ io: WebSocketable) {
         let ack = GraphQLMessage(type: GQL_CONNECTION_ACK)
         let ka = GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)
-        ws.send(msg: ack.jsonString)
-        ws.send(msg: ka.jsonString)
+        io.out(ack.jsonString)
+        io.out(ka.jsonString)
     }
     
     static var next: String { GQL_DATA }
@@ -59,6 +59,8 @@ enum SubscriptionTransportWs: SubProtocol {
     static var complete: String { GQL_COMPLETE }
 
     static var error: String { GQL_ERROR }
+    
+    static var pong: String { GQL_CONNECTION_KEEP_ALIVE }
 
     static var keepAliveMessage: String {
         GraphQLMessage(type: GQL_CONNECTION_KEEP_ALIVE)

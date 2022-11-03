@@ -74,7 +74,7 @@ func users(ctx: Context, _: NoArguments) async -> [User] {
 
 Since `0.7.0`, Pioneer allow a seperate context builder for the websocket operations where it provide a different set of arguments.
 
-This context builder is similar to what you can provide to the [`context` property](https://github.com/enisdenjo/graphql-ws/blob/master/docs/interfaces/server.ServerOptions.md#context) in `graphql-ws` where you are given the `Request`, `ConnectionParams`, and `GraphQLRequest`.
+This context builder is similar to what you can provide to the [`context` property](https://github.com/enisdenjo/graphql-ws/blob/master/docs/interfaces/server.ServerOptions.md#context) in `graphql-ws` where you are given the `Request`, `Payload`, and `GraphQLRequest`.
 
 ```swift main.swift
 import Pioneer
@@ -92,7 +92,7 @@ func getContext(req: Request, res: Response) -> Context {
 }
 
 @Sendable
-func getWebsocketContext(req: Request, params: ConnectionParams, gql: GraphQLRequest) -> {
+func getWebsocketContext(req: Request, params: Payload, gql: GraphQLRequest) -> {
     Context(
         req: req, res: .init(),
         params: params,
@@ -117,8 +117,8 @@ By default if you don't provide a seperate context builder for websocket, Pionee
 ==- Custom Request for Websocket
 The custom request will similar to the request used to upgrade to websocket but will have:
 
-- The headers taken from `"header"/"headers"` value from the `ConnectionParams` or all the entirety of `ConnectionParams`
-- The query parameters taken from `"query"/"queries"/"queryParams"/"queryParameters"` value from the `ConnectionParams`
+- The headers taken from `"header"/"headers"` value from the `Payload` or all the entirety of `Payload`
+- The query parameters taken from `"query"/"queries"/"queryParams"/"queryParameters"` value from the `Payload`
 - The body from the `GraphQLRequest`
 
 !!!warning Only when using shared builder
@@ -145,7 +145,7 @@ struct Resolver {
 }
 ```
 
-### ConnectionParams
+### Payload
 
 The connection params is given during websocket initialization from [`payload` as part of `ConnectionInit` message](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit) inside an established WebSocket connection.
 

@@ -6,8 +6,6 @@
 //
 
 import class Graphiti.Schema
-import class Vapor.Request
-import class Vapor.Response
 
 public extension Pioneer {
     /// - Parameters:
@@ -20,34 +18,28 @@ public extension Pioneer {
     ///   - playground: Allowing playground
     ///   - validationRules: Validation rules to be applied before operation
     ///   - keepAlive: Keep alive internal in nanosecond, default to 12.5 sec, nil for disable
+    ///   - timeout: Timeout interval in nanosecond, default to 5 sec, nil for disable
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
-        httpStrategy: HTTPStrategy = .queryOnlyGet,
+        httpStrategy: HTTPStrategy = .csrfPrevention,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .sandbox,
         validationRules: Validations = .none,
-        keepAlive: UInt64? = .seconds(30)
+        keepAlive: UInt64? = .seconds(30),
+        timeout: UInt64? = .seconds(5)
     ) {
         self.init(
             schema: schema.schema,
             resolver: resolver,
-            contextBuilder: contextBuilder,
             httpStrategy: httpStrategy,
-            websocketContextBuilder: { @Sendable req, payload, gql async throws in
-                try await req.defaultWebsocketContextBuilder(
-                    payload: payload,
-                    gql: gql,
-                    contextBuilder: contextBuilder
-                )
-            },
             websocketProtocol: websocketProtocol,
             introspection: introspection,
             playground: playground,
             validationRules: validationRules,
-            keepAlive: keepAlive
+            keepAlive: keepAlive,
+            timeout: timeout
         )
     }
     
@@ -63,33 +55,25 @@ public extension Pioneer {
     ///   - playground: Allowing playground
     ///   - validationRules: Validation rules to be applied before operation
     ///   - keepAlive: Keep alive internal in nanosecond, default to 12.5 sec, nil for disable
-    ///   - timeout: Timeout interval in nanosecond, default to 5 sec, nil for disable
     init(
         schema: Schema<Resolver, Context>,
         resolver: Resolver,
-        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
-        httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-        websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in },
+        httpStrategy: HTTPStrategy = .csrfPrevention,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .sandbox,
         validationRules: Validations = .none,
-        keepAlive: UInt64? = .seconds(30),
-        timeout: UInt64? = .seconds(5)
+        keepAlive: UInt64? = .seconds(30)
     ) {
         self.init(
             schema: schema.schema,
             resolver: resolver,
-            contextBuilder: contextBuilder,
             httpStrategy: httpStrategy,
-            websocketContextBuilder: websocketContextBuilder,
             websocketProtocol: websocketProtocol,
             introspection: introspection,
             playground: playground,
             validationRules: validationRules,
-            keepAlive: keepAlive,
-            timeout: timeout
+            keepAlive: keepAlive
         )
     }
 }

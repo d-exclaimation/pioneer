@@ -42,21 +42,15 @@ final class ProbeTests: XCTestCase {
         return .init(
             schema: schema,
             resolver: Resolver(),
-            proto: SubscriptionTransportWs.self,
-            websocketContextBuilder: { _, _, _ in },
-            websocketOnInit: { payload in
-                guard case .some = payload else {
-                    throw Abort(.ok)
-                }
-            }
+            proto: SubscriptionTransportWs.self
         )
     }
 
     /// Setup a Process using a custom test consumer
-    func consumer() -> (Pioneer<Resolver, Void>.Process, TestConsumer)  {
+    func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestConsumer)  {
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
-        return (.init(ws: consumer, payload: [:], req: req), consumer)
+        return (.init(id: UUID(), io: consumer, payload: [:], ev: req.eventLoop, context: { _, _ in }), consumer)
     }
 
     /// Probe
@@ -147,19 +141,5 @@ final class ProbeTests: XCTestCase {
         }
         XCTAssert(!errors.isEmpty)
         await probe.disconnect(for: process.id)
-    }
-
-    /// Probe
-    /// 1. Should not accept if websocketOnInit throws an error
-    func testOnInit() async throws {
-        let probe = try setup()
-        let req = Request.init(application: app, on: app.eventLoopGroup.next())
-        let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
-        await probe.connect(with: .init(ws: consumer, payload: nil, req: req))
-
-        let results = await consumer.waitAll()
-        guard let _ = results.first(where: { $0.contains("\"error\"") }) else {
-            return XCTFail("No result")
-        }
     }
 }

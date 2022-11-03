@@ -81,7 +81,7 @@ You can set them in the [Response](/guides/advanced/context/#response) object gi
 
 Yes, you can access it from the [Websocket Context Builder](/guides/advanced/context/#connectionparams) from the Pioneer initializer.
 
-[!ref ConnectionParams](/guides/advanced/context/#connectionparams)
+[!ref Payload](/guides/advanced/context/#connectionparams)
 
 ### Data Source
 

@@ -1,15 +1,13 @@
 //
-//  Pioneer+IDE.swift
-//  Pioneer
+//  IDE.swift
+//  pioneer
 //
-//  Created by d-exclaimation.
+//  Created by d-exclaimation on 14:17.
 //
-import Vapor
 
 extension Pioneer {
     /// GraphQL Hosted IDE
-    public enum IDE {
-        /// GraphQL Playground IDE (only for `subscriptions-graphql-ws`)
+    public enum IDE: Equatable {
         @available(*, deprecated, message: "Use `GraphiQL or Apollo Sandbox instead`")
         case playground
         
@@ -31,17 +29,21 @@ extension Pioneer {
             
             /// Cloud version of Banana Cake Pop
             case bananaCakePop
-        }
-        
-        
-        /// Alias for the preferred Apollo Sandbox option (Currently `.sandbox`)
-        public static var apolloSandbox: IDE {
-            .sandbox
+
+            /// URL for Cloud-based IDE
+            var url: String {
+                switch (self) {
+                    case .apolloSandbox:
+                        return "https://studio.apollographql.com/sandbox/explorer"
+                    case .bananaCakePop:
+                        return "https://eat.bananacakepop.com"
+                }
+            }
         }
     }
-    
-    /// Apply playground for `GET` on `/playground`.
-    func applyPlayground(on router: RoutesBuilder, at path: PathComponent) {
+        
+    /// GraphQL Playground HTML
+    internal var playgroundHtml: String {
         let graphqlPlayground = """
         <!DOCTYPE html>
         <html>
@@ -95,10 +97,11 @@ extension Pioneer {
             </div>
         </div>
         <script>
-            const subscriptionEndpoint = window.location.href.replace("playground", "\(path)/websocket").replace("http", "ws");
+            const subscriptionEndpoint = window.location.href.replace("http", "ws");
+            const endpoint = window.location.href;
             window.addEventListener('load', function (event) {
                 GraphQLPlayground.init(document.getElementById('root'), {
-                    endpoint: "./\(path)",
+                    endpoint,
                     subscriptionEndpoint
                 })
             })
@@ -107,28 +110,19 @@ extension Pioneer {
 
         </html>
         """
-        
-        func handler(req: Request) -> Response {
-            Response(
-                status: .ok,
-                headers: HTTPHeaders([(HTTPHeaders.Name.contentType.description, "text/html")]),
-                body: Response.Body(string: graphqlPlayground)
-            )
-        }
-        
-        router.get("playground", use: handler)
+        return graphqlPlayground
     }
-    
-    /// Apply GraphiQL for `GET` on `/playground`.
-    func applyGraphiQL(on router: RoutesBuilder, at path: PathComponent) {
+
+    /// GraphiQL HTML
+    internal var graphiqlHtml: String {
         let fetcher: String = def {
             switch websocketProtocol {
             case .subscriptionsTransportWs:
                 return """
                 <script src="https://unpkg.com/subscriptions-transport-ws/browser/client.js" type="application/javascript"></script>
                 <script>
-                    const url = './\(path)';
-                    const subscriptionUrl = window.location.href.replace("playground", "\(path)/websocket").replace("http", "ws");
+                    const url = window.location.href;
+                    const subscriptionUrl = window.location.href.replace("http", "ws");
                 
                     const legacyClient = new window.SubscriptionsTransportWs.SubscriptionClient(subscriptionUrl, { reconnect: true });
                 
@@ -148,8 +142,8 @@ extension Pioneer {
             case .graphqlWs:
                 return """
                 <script>
-                    const url = './\(path)';
-                    const subscriptionUrl = window.location.href.replace("playground", "\(path)/websocket").replace("http", "ws");
+                    const url = window.location.href;
+                    const subscriptionUrl = window.location.href.replace("http", "ws");
 
                     const fetcher = GraphiQL.createFetcher({
                         url,
@@ -167,7 +161,7 @@ extension Pioneer {
             case .disable:
                 return """
                 <script>
-                    const url = './\(path)';
+                    const url = window.location.href;
 
                     const fetcher = GraphiQL.createFetcher({
                         url
@@ -183,7 +177,7 @@ extension Pioneer {
                 """
             }
         }
-        let graphiql = """
+        return """
         <!DOCTYPE html>
         <html>
           <head>
@@ -233,20 +227,11 @@ extension Pioneer {
           </body>
         </html>
         """
-        func handler(req: Request) -> Response {
-            Response(
-                status: .ok,
-                headers: HTTPHeaders([(HTTPHeaders.Name.contentType.description, "text/html")]),
-                body: Response.Body(string: graphiql)
-            )
-        }
-        
-        router.get("playground", use: handler)
     }
     
-    /// Apply Embedded Apollo Sandbox for `GET` on `/playground`.
-    func applyEmbeddedSandbox(on router: RoutesBuilder, at path: PathComponent) {
-        let embeddedSandbox = """
+    /// Embedded Apollo Sandbox HTML
+    internal var embeddedSandboxHtml: String {
+        """
         <!DOCTYPE html>
         <html>
         <div id="sandbox" style="position:absolute;top:0;right:0;bottom:0;left:0"></div>
@@ -256,26 +241,10 @@ extension Pioneer {
             target: "#sandbox",
             // Pass through your server href if you are embedding on an endpoint.
             // Otherwise, you can pass whatever endpoint you want Sandbox to start up with here.
-            initialEndpoint: window.location.href.replace("playground", "\(path)")
+            initialEndpoint: window.location.href
           });
         </script>
         </html>
         """
-        
-        func handler(req: Request) -> Response {
-            Response(
-                status: .ok,
-                headers: HTTPHeaders([(HTTPHeaders.Name.contentType.description, "text/html")]),
-                body: Response.Body(string: embeddedSandbox)
-            )
-        }
-        
-        router.get("playground", use: handler)
-    }
-    
-    func applySandboxRedirect(on router: RoutesBuilder, with target: String) {
-        router.get("playground") { req in
-            req.redirect(to: target, type: .permanent)
-        }
     }
 }

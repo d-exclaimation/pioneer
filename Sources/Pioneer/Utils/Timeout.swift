@@ -10,7 +10,7 @@
 ///   - delay: The delay before the code is executed
 ///   - block: The code to be executed
 /// - Returns: The task used for the delay
-@discardableResult func setTimeout(delay: UInt64?, _ block: @Sendable @escaping () async throws -> Void) -> Task<Void, Error>? {
+@discardableResult public func setTimeout(delay: UInt64?, _ block: @Sendable @escaping () async throws -> Void) -> Task<Void, Error>? {
     guard let delay = delay else {
         return nil
     } 

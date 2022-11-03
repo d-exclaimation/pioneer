@@ -5,24 +5,21 @@
 //  Created by d-exclaimation on 12:18 AM.
 //
 
-import Vapor
+import NIO
+import Foundation
 import class GraphQL.GraphQLSchema
 import struct GraphQL.GraphQLResult
 import struct GraphQL.GraphQLError
 import enum GraphQL.OperationType
 
-/// Pioneer GraphQL Vapor Server for handling all GraphQL operations
+/// Pioneer GraphQL Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
     /// Graphiti schema used to execute operations
     public private(set) var schema: GraphQLSchema
     /// Resolver used by the GraphQL schema
     public private(set) var resolver: Resolver
-    /// Context builder from request
-    public private(set) var contextBuilder: @Sendable (Request, Response) async throws -> Context
     /// HTTP strategy
     public private(set) var httpStrategy: HTTPStrategy
-    /// Websocket Context builder
-    public private(set) var websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
     /// Websocket sub-protocol
     public private(set) var websocketProtocol: WebsocketProtocol
     /// Allowing introspection
@@ -55,10 +52,7 @@ public struct Pioneer<Resolver, Context> {
     public init(
         schema: GraphQLSchema,
         resolver: Resolver,
-        contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context,
-        httpStrategy: HTTPStrategy = .queryOnlyGet,
-        websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-        websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in },
+        httpStrategy: HTTPStrategy = .csrfPrevention,
         websocketProtocol: WebsocketProtocol = .graphqlWs,
         introspection: Bool = true,
         playground: IDE = .sandbox,
@@ -68,9 +62,7 @@ public struct Pioneer<Resolver, Context> {
     ) {
         self.schema = schema
         self.resolver = resolver
-        self.contextBuilder = contextBuilder
         self.httpStrategy = httpStrategy
-        self.websocketContextBuilder = websocketContextBuilder
         self.websocketProtocol = websocketProtocol
         self.introspection = introspection
         self.playground = !introspection ? .disable : playground
@@ -91,51 +83,27 @@ public struct Pioneer<Resolver, Context> {
         let probe = Probe(
             schema: schema,
             resolver: resolver,
-            proto: proto,
-            websocketContextBuilder: websocketContextBuilder
+            proto: proto
         )
         self.probe = probe
     }
 
-    /// Apply Pioneer GraphQL handlers to a Vapor route
+    /// Guard for operation allowed
     /// - Parameters:
-    ///   - router: The router to apply handlers to
-    ///   - path: The path within the route to add handles
-    ///   - bodyStrategy: The strategy to process the request body
-    public func applyMiddleware(on router: RoutesBuilder, at path: PathComponent = "graphql", bodyStrategy: HTTPBodyStreamStrategy = .collect) {
-        // HTTP Portion
-        switch httpStrategy {
-        case .onlyPost:
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy)
-        case .onlyGet:
-            applyGet(on: router, at: path)
-        default:
-            applyGet(on: router, at: path)
-            applyPost(on: router, at: path, bodyStrategy: bodyStrategy)
+    ///   - gql: GraphQL operation
+    ///   - allowing: Set of operation allowed
+    /// - Returns: True if operation should be allowed
+    public func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) -> Bool {
+        guard introspection || !gql.isIntrospection else {
+            return false
         }
-        
-        switch playground {
-        case .playground:
-            applyPlayground(on: router, at: path)
-        case .graphiql:
-            applyGraphiQL(on: router, at: path)
-        case .sandbox:
-            applyEmbeddedSandbox(on: router, at: path)
-        case .redirect(to: .apolloSandbox):
-            applySandboxRedirect(on: router, with: "https://studio.apollographql.com/sandbox/explorer")
-        case .redirect(to: .bananaCakePop):
-            applySandboxRedirect(on: router, with: "https://eat.bananacakepop.com")
-        case .disable:
-            break
+        guard let operationType = gql.operationType else {
+            return false
         }
-        
-        // Websocket portion
-        if websocketProtocol.isAccepting {
-            applyWebSocket(on: router, at: [path, "websocket"])
-        }
+        return allowing.contains(operationType)
     }
 
-    /// Execute operation through Pioneer for a GraphQLRequest, context and get aa well formatted GraphQlResult
+    /// Execute operation through Pioneer for a GraphQLRequest, context and get a well formatted GraphQlResult
     /// - Parameters:
     ///   - gql: The GraphQL Request for this operation
     ///   - ctx: The context for the operation
@@ -158,14 +126,191 @@ public struct Pioneer<Resolver, Context> {
     }
 
 
-    /// Guard for operation allowed
-    internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) -> Bool {
-        guard introspection || !gql.isIntrospection else {
-            return false
+    /// Handle messages that follow the websocket protocol for a specific client using Pioneer.Probe 
+    /// - Parameters:
+    ///   - cid: The client key
+    ///   - io: The client IO
+    ///   - keepAlive: The keepAlive interval for the client
+    ///   - timeout: The timeout interval for the client
+    ///   - ev: Any event loop
+    ///   - txt: The message received
+    ///   - context: The context builder for the client
+    public func receiveMessage(
+        cid: UUID, 
+        io: WebSocketable,
+        keepAlive: Task<Void, Error>?,
+        timeout: Task<Void, Error>?, 
+        ev: EventLoopGroup,
+        txt: String,
+        context: @escaping WebSocketContext,
+        check: @escaping WebSocketGuard
+    ) async  {
+        guard let data = txt.data(using: .utf8) else {
+            // Shouldn't accept any message that aren't utf8 string
+            // -> Close with 1003 code
+            try? await io.terminate(code: .unacceptableData)
+            return
         }
-        guard let operationType = gql.operationType else {
-            return false
+
+        switch websocketProtocol.parse(data) {
+
+        // Initial sub-protocol handshake established
+        // Dispatch process to probe so it can start accepting operations
+        // Timer fired here to keep connection alive by sub-protocol standard
+        case .initial(let payload):
+            do {
+                try await check(payload)
+                await initialiseClient(
+                    cid: cid, 
+                    io: io, 
+                    payload: payload, 
+                    timeout: timeout, 
+                    ev: ev,
+                    context: context
+                )
+            } catch {
+                let err = GraphQLMessage.errors(type: websocketProtocol.error, [error.graphql])
+                io.out(err.jsonString)
+
+                // Deallocation of resources
+                await probe.disconnect(for: cid)
+                keepAlive?.cancel()
+                try? await io.terminate(code: .graphqlInvalid) 
+            }
+
+        // Ping is for requesting server to send a keep alive message
+        case .ping:
+            io.out(GraphQLMessage(type: websocketProtocol.pong).jsonString)
+
+        // Explicit message to terminate connection to deallocate resources, stop timer, and close connection
+        case .terminate:
+            await probe.disconnect(for: cid)
+            keepAlive?.cancel()
+            timeout?.cancel()
+            try? await io.terminate(code: .normalClosure)
+
+        // Start -> Long running operation
+        case .start(oid: let oid, gql: let gql):
+            await executeLongOperation(cid: cid, io: io, oid: oid, gql: gql)
+
+        // Once -> Short lived operation
+        case .once(oid: let oid, gql: let gql):
+            await executeShortOperation(cid: cid, io: io, oid: oid, gql: gql)
+
+        // Stop -> End any running operation
+        case .stop(oid: let oid):
+            await probe.stop(
+                for: cid,
+                with: oid
+            )
+
+        // Error in validation should notify that no operation will be run, does not close connection
+        case .error(oid: let oid, message: let message):
+            let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [.init(message: message)])
+            io.out(err.jsonString)
+
+        // Fatal error is an event trigger when message given in unacceptable by protocol standard
+        // This message if processed any further will cause securities vulnerabilities, thus connection should be closed
+        case .fatal(message: let message):
+            let err = GraphQLMessage.errors(type: websocketProtocol.error, [.init(message: message)])
+            io.out(err.jsonString)
+
+            // Deallocation of resources
+            await probe.disconnect(for: cid)
+            keepAlive?.cancel()
+            try? await io.terminate(code: .graphqlInvalid)
+
+        case .ignore:
+            break
         }
-        return allowing.contains(operationType)
+    }
+
+    /// Initialise a client and connect it to Pioneer.Probe
+    /// - Parameters:
+    ///   - cid: The client key
+    ///   - io: The client IO
+    ///   - payload: The initial connectionpayload 
+    ///   - timeout: The timeout interval for the client
+    ///   - ev: Any event loop
+    ///   - context: The context builder for the client
+    public func initialiseClient(
+        cid: UUID, 
+        io: WebSocketable, 
+        payload: Payload, 
+        timeout: Task<Void, Error>?, 
+        ev: EventLoopGroup,
+        context: @escaping WebSocketContext
+    ) async {
+        let client = WebSocketClient(id: cid, io: io, payload: payload, ev: ev, context: context)
+        await probe.connect(with: client)
+        websocketProtocol.initialize(io)
+        timeout?.cancel()
+    }
+
+    /// Close a client connected through Pioneer.Probe
+    /// - Parameters:
+    ///   - cid: The client key
+    ///   - keepAlive: The client's keepAlive interval
+    ///   - timeout: The client's timeout interval
+    public func closeClient(cid: UUID, keepAlive: Task<Void, Error>?, timeout: Task<Void, Error>?) {
+        Task {
+            await probe.disconnect(for: cid)
+        }
+        keepAlive?.cancel()
+        timeout?.cancel()
+    }
+
+    /// Execute long-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult 
+    /// - Parameters:
+    ///   - cid: The client key
+    ///   - io: The client IO for outputting errors
+    ///   - oid: The key for this operation
+    ///   - gql: The GraphQL Request for this operation
+    public func executeLongOperation(cid: UUID, io: WebSocketable, oid: String, gql: GraphQLRequest) async {
+        // Introspection guard
+        guard allowed(from: gql) else {
+            let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
+                .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
+            ])
+            return io.out(err.jsonString)
+        }
+        let errors = validationRules(using: schema, for: gql)
+        guard errors.isEmpty else {
+            let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, errors)
+            return io.out(err.jsonString)
+        }
+
+        await probe.start(
+            for: cid,
+            with: oid,
+            given: gql
+        )
+    }
+
+    /// Execute short-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult 
+    /// - Parameters:
+    ///   - cid: The client key
+    ///   - io: The client IO for outputting errors
+    ///   - oid: The key for this operation
+    ///   - gql: The GraphQL Request for this operation
+    public func executeShortOperation(cid: UUID, io: WebSocketable, oid: String, gql: GraphQLRequest) async {
+        // Introspection guard
+        guard allowed(from: gql) else {
+            let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
+                .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
+            ])
+            return io.out(err.jsonString)
+        }
+        let errors = validationRules(using: schema, for: gql)
+        guard errors.isEmpty else {
+            let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, errors)
+            return io.out(err.jsonString)
+        }
+
+        await probe.once(
+            for: cid,
+            with: oid,
+            given: gql
+        )
     }
 }

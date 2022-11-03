@@ -48,8 +48,8 @@ public extension Pioneer {
             innerProtocol.decode(data)
         }
 
-        func initialize(ws: ProcessingConsumer) {
-            innerProtocol.initialize(ws: ws)
+        func initialize(_ io: WebSocketable) {
+            innerProtocol.initialize(io)
         }
 
         /// Inner protocol namespace
@@ -68,7 +68,7 @@ public extension Pioneer {
                     If you are seeing this failure, try enabling Pioneer Websocket feature or using a guard to make sure it is not disabled
                     ```
                     // Enabling Websocket 
-                    Pioneer(..., websocketProtocol: .subscriptionTransportWs)
+                    Pioneer(..., websocketProtocol: .graphqlWs)
 
                     // or use guards
                     if case .disable = pioneer.wsProtocol { return }
@@ -90,6 +90,10 @@ public extension Pioneer {
 
         var complete: String {
             innerProtocol.complete
+        }
+
+        var pong: String {
+            innerProtocol.pong
         }
 
         var keepAliveMessage: String {

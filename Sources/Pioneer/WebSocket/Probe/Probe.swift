@@ -7,7 +7,6 @@
 
 import GraphQL
 import class Graphiti.Schema
-import class Vapor.Request
 import struct Foundation.UUID
 import protocol NIO.EventLoopGroup
 
@@ -17,96 +16,80 @@ extension Pioneer {
         private let schema: GraphQLSchema
         private let resolver: Resolver
         private let proto: SubProtocol.Type
-        private let websocketContextBuilder: @Sendable (Request, ConnectionParams, GraphQLRequest) async throws -> Context
-        private let websocketOnInit: @Sendable (ConnectionParams) async throws -> Void
 
         init(
-            schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-            websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in }
+            schema: GraphQLSchema, resolver: Resolver, proto: SubProtocol.Type
         ) {
             self.schema = schema
             self.resolver = resolver
             self.proto = proto
-            self.websocketContextBuilder = websocketContextBuilder
-            self.websocketOnInit = websocketOnInit
         }
         
         init(
-            schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type,
-            websocketContextBuilder: @Sendable @escaping (Request, ConnectionParams, GraphQLRequest) async throws -> Context,
-            websocketOnInit: @Sendable @escaping (ConnectionParams) async throws -> Void = { _ in }
+            schema: Schema<Resolver, Context>, resolver: Resolver, proto: SubProtocol.Type
         ) {
             self.schema = schema.schema
             self.resolver = resolver
             self.proto = proto
-            self.websocketContextBuilder = websocketContextBuilder
-            self.websocketOnInit = websocketOnInit
         }
 
         // MARK: - Private mutable states
-        private var clients: [UUID: Process] = [:]
+        private var clients: [UUID: WebSocketClient] = [:]
         private var drones: [UUID: Drone] = [:]
         
         
         // MARK: - Event callbacks
         
         /// Allocate space and save any verified process
-        func connect(with process: Process) async {
-            do {
-                try await websocketOnInit(process.payload)
-                clients.update(process.id, with: process)
-            } catch {
-                await deny(process: process, with: error)
-            }
+        func connect(with client: WebSocketClient) async {
+            clients.update(client.id, with: client)
         }
         
         /// Deallocate the space from a closing process
-        func disconnect(for pid: UUID) async {
-            await drones[pid]?.acid()
-            clients.delete(pid)
-            drones.delete(pid)
+        func disconnect(for cid: UUID) async {
+            await drones[cid]?.acid()
+            clients.delete(cid)
+            drones.delete(cid)
         }
         
         /// Long running operation require its own actor, thus initialing one if there were none prior
-        func start(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let process = clients[pid] else { 
+        func start(for cid: UUID, with oid: String, given gql: GraphQLRequest) async {
+            guard let client = clients[cid] else { 
                 return
             }
 
-            let drone = drones.getOrElse(pid) {
-                .init(process,
+            let drone = drones.getOrElse(cid) {
+                .init(client,
                     schema: schema,
                     resolver: resolver,
-                    proto: proto,
-                    websocketContextBuilder: websocketContextBuilder
+                    proto: proto
                 )
             }
-            drones.update(pid, with: drone)
+            drones.update(cid, with: drone)
             await drone.start(for: oid, given: gql)
         }
         
         /// Short lived operation is processed immediately and pipe back later
-        func once(for pid: UUID, with oid: String, given gql: GraphQLRequest) async {
-            guard let process = clients[pid] else { 
+        func once(for cid: UUID, with oid: String, given gql: GraphQLRequest) async {
+            guard let client = clients[cid] else { 
                 return
             }
 
-            let future = execute(gql, payload: process.payload, req: process.req)
+            let future = execute(gql, client: client)
             
             pipeToSelf(future: future) { sink, res in
                 switch res {
                 case .success(let value):
                     await sink.outgoing(
                         with: oid,
-                        to: process,
+                        to: client,
                         given: .from(type: self.proto.next, id: oid, value)
                     )
                 case .failure(let error):
                     let result: GraphQLResult = .init(data: nil, errors: [error.graphql])
                     await sink.outgoing(
                         with: oid,
-                        to: process,
+                        to: client,
                         given: .from(type: self.proto.next, id: oid, result)
                     )
                 }
@@ -114,23 +97,23 @@ extension Pioneer {
         }
 
         /// Stopping any operation to client specific actor
-        func stop(for pid: UUID, with oid: String) async {
-            await drones[pid]?.stop(for: oid)
+        func stop(for cid: UUID, with oid: String) async {
+            await drones[cid]?.stop(for: oid)
         }
         
         /// Message for pipe to self result after processing short lived operation
-        func outgoing(with oid: String, to process: Process, given msg: GraphQLMessage) async {
-            process.send(msg.jsonString)
-            process.send(GraphQLMessage(id: oid, type: proto.complete).jsonString)
+        func outgoing(with oid: String, to client: WebSocketClient, given msg: GraphQLMessage) async {
+            client.out(msg.jsonString)
+            client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
         }
         
         // MARK: - Utility methods
     
         /// Build context and execute short-lived GraphQL Operation inside an event loop 
-        private func execute(_ gql: GraphQLRequest, payload: ConnectionParams, req: Request) -> Future<GraphQLResult> {
-            req.eventLoop.performWithTask { [unowned self] in
-                let ctx = try await self.websocketContextBuilder(req, payload, gql)
-                return try await self.executeOperation(for: gql, with: ctx, using: req.eventLoop)
+        private func execute(_ gql: GraphQLRequest, client: WebSocketClient) -> Task<GraphQLResult, Error> {
+            Task { [unowned self] in
+                let ctx = try await client.context(gql)
+                return try await self.executeOperation(for: gql, with: ctx, using: client.ev)
             }
         }
 
@@ -146,13 +129,5 @@ extension Pioneer {
                 operationName: gql.operationName
             ) 
         }
-
-        /// Deny a process and close it with an error message
-        private func deny(process: Process, with error: Error) async {
-            let err = GraphQLMessage.errors(type: proto.error, [error.graphql])
-            process.send(err.jsonString)
-            process.keepAlive?.cancel()
-            await process.close(code: .graphqlNotAuthorized) 
-        } 
     }
 }

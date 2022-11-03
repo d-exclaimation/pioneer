@@ -8,11 +8,12 @@
 
 import Foundation
 import XCTest
-import GraphQL
+import enum GraphQL.OperationType
+import enum GraphQL.Map
 @testable import Pioneer
 
 final class BuiltInTypesTests: XCTestCase {
-    typealias Req = Pioneer<Void, Void>.GraphQLRequest
+    typealias Req = GraphQLRequest
     
     /// Test ID Randomised features
     func testID() throws {
