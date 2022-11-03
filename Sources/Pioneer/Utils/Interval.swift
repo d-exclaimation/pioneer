@@ -10,7 +10,7 @@
 ///   - delay: The interval delay
 ///   - block: The code to be executed
 /// - Returns: The task used to create the interval
-@discardableResult func setInterval(delay: UInt64?, _ block: @Sendable @escaping () throws -> Void) -> Task<Void, Error>? {
+@discardableResult public func setInterval(delay: UInt64?, _ block: @Sendable @escaping () throws -> Void) -> Task<Void, Error>? {
     guard let delay = delay else {
         return nil
     }

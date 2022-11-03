@@ -30,11 +30,10 @@ extension Pioneer {
     /// - Returns: A response from the GraphQL operation execution properly formatted
     public func httpHandler(req: Request, using encoder: ContentEncoder, context: @escaping VaporHTTPContext) async throws -> Response {
         // Check for CSRF Prevention
-        guard isCSRFProtected(isActive: httpStrategy == .csrfPrevention, on: req) else {
+        guard !csrfVunerable(given: req.headers) else {
             return try GraphQLError(
-                message: "Operation has been blocked as a potential Cross-Site Request Forgery (CSRF)." +
-                "Either specify a 'content-type' header that is not 'text/plain', 'application/x-www-form-urlencoded', or 'multipart/form-data' " +
-                " or provide a non-empty value for one of the following headers: 'x-apollo-operation-name' or 'apollo-require-preflight'")
+                message: "Operation has been blocked as a potential Cross-Site Request Forgery (CSRF)."
+            )
             .response(with: .badRequest)
         }
         do {
@@ -73,28 +72,6 @@ extension Pioneer {
             return try error.response(using: res)
         } catch {
             return try error.graphql.response(using: res)
-        }
-    }
-    
-    
-    /// Check if request is CSRF protected if prevention is active
-    /// - Parameters:
-    ///   - isActive: True if enable prevention and checking
-    ///   - req: The request being made
-    /// - Returns: True if the request is CSRF protected
-    internal func isCSRFProtected(isActive: Bool = true, on req: Request) -> Bool {
-        guard isActive else {
-            return true
-        }
-        let hasPreflight = !req.headers[HTTPHeaders.Name("Apollo-Require-Preflight")].isEmpty
-        let hasOperationName = !req.headers[HTTPHeaders.Name("X-Apollo-Operation-Name")].isEmpty
-        if hasPreflight || hasOperationName {
-            return true
-        }
-        let restrictedHeaders = ["text/plain", "application/x-www-form-urlencoded", "multipart/form-data"]
-        let contentTypes = req.headers[.contentType]
-        return contentTypes.allSatisfy { contentType in
-            restrictedHeaders.allSatisfy { !contentType.lowercased().contains($0) }
         }
     }
 }

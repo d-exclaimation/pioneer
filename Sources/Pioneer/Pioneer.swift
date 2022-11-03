@@ -89,7 +89,11 @@ public struct Pioneer<Resolver, Context> {
     }
 
     /// Guard for operation allowed
-    internal func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) -> Bool {
+    /// - Parameters:
+    ///   - gql: GraphQL operation
+    ///   - allowing: Set of operation allowed
+    /// - Returns: True if operation should be allowed
+    public func allowed(from gql: GraphQLRequest, allowing: [OperationType] = [.query, .mutation, .subscription]) -> Bool {
         guard introspection || !gql.isIntrospection else {
             return false
         }
