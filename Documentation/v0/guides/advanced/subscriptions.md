@@ -14,7 +14,7 @@ Since `0.7.0`, Pioneer allow a seperate context builder for the websocket operat
 
 Subscription in Pioneer run through websocket so it will use that websocket context builder.
 
-[!ref Websocket Context](/guides/advanced/context/#websocket-context)
+[!ref Websocket Context](../../guides/advanced/context/#websocket-context)
 
 !!!
 
@@ -37,7 +37,7 @@ struct Resolver {
 }
 ```
 
-The resolver function must return an `EventStream` built from [`AsyncEventStream`](/features/async-event-stream) which can come from any `AsyncSequence`, a standard protocol in Swift 5.5 for asynchronous, sequential, iterated elements.
+The resolver function must return an `EventStream` built from [`AsyncEventStream`](../../features/async-event-stream) which can come from any `AsyncSequence`, a standard protocol in Swift 5.5 for asynchronous, sequential, iterated elements.
 
 ## AsyncPubSub
 

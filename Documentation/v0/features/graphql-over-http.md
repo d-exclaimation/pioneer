@@ -194,7 +194,7 @@ To do that, you can utilize the newly added [`.httpHandler(req:)`](https://swift
 !!!success Manual WebSocket Routing
 Pioneer also provide handler to manually setting routes for WebSocket
 
-[!ref Manual WebSocket Routing](/features/graphql-over-websocket/#manual-websocket-routing)
+[!ref Manual WebSocket Routing](./graphql-over-websocket/#manual-websocket-routing)
 !!!
 
 !!!success Custom ContentEncoder

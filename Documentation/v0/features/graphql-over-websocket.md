@@ -84,7 +84,7 @@ This also include introspection query.
 !!!info Websocket Context
 Any operation going through websocket uses the websocket context builder instead of the regular context builder.
 
-[!ref Websocket Context](/guides/advanced/context/#websocket-context)
+[!ref Websocket Context](../guides/advanced/context/#websocket-context)
 !!!
 
 ## Manual WebSocket Routing
@@ -96,7 +96,7 @@ To do that, you can utilize the newly added [`.webSocketHandler(req:)`](https://
 !!!success Manual HTTP Routing
 Pioneer also provide handler to manually setting routes for HTTP
 
-[!ref Manual HTTP Routing](/features/graphql-over-http/#manual-http-routing)
+[!ref Manual HTTP Routing](../features/graphql-over-http/#manual-http-routing)
 !!!
 
 !!!warning Upgrade Response
