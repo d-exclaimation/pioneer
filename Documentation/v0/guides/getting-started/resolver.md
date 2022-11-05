@@ -5,6 +5,10 @@ order: 80
 
 # Resolvers and Context
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 Now, let's get into the resolvers (and context as well), the main logic of the API.
 
 Graphiti require a seperate top level structure acting as the resolver and a context type be given to these resolver functions.

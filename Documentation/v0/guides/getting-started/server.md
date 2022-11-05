@@ -5,6 +5,10 @@ order: 60
 
 # Pioneer
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 The final step is to integrate Pioneer into the existing Vapor application using the resolver and schema declared before.
 
 ## Integration

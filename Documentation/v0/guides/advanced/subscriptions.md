@@ -5,6 +5,10 @@ order: 90
 
 # Subscriptions
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 ## Resolving a subscription
 
 Resolvers for Subscription differ from resolvers for fields of other types. Specifically, Subscription resolvers require to return an implementation of `EventStream`.

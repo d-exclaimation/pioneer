@@ -5,6 +5,10 @@ order: 60
 
 # GraphQL IDE
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 GraphQL IDEs are quick and convenient ways to develop and test your GraphQL APIs, by making request on it without having to worry about setting up all the proper HTTP method, headers, and body.
 
 !!! Introspection

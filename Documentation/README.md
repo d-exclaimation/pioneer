@@ -22,7 +22,7 @@ Compability with any data source, any GraphQL client, any GraphQL schema built o
 === 🕊 Subscriptions capable
 Subscriptions using GraphQL over WebSocket protocols such as [graphql-ws](https://github.com/enisdenjo/graphql-ws) and [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws)
 === 🚀 Wide range of features
-HTTP resolving strategy, extensive context building, [AsyncEventStream]() and [PubSub]()
+HTTP resolving strategy, extensive context building, [AsyncEventStream](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asynceventstream) and [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub)
 ===
 
 [!ref Get started!](/getting-started)

@@ -5,6 +5,10 @@ order: 100
 
 # Context
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) allow a custom data structure to be passed into all of your field resolver functions. This allows you to apply some dependency injection to your API and put any code that talks to a database or get the values from the request.
 
 ## Context, Request and Response

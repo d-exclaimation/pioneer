@@ -5,6 +5,11 @@ order: 100
 
 # Async / Await
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
+
 Pioneer is built for Swift 5.5 and up, which utilies heavily the new concurrency features of Swift. One of the most common one is `async/await` as replacement for using something like callback and `EventLoopFuture` from Swift-NIO.
 
 ## Async resolver

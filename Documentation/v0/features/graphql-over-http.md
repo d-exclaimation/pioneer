@@ -5,6 +5,10 @@ order: 80
 
 # GraphQL Over HTTP
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 GraphQL spec define how a GraphQL operation is supposed to be performed through HTTP. The spec specify that operations can be done through either **GET** and **POST** request. Both of these are supported by Pioneer.
 
 ## HTTP Strategy

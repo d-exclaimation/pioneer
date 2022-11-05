@@ -5,6 +5,10 @@ order: 70
 
 # GraphQL Over WebSocket
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 To perform GraphQL over WebSocket, there need to be a sub protocol to define operations clearly. No "official" sub-protocol nor implementation details on handling subscription given in the GraphQL Spec. However, there are many implementations by the community that have become de facto standards like `subscriptions-transport-ws` and `graphql-ws`.
 
 ## Websocket Subprotocol

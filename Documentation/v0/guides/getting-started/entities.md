@@ -5,6 +5,10 @@ order: 90
 
 # Entities
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 Continuing from the setup, now we will be declaring entities for the GraphQL API.
 
 Let's say for this example, we will have a user management system where the API can be used to create, find, update, and delete user profile(s).

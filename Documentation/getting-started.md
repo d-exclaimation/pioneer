@@ -8,11 +8,11 @@ order: 100
 
 This tutorial will help you get started with building a GraphQL API using Pioneer.
 
-!!!info Swift, Swift Package Manager, CLI
+!!!info 
 This tutorial assumes that you are familiar with the command line, Swift, and Swift Package Manager and have installed a recent Swift version. 
 !!!
 
-## 1: New Swift project
+## 1: New Swift project 
 
 Go to a directory where you want to create the project on.
 
@@ -87,15 +87,15 @@ struct Book: Identifiable {
 ```
 
 !!!success ID
-Pioneer provide a struct to define [ID]() from a `String` or `UUID` which will be differentiable from a regular `String` by [Graphiti](https://github.com/GraphQLSwift/Graphiti).
+Pioneer provide a struct to define [ID](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/id) from a `String` or `UUID` which will be differentiable from a regular `String` by [Graphiti](https://github.com/GraphQLSwift/Graphiti).
 
-[ID]() are commonly used scalar in GraphQL use to identify types.
+[ID](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/id) are commonly used scalar in GraphQL use to identify types.
 !!!
 
 ### Context
 
-Context is a useful type that can be generated for each request and can be used for many purpose such as 
-- Reading request-specific header value
+Context is a useful type that can be generated for each request and can be used for many purpose such as: 
+- Reading request-specific header value,
 - Setting response headers and cookies, or 
 - Performing dependency injection to each resolver functions
 
@@ -121,9 +121,9 @@ For simplicity, we will simple hardcode the value and use actor to store it.
 actor Books {
     private var books: [Book.ID: Book] = [:]
 
-    func create(book: Book) throws -> Book {
+    func create(book: Book) -> Book? {
         guard case .none = books[book.id] else {
-            throw Errors.duplicate(id: book.id)
+            return nil
         }
         books[book.id] = book
         return book
@@ -173,8 +173,9 @@ For a mutation, arguments may be necessary to provide information to create a ne
 
 In [Graphiti](https://github.com/GraphQLSwift/Graphiti), this is done with a seperate argument struct which must be `Decodable`.
 
-```swift #8-15
+```swift #2,9-11,13-21
 import struct Graphiti.NoArguments
+import struct Vapor.Abort
 
 struct Resolver {
     func books(ctx: Context, args: NoArguments) async -> [Book] {
@@ -186,8 +187,13 @@ struct Resolver {
     }
 
     func newBook(ctx: Context, args: NewArgs) async throws -> Book {
-        let book = Book(id: .uuid(), title: args.title) // ID from a new UUID
-        return try await Books.shared.create(book: book)
+        let book = await Books.shared.create(
+            book: Book(id: .uuid(), title: args.title)
+        )
+        guard let book else {
+            throw Abort(.internalServerError)
+        }
+        return book
     }
 }
 ```
@@ -385,14 +391,15 @@ try app.run()
 ### Subscription resolver
 
 Now, let's add the subscription resolver. Pioneer can resolve subscription as long as the return value is either:
-- [AsyncEventStream](), or
+- [AsyncEventStream](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asynceventstream), or
 - `ConcurrentEventStream`
 
-In this tutorial, we will be using Pioneer's built in [PubSub]() system and its in-memory implementation, [AsyncPubSub]().
+In this tutorial, we will be using Pioneer's built in [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) system and its in-memory implementation, [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asyncpubsub).
 
-```swift #2-4,7-8,23-25 Resolver.swift
+```swift #1,4-5,8-9,29-31 Resolver.swift
 import class GraphQL.EventStream
 import struct Graphiti.NoArguments
+import struct Vapor.Abort
 import struct Pioneer.AsyncPubSub
 import protocol Pioneer.PubSub
 
@@ -409,8 +416,13 @@ struct Resolver {
     }
 
     func newBook(ctx: Context, args: NewArgs) async throws -> Book {
-        let book = Book(id: .uuid(), title: args.title) // ID from a new UUID
-        return try await Books.shared.create(book: book)
+        let book = await Books.shared.create(
+            book: Book(id: .uuid(), title: args.title)
+        )
+        guard let book else {
+            throw Abort(.internalServerError)
+        }
+        return book
     }
 
     func bookAdded(ctx: Context, args: NoArguments) -> EventStream<Book> {
@@ -421,9 +433,9 @@ struct Resolver {
 
 ### Triggering a subscription
 
-With [PubSub](), subscription value can be pushed manually from a mutation. All we have to do is to publish under the same trigger.
+With [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub), subscription value can be pushed manually from a mutation. All we have to do is to publish under the same trigger.
 
-```swift #19-23 Resolver.swift
+```swift #25 Resolver.swift
 import class GraphQL.EventStream
 import struct Graphiti.NoArguments
 import struct Pioneer.AsyncPubSub
@@ -442,9 +454,12 @@ struct Resolver {
     }
 
     func newBook(ctx: Context, args: NewArgs) async throws -> Book {
-        let book = try await Books.shared.create(
+        let book = await Books.shared.create(
             book: Book(id: .uuid(), title: args.title)
         )
+        guard let book else {
+            throw Abort(.internalServerError)
+        }
         await pubsub.publish(for: trigger, payload: book)
         return book
     }
@@ -555,4 +570,5 @@ Now, just open [http://localhost:8080/graphql](http://localhost:8080/graphql) to
 
 Congrats, you have just built a GraphQL server with Swift and Pioneer!
 
+<!-- [!ref] -->
 !!!
