@@ -13,7 +13,7 @@ import NIOWebSocket
 
 struct TestConsumer: WebSocketable {
     var buffer: Buffer = .init()
-    var group: EventLoopGroup
+
     actor Buffer {
         var store: [String] = []
 
@@ -32,15 +32,14 @@ struct TestConsumer: WebSocketable {
         }
     }
 
-     func out<S>(_ msg: S) where S: Collection, S.Element == Character {
+    func out<S>(_ msg: S) where S: Collection, S.Element == Character {
         guard let str = msg as? String else { return }
         Task.init {
             await buffer.set(str)
         }
     }
 
-    func terminate(code: WebSocketErrorCode) async throws {
-    }
+    func terminate(code: WebSocketErrorCode) async throws {}
 
     func wait() async -> String {
         await withCheckedContinuation { continuation in

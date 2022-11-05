@@ -49,7 +49,7 @@ final class ProbeTests: XCTestCase {
     /// Setup a Process using a custom test consumer
     func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestConsumer)  {
         let req = Request.init(application: app, on: app.eventLoopGroup.next())
-        let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
+        let consumer = TestConsumer()
         return (.init(id: UUID(), io: consumer, payload: [:], ev: req.eventLoop, context: { _, _ in }), consumer)
     }
 
