@@ -25,4 +25,4 @@ Subscriptions using GraphQL over WebSocket protocols such as [graphql-ws](https:
 HTTP resolving strategy, extensive context building, [AsyncEventStream]() and [PubSub]()
 ===
 
-[!ref Get started!](/)
+[!ref Get started!](/getting-started)

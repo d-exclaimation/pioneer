@@ -232,6 +232,10 @@ func schema() throws -> Schema<Resolver, Context> {
 
 +++ Schema.graphql
 
+!!!info GraphQL SDL
+This is the equivalent schema in GraphQL SDL for one built with Graphiti. This is not **required** to be created.
+!!!
+
 ```gql #
 type Book {
   id: ID!
@@ -333,7 +337,13 @@ app.middleware.use(
 try app.run()
 ```
 
-## 9: Adding subscriptions
+!!!info
+
+[!badge variant="info" text="Skip to the end"](#9-start-the-server)  If you don't need subscriptions.
+
+!!!
+
+## 8: Adding subscriptions
 
 Subscriptions is a feature of GraphQL which allow real-time stream of data. This is usually done through WebSocket using an [additional protocol](). 
 
@@ -413,7 +423,7 @@ struct Resolver {
 
 With [PubSub](), subscription value can be pushed manually from a mutation. All we have to do is to publish under the same trigger.
 
-```swift #19-22 Resolver.swift
+```swift #19-23 Resolver.swift
 import class GraphQL.EventStream
 import struct Graphiti.NoArguments
 import struct Pioneer.AsyncPubSub
@@ -436,10 +446,50 @@ struct Resolver {
             book: Book(id: .uuid(), title: args.title)
         )
         await pubsub.publish(for: trigger, payload: book)
+        return book
     }
 
     func bookAdded(ctx: Context, args: NoArguments) -> EventStream<Book> {
         pubsub.asyncStream(Book.self, for: trigger).toEventStream()
+    }
+}
+```
+
+### Updating the schema
+
+We can now add the subscription in the schema.
+
+```swift #28-30 Schema.swift
+import Graphiti
+import struct Pioneer.ID
+
+func schema() throws -> Schema<Resolver, Context> {
+    .init {
+        // Adding ID as usable scalar for Graphiti
+        Scalar(ID.self)
+
+        // The Book as a GraphQL type with all its properties as fields
+        Type(Book.self) {
+            Field("id", at: \.id)
+            Field("title", at: \.title)
+        }
+
+        Query {
+            // The root query field to fetch all books
+            Field("books", at: Resolver.books)
+        }
+
+        Mutation {
+            // The root mutation field to create a new book
+            Field("newBook", at: Resolver.book) {
+                // Argument for this field
+                Argument("title", at: \.title)
+            }
+        }
+
+        Subscription {
+            SubsciptionField("bookAdded", as: Book.self, atSub: Resolver.bookAdded)
+        }
     }
 }
 ```
@@ -488,7 +538,8 @@ app.middleware.use(
 try app.run()
 ```
 
-## 8: Start the server
+
+## 9: Start the server
 
 The server is now ready!
 
@@ -499,3 +550,9 @@ swift run
 ```
 
 Now, just open [http://localhost:8080/graphql](http://localhost:8080/graphql) to go the Apollo Sandbox and play with the queries, and mutations.
+
+!!!success 🎉 Congrats
+
+Congrats, you have just built a GraphQL server with Swift and Pioneer!
+
+!!!
