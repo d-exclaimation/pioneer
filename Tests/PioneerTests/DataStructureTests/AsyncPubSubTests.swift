@@ -41,7 +41,7 @@ final class AsyncPubSubTests: XCTestCase {
             }
         }
         
-        try? await Task.sleep(nanoseconds: 1_000_000)
+        try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
         
         await pubsub.publish(for: trigger, payload: "invalid")
         await pubsub.publish(for: trigger, payload: 0)
@@ -88,7 +88,7 @@ final class AsyncPubSubTests: XCTestCase {
     }
 
     func testAsyncStream() async throws {
-        let stream1 = EventStream<Int>.async(Int.self) { con in 
+        let stream1 = EventStream<Int>.async { con in 
             con.yield(1)
             con.finish()
         }
@@ -97,7 +97,7 @@ final class AsyncPubSubTests: XCTestCase {
             XCTAssertEqual(each, 1)
         }
 
-        let stream2 = AsyncEventStream<Int, AsyncThrowingStream<Int, Error>>(Int.self) { con in 
+        let stream2 = AsyncEventStream<Int, AsyncThrowingStream<Int, Error>> { con in 
             con.yield(1)
             con.finish()
         }
