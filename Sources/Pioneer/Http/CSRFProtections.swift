@@ -11,7 +11,7 @@ public extension Pioneer {
     /// Check the headers show signs of CSRF vunerabilities
     /// - Parameter headers: HTTP Headers by NIO standard
     /// - Returns: True if vulnerable
-    func csrfVunerable(given headers: HTTPHeaders) -> Bool {
+    func csrfVulnerable(given headers: HTTPHeaders) -> Bool {
         // If CSRF Prevention is disabled, it is deemed not vulnerable
         guard case .csrfPrevention = httpStrategy else {
             return false

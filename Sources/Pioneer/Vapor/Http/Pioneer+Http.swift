@@ -30,7 +30,7 @@ extension Pioneer {
     /// - Returns: A response from the GraphQL operation execution properly formatted
     public func httpHandler(req: Request, using encoder: ContentEncoder, context: @escaping VaporHTTPContext) async throws -> Response {
         // Check for CSRF Prevention
-        guard !csrfVunerable(given: req.headers) else {
+        guard !csrfVulnerable(given: req.headers) else {
             return try GraphQLError(
                 message: "Operation has been blocked as a potential Cross-Site Request Forgery (CSRF)."
             )
