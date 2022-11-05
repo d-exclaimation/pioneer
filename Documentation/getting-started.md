@@ -32,6 +32,8 @@ For this tutorial, we will be using [Vapor](https://github.com/vapor/vapor) as t
 Pioneer comes with first-party support for [Vapor](https://github.com/vapor/vapor) and [Graphiti](https://github.com/GraphQLSwift/Graphiti), but they are not restricted to both packages.
 !!!
 
+### Adding dependencies
+
 Add these dependencies and [Pioneer](/) to the `Package.swift`
 
 ```swift # Package.swift
@@ -54,6 +56,8 @@ let package = Package(
 )
 ```
 
+### Using Swift 5.5 or higher
+
 We will also restrict the platform of the project to macOS v12 or higher, to allow the use of Swift Concurrency.
 
 ```swift #2-4
@@ -67,9 +71,11 @@ let package = Package(
 
 ## 3: Define entities and context
 
-Continuing from the setup, now we will be declaring entities and the resolvers for the GraphQL API.
+Continuing from the setup, now we will be declaring entities for the GraphQL API.
 
-We'll create a simple `Book` entity and simple context type to hold both the Vapor's `Request` and `Response` object.
+### Book entity
+
+We'll create a simple `Book` entity.
 
 ```swift # Book.swift
 import struct Pioneer.ID
@@ -86,6 +92,14 @@ Pioneer provide a struct to define [ID]() from a `String` or `UUID` which will b
 [ID]() are commonly used scalar in GraphQL use to identify types.
 !!!
 
+### Context
+
+Context is a useful type that can be generated for each request and can be used for many purpose such as 
+- Reading request-specific header value
+- Setting response headers and cookies, or 
+- Performing dependency injection to each resolver functions
+
+For this tutorial, we will create simple context type to hold both the Vapor's `Request` and `Response` object.
 
 ```swift # Context.swift
 import class Vapor.Request
@@ -131,11 +145,15 @@ actor Books {
 
 Resolvers tell GraphQL schema how to fetch the data associated with a particular type. 
 
+### Resolver 
+ 
 In [Graphiti](https://github.com/GraphQLSwift/Graphiti), this is done with a seperate resolver struct.
 
 ```swift # Resolver.swift
 struct Resolver {}
 ```
+
+### Query resolver
 
 Let's now add a resolver to query all the books
 
@@ -148,6 +166,8 @@ struct Resolver {
     }
 }
 ```
+
+### Mutation resolver and arguments
 
 For a mutation, arguments may be necessary to provide information to create a new instance of a type.
 
@@ -178,9 +198,10 @@ Every GraphQL server uses a schema to define the structure of data that clients 
 
 In [Graphiti](https://github.com/GraphQLSwift/Graphiti), schema can be declared using Swift code which allow type safety.
 
-```swift # Schema.swift
-import struct Pioneer.ID
++++ Schema.swift
+```swift # 
 import Graphiti
+import struct Pioneer.ID
 
 func schema() throws -> Schema<Resolver, Context> {
     .init {
@@ -209,9 +230,35 @@ func schema() throws -> Schema<Resolver, Context> {
 }
 ```
 
++++ Schema.graphql
+
+```gql #
+type Book {
+  id: ID!
+  title: String!
+}
+
+type Query {
+  books: [Book!]!
+}
+
+type Mutation {
+  newBook(title: String!): Book!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+```
+
++++
+
 ## 7: Pioneer instance
 
 Now, it's time to integrate Pioneer into the existing Vapor application using the resolver and schema declared before.
+
+### Basic Vapor application
 
 First, let's setup a basic Vapor application.
 
@@ -226,6 +273,8 @@ defer {
 
 try app.run()
 ```
+
+### Pioneer configuration
 
 Now, create an instance of Pioneer with the desired configuration.
 
@@ -250,7 +299,9 @@ defer {
 try app.run()
 ```
 
-Finally, apply Pioneer to Vapor as a middleware.
+### Pioneer as Vapor middleware
+
+Finally, apply Pioneer to Vapor as a [middleware]().
 
 ```swift #18-25 main.swift
 import Pioneer
@@ -282,6 +333,161 @@ app.middleware.use(
 try app.run()
 ```
 
+## 9: Adding subscriptions
+
+Subscriptions is a feature of GraphQL which allow real-time stream of data. This is usually done through WebSocket using an [additional protocol](). 
+
+### Enabling GraphQL over WebSocket
+
+Pioneer is already built with these feature, and all that you have to do is enable it.
+
+```swift #10 main.swift
+import Pioneer
+import Vapor
+
+let app = try Application(.detect())
+
+let server = try Pioneer(
+    schema: schema(),
+    resolver: Resolver(),
+    httpStrategy: .csrfPrevention,
+    websocketProtocol: .graphqlWs,
+    introspection: true,
+    playground: .sandbox
+)
+
+defer {
+    app.shutdown()
+}
+
+app.middleware.use(
+    server.vaporMiddleware(
+        at: "graphql",
+        context: { req, res in
+            Context(req, res)
+        }
+    )
+)
+
+try app.run()
+```
+
+### Subscription resolver
+
+Now, let's add the subscription resolver. Pioneer can resolve subscription as long as the return value is either:
+- [AsyncEventStream](), or
+- `ConcurrentEventStream`
+
+In this tutorial, we will be using Pioneer's built in [PubSub]() system and its in-memory implementation, [AsyncPubSub]().
+
+```swift #2-4,7-8,23-25 Resolver.swift
+import class GraphQL.EventStream
+import struct Graphiti.NoArguments
+import struct Pioneer.AsyncPubSub
+import protocol Pioneer.PubSub
+
+struct Resolver {
+    private let pubsub: PubSub = AsyncPubSub()
+    private let trigger = "*:book-added"
+
+    func books(ctx: Context, args: NoArguments) async -> [Book] {
+        await Books.shared.all()
+    }
+
+    struct NewArgs: Decodable {
+        var title: String
+    }
+
+    func newBook(ctx: Context, args: NewArgs) async throws -> Book {
+        let book = Book(id: .uuid(), title: args.title) // ID from a new UUID
+        return try await Books.shared.create(book: book)
+    }
+
+    func bookAdded(ctx: Context, args: NoArguments) -> EventStream<Book> {
+        pubsub.asyncStream(Book.self, for: trigger).toEventStream()
+    }
+}
+```
+
+### Triggering a subscription
+
+With [PubSub](), subscription value can be pushed manually from a mutation. All we have to do is to publish under the same trigger.
+
+```swift #19-22 Resolver.swift
+import class GraphQL.EventStream
+import struct Graphiti.NoArguments
+import struct Pioneer.AsyncPubSub
+import protocol Pioneer.PubSub
+
+struct Resolver {
+    private let pubsub: PubSub = AsyncPubSub()
+    private let trigger = "*:book-added"
+
+    func books(ctx: Context, args: NoArguments) async -> [Book] {
+        await Books.shared.all()
+    }
+
+    struct NewArgs: Decodable {
+        var title: String
+    }
+
+    func newBook(ctx: Context, args: NewArgs) async throws -> Book {
+        let book = try await Books.shared.create(
+            book: Book(id: .uuid(), title: args.title)
+        )
+        await pubsub.publish(for: trigger, payload: book)
+    }
+
+    func bookAdded(ctx: Context, args: NoArguments) -> EventStream<Book> {
+        pubsub.asyncStream(Book.self, for: trigger).toEventStream()
+    }
+}
+```
+
+### WebSocket context
+
+Due to the nature of subscription which goes through WebSocket instead of HTTP, the context is built with different types of information i.e. there is no `Response` object for WebSocket operation.
+
+Pioneer allow a different [WebSocket context builder]() which gives a different set of arguments catered towards what will be available on a WebSocket operation.
+
+!!!success Shared context builder
+Pioneer will try to use the same context builder if not explicit given a different one for WebSocket. It will try to maintain all relevant information and inject that values into the `Request` object.
+!!!
+
+```swift #25-27 main.swift
+import Pioneer
+import Vapor
+
+let app = try Application(.detect())
+
+let server = try Pioneer(
+    schema: schema(),
+    resolver: Resolver(),
+    httpStrategy: .csrfPrevention,
+    websocketProtocol: .graphqlWs,
+    introspection: true,
+    playground: .sandbox
+)
+
+defer {
+    app.shutdown()
+}
+
+app.middleware.use(
+    server.vaporMiddleware(
+        at: "graphql",
+        context: { req, res in
+            Context(req, res)
+        },
+        websocketContext: { req, payload, gql in
+            Context(req, .init())
+        }
+    )
+)
+
+try app.run()
+```
+
 ## 8: Start the server
 
 The server is now ready!
@@ -292,4 +498,4 @@ Run the Swift project using:
 swift run
 ```
 
-Now, just open http://localhost:8080/graphql to go the Apollo Sandbox and play with the queries, and mutations.
+Now, just open [http://localhost:8080/graphql](http://localhost:8080/graphql) to go the Apollo Sandbox and play with the queries, and mutations.

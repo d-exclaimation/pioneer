@@ -13,7 +13,7 @@ title: Introduction
 
 Pioneer is an open-source, spec-compliant GraphQL server that's compatible with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). 
 
-![Pioner and GraphQL as a layer between your Swift backend and your Web, iOS, and Android frontend](/static/pioneer-graphql.png)
+![Pioneer and GraphQL as a layer between your Swift backend and your Web, iOS, and Android frontend](/static/pioneer-graphql.png)
 
 === 🪛 Straightforward setup
 Just plug it in and start working immediately 
