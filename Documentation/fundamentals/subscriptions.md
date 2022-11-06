@@ -1,13 +1,11 @@
 ---
-icon: file-symlink-file
+icon: arrow-switch
 order: 9
 ---
 
 # Subscriptions
 
-!!!success
-For this guide, we will using [Graphiti](https://github.com/GraphQLSwift/Graphiti) to define resolvers. However, this guide is not specific to [Graphiti](https://github.com/GraphQLSwift/Graphiti).
-!!!
+Subscriptions are long-lasting GraphQL read operations that can update their result whenever a particular server-side event occurs. Subscriptions are most commonly used tp pushed updated results from the server to subscribing clients. 
 
 ## Resolving a subscription
 
