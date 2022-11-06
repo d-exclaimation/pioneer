@@ -396,12 +396,11 @@ Now, let's add the subscription resolver. Pioneer can resolve subscription as lo
 
 In this tutorial, we will be using Pioneer's built in [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) system and its in-memory implementation, [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asyncpubsub).
 
-```swift #1,4-5,8-9,29-31 Resolver.swift
+```swift #1,7-8,28-30 Resolver.swift
+import Pioneer
 import class GraphQL.EventStream
 import struct Graphiti.NoArguments
 import struct Vapor.Abort
-import struct Pioneer.AsyncPubSub
-import protocol Pioneer.PubSub
 
 struct Resolver {
     private let pubsub: PubSub = AsyncPubSub()
@@ -436,10 +435,10 @@ struct Resolver {
 With [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub), subscription value can be pushed manually from a mutation. All we have to do is to publish under the same trigger.
 
 ```swift #25 Resolver.swift
+import Pioneer
 import class GraphQL.EventStream
 import struct Graphiti.NoArguments
-import struct Pioneer.AsyncPubSub
-import protocol Pioneer.PubSub
+import struct Vapor.Abort
 
 struct Resolver {
     private let pubsub: PubSub = AsyncPubSub()
@@ -515,7 +514,7 @@ Due to the nature of subscription which goes through WebSocket instead of HTTP, 
 
 Pioneer allow a different [WebSocket context builder]() which gives a different set of arguments catered towards what will be available on a WebSocket operation.
 
-!!!success Shared context builder
+!!!success
 Pioneer will try to use the same context builder if not explicit given a different one for WebSocket. It will try to maintain all relevant information and inject that values into the `Request` object.
 !!!
 

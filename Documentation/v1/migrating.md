@@ -1,5 +1,5 @@
 ---
-icon: history
+icon: git-pull-request
 order: 10
 ---
 
@@ -9,7 +9,7 @@ One of the big goal of [v1](/) is to bring fully bring a stable release of Pione
 
 ## Decoupling from Vapor
 
-Pioneer also now no longer a [Vapor](https://github.com/vapor/vapor)-only library exposes more of its internal functions, structs, protocols, and classes which will allow integrations with other web frameworks.
+Pioneer also now no longer a [Vapor](https://github.com/vapor/vapor)-only library and exposes more of its internal functions, structs, protocols, and classes which will allow integrations with other web frameworks.
 
 !!!success
 Pioneer [v1](/) will still have first-party integration for [Vapor](https://github.com/vapor/vapor).
@@ -94,7 +94,7 @@ server.applyMiddleware(on: app)
 
 ### WebSocket Guard
 
-Pioneer now properly implement a WebSocket initialisation guard, which will fire for each new GraphQL over WebSocket connection that initialise properly. This allow user configured authorisation of each WebSocket connection.
+Pioneer now properly implement a WebSocket initialisation guard, which will fire for each new GraphQL over WebSocket connection that initialise properly. This allow user configured authorization of each WebSocket connection.
 
 ```swift #14-16
 let server = Pioneer(
@@ -152,6 +152,8 @@ typealias Payload = [String: Map]?
 
 ## Changes between v1 and v0
 
+These are simplified list of things that changed
+
 [!badge variant="success" text="Added or improved"](#tradeoff)
 - Vapor integration module
 - Vapor GraphQL middleware using Pioneer
@@ -161,7 +163,7 @@ typealias Payload = [String: Map]?
 - Open opportunity for other web framework integrations
 - Changed defaults to [`.csrfPrevention`]() for HTTP strategy, [`.graphqlWs`]() for WebSocket protocol, and [`.sandbox`]() for GraphQL IDE.
 
-[!badge variant="danger" text="Removed or impaired"](#tradeoff)
+[!badge variant="danger" text="Removed"](#tradeoff)
 
 - Must be applied as a middleware at `Application` level (no nesting)
 - Removed `Configuration`

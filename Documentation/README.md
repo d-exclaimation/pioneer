@@ -8,7 +8,7 @@ title: Introduction
 !!!success 📣 Pioneer v1 is generally available!
 <small>See what's new!</small>
 <br/>
-<small>Docs for Pioneer v0 are [available here](/v0/README.md)</small>
+<small>Docs for Pioneer v0 are [available here](/v0/features/async-await)</small>
 !!!
 
 Pioneer is an open-source, spec-compliant GraphQL server that's compatible with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). 
