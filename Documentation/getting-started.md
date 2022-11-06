@@ -204,8 +204,7 @@ Every GraphQL server uses a schema to define the structure of data that clients 
 
 In [Graphiti](https://github.com/GraphQLSwift/Graphiti), schema can be declared using Swift code which allow type safety.
 
-+++ Schema.swift
-```swift # 
+```swift # Schema.swift
 import Graphiti
 import struct Pioneer.ID
 
@@ -236,7 +235,7 @@ func schema() throws -> Schema<Resolver, Context> {
 }
 ```
 
-+++ Schema.graphql
+==- Schema.graphql
 
 !!!info GraphQL SDL
 This is the equivalent schema in GraphQL SDL for one built with Graphiti. This is not **required** to be created.
@@ -262,7 +261,11 @@ schema {
 }
 ```
 
-+++
+===
+
+!!!success
+For further reading, the team at [Apollo GraphQL](https://www.apollographql.com/) has provided [a guide on good schema design](https://www.apollographql.com/docs/apollo-server/schema/schema#growing-with-a-schema).
+!!!
 
 ## 7: Pioneer instance
 
@@ -569,5 +572,4 @@ Now, just open [http://localhost:8080/graphql](http://localhost:8080/graphql) to
 
 Congrats, you have just built a GraphQL server with Swift and Pioneer!
 
-<!-- [!ref] -->
 !!!
