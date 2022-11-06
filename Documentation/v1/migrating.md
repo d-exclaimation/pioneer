@@ -123,23 +123,23 @@ app.middleware.use(
 
 Some WebSocket callbacks are now exposed as functions in Pioneer. These can be used to add a custom WebSocket layer.
 
-- `.receiveMessage`
+- [.receiveMessage]()
 	- Callback to be called for each WebSocket message
-- `.initialiseClient`
+- [.initialiseClient]()
 	- Callback after getting a GraphQL over WebSocket initialisation message according to the given protocol
-- `.executeLongOperation`
+- [.executeLongOperation]()
 	- Callback to run long running operation using Pioneer
-- `.executeShortOperation`
+- [.executeShortOperation]()
 	- Callback to run short lived operation using Pioneer
 
 ### Pioneer capabilities
 
 Some other capabilities of Pioneer is now exposed:
 
-- `.allowed`
+- [.allowed]()
 	- Check if a GraphQL request is allowed given the allowed list of operations
 
-- `csrfVulnerable`
+- [.csrfVulnerable]()
 	- Check if the headers given show signs of CSRF and XS-Search vulnerability
 
 ### ConnectionParams >> Payload
