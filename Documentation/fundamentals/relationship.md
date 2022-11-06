@@ -5,64 +5,75 @@ order: 8
 
 # Relationship
 
-<!-- TODO: Change stuff :) -->
+Relationship are integral part of GraphQL. It define how one entity integrate with another.
 
 ## Relationship Resolver
 
-Say we have a new struct `Item` that have a many to one relationship to `User`. You can easily describe this into the GraphQL schema with using Swift's extension.
+Relationship field (fields that are referencing other types) can be done using a relationship resolver, which is similar to any field resolver.
 
-```swift Item.swift
-import Foundation
-import Vapor
-import Fluent
+Say we have a type `Car` that have many `Part`s, where each `Part` holds the `id` for the `Car` it is for. 
 
-final class Item: Model, Content {
-    static let schema = "items"
+```swift #11
+import struct Pioneer.ID
 
-    @ID(key: .id)
-    var id: UUID?
+struct Car: Identifiable {
+    var id: ID
+    var model: String
+}
 
-    @Field(key: "name")
+struct Part: Identifiable {
+    var id: ID
     var name: String
-
-    @Parent(key: "user_id")
-    var user: User
-
-    init() { }
-
-    init(name: String, userID: User.IDValue) {
-        self.name = name
-        self.$user.id = userID
-    }
+    var carId: Car.ID
 }
 ```
 
-Using extensions, we can describe a custom resolver function to fetch the `User` for the `Item`.
-
 ### Resolver on Object type
 
-```swift Item+GraphQL.swift
-import Foundation
-import Fluent
-import Vapor
-import Pioneer
-import Graphiti
+Using extensions, we can describe a custom resolver function to fetch the `Car` for a given `Part`, and getting all the `Part` for a given `Car`.
 
-extension Item {
-    func owner(ctx: Context, _: NoArguments) async throws -> User? {
-        return try await User.find($user.id, on: ctx.req.db)
+
+```swift #
+extension Car {
+    func parts(ctx: Context, _: NoArguments) async throws -> [Part] {
+        try await ctx.db.find(Part.self).filter { $0.carId == id }
+    }
+}
+
+extension Part {
+    func car(ctx: Context, _: NoArguments) async throws -> User? {
+        try await ctx.db.find(Car.self).first { $0.id == carId }
     }
 }
 ```
 
 !!!warning 
-In a real producation application, this example resolver is flawed with the [N+1 problem](#n1-problem).
+In a real producation application, this example resolvers are flawed with the [N+1 problem](#n1-problem).
 !!!
 
 And update the schema accordingly.
 
-```swift Schema.swift
-import Foundation
+```graphql #4,10
+type Car {
+  id: ID!
+  model: String!
+  parts: [Part!]!
+}
+
+type Part {
+  id: ID!
+  name: String!
+  car: Car
+}
+```
+
+==- Schema in [Graphiti](https://github.com/GraphQLSwift/Graphiti)
+
+!!!info
+This is an example how it would look like in [Graphiti](https://github.com/GraphQLSwift/Graphiti), this part is not restricted only to [Graphiti](https://github.com/GraphQLSwift/Graphiti).
+!!!
+
+```swift #11,17
 import Graphiti
 import Pioneer
 
@@ -70,22 +81,22 @@ func schema() throws -> Schema<Resolver, Context> {
     try .init {
         ID.asScalar()
 
-        Type(User.self) {
-            Field("id", at: \.gid)
-            Field("name", at: \.name)
+        Type(Car.self) {
+            Field("id", at: \.id)
+            Field("model", at: \.model)
+            Field("parts", at: Car.parts, at: [Part].self)
         }
 
-        Type(Item.self) {
+        Type(Part.self) {
+            Field("id", at: \.id)
             Field("name", at: \.name)
-            Field("owner", at: Item.owner, as: TypeReference<User>.self)
+            Field("car", at: Part.car, as: Car?.self)
         }
-
-        ...
     }
 }
 ```
 
-This approach is actually not a specific to Pioneer. You can use the same or similar solutions if you are using Vapor, Fluent, and Graphiti, albeit without some features provided by Pioneer (i.e. async await resolver, and custom ID struct).
+===
 
 ## N+1 Problem
 
@@ -93,43 +104,41 @@ Imagine your graph has query that lists items
 
 ```graphql
 query {
-  items {
+  parts {
     name
-    owner {
+    car {
       id
-      name
+      model
     }
   }
 }
 ```
 
-with the `items` resolver looked like
+with the `parts` resolver looked like
 
 ```swift Resolver.swift
 struct Resolver {
-    func items(ctx: Context, _: NoArguments) async throws -> [Item] {
-        try await Item.query(on: ctx.req.d).all()
+    func parts(ctx: Context, _: NoArguments) async throws -> [Part] {
+        try await ctx.db.find(Part.self)
     }
 }
 ```
 
-and the `Item` has relationship resolver looked like [`Item.owner`](#resolver-on-item).
+The graph will executed that `Resolver.parts` function which will make a request to the database to get all items.
 
-The graph will executed that `Resolver.items` function which will make a request to the database to get all items.
+Let's assume the database is an SQL database and the following SQL statements created when resolving the query are:
 
-Furthermore for each item, the graph will also execute the `Item.owner` function which make another request to the databse to get the user with the given id. Resulting in the following SQL statements:
-
-```SQL N+1 queries
-SELECT * FROM items
-SELECT * FROM users WHERE id = ?
-SELECT * FROM users WHERE id = ?
-SELECT * FROM users WHERE id = ?
-SELECT * FROM users WHERE id = ?
-SELECT * FROM users WHERE id = ?
+```SQL #
+SELECT * FROM parts
+SELECT * FROM cars WHERE id = ?
+SELECT * FROM cars WHERE id = ?
+SELECT * FROM cars WHERE id = ?
+SELECT * FROM cars WHERE id = ?
+SELECT * FROM cars WHERE id = ?
 ...
 ```
 
-What's worse is that certain items can be owned by the same user so these statements will likely query for the same users multiple times.
+What's worse is that certain parts can be for the same car so these statements will likely query for the same users multiple times.
 
 This is what's called the N+1 problem which you want to avoid. The solution? [DataLoader](#dataloader).
 
@@ -137,57 +146,70 @@ This is what's called the N+1 problem which you want to avoid. The solution? [Da
 
 The GraphQL Foundation provided a specification for solution to the [N+1 problem](#n1-problem) called `dataloader`. Essentially, dataloaders combine the fetching of process across all resolvers for a given GraphQL request into a single query.
 
-!!!success DataLoader with async-await
-Newest version of DataLoader already provide extensions to use it with async await.
-
-However if you are using older version of DataLoader, Pioneer also provide extensions to use DataLoader with async await since `v0.5.2`.
-!!!
-
 The package [Dataloader](https://github.com/GraphQLSwift/DataLoader) implement that solution for [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/DataLoader).
 
-```swift Adding DataLoader
+```swift #1
 .package(url: "https://github.com/GraphQLSwift/DataLoader", from: "...")
 ```
 
-After that, we can create a function to build a new dataloader for each `Request`, and update the relationship resolver to use the loader
+After that, we can create a function to build a new dataloader for each operation, and update the relationship resolver to use the loader
 
-```swift Loader and Context
+```swift #3-4,8-20,24-34
 struct Context {
-    ...
-    // Loader computed on each Context or each request
-    var userLoader: DataLoader<UUID, User>
+    var db: Database
+    var carLoader: DataLoader<Car.ID, Car?>
+    var partsLoader: DataLoader<Car.ID, [Part]>
 }
 
-extension User {
-    func makeLoader(req: Request) -> DataLoader<UUID, User> {
-        .init(on: req) { keys async in
-            let users = try? await User.query(on: req.db).filter(\.$id ~~ keys).all()
+extension Car {
+    func loader(ev: EventLoop, db: Database) -> DataLoader<Car.ID, Car?> {
+        .init(on: ev) { keys in
+            let cars = try? await db.find(Car.self).filter { keys.contains($0.id) }
             return keys.map { key in
-                guard let user = res?.first(where: { $0.id == key }) else {
-                    return .error(GraphQLError(
-                        message: "No user with corresponding key: \(key)"
-                    ))
+                guard let car = cars?.first(where: { $0.id == key }) else {
+                    return .succes(nil)
                 }
-                return .success(user)
+                return .success(car)
             }
         }
     }
 }
+
+extension Part {
+   func loader(ev: EventLoop, db: Database) -> DataLoader<Car.ID, [Part]> {
+        .init(on: ev) { keys in
+            let all = try? await db.find(Part.self).filter { keys.contains($0.carId) }
+            return keys.map { key in
+                guard let parts = all?.filter({ $0.carId == key }) else {
+                    return .success([])
+                }
+                return .success(parts)
+            }
+        }
+    } 
+}
 ```
 
-!!!success Loading Many
-In cases where you have an arrays of ids of users and need to fetch those users in a relationship resolver, [Dataloader](https://github.com/GraphQLSwift/DataLoader) have a method called `loadMany` which takes multiple keys and return them all.
-
-In other cases where you have the user id but need to fetch all items with that user id, you can just have the loader be `DataLoader<UUID, [Item]>` where the `UUID` is the user id and now `load` should return an array of `Item`.
+!!!warning
+It's best to create a loader for each operation as its cache will be valid only for that operation and doesn't create a **out-of-sync** cache problem on subsequent operation.
 !!!
 
-```swift Item+GraphQL.swift
-extension Item {
-    func owner(ctx: Context, _: NoArguments, ev: EventLoopGroup) async throws -> User? {
-        guard let uid = $user.id else {
-            return nil
-        }
-        return try await ctx.userLoader.load(key: uid, on: ev.next())
+!!!success
+[Dataloader](https://github.com/GraphQLSwift/DataLoader) have a method called `.loadMany` which takes multiple keys and return them all.
+!!!
+
+### Using dataloader in resolvers
+
+```swift #3,9
+extension Car {
+    func parts(ctx: Context, _: NoArguments) async throws -> [Part] {
+        try await ctx.partsLoader.load(key: id, on: ev)
+    }
+}
+
+extension Part {
+    func car(ctx: Context, _: NoArguments, ev: EventLoopGroup) async throws -> User? {
+        try await ctx.carLoader.load(key: carId, on: ev)
     }
 }
 ```
@@ -195,32 +217,8 @@ extension Item {
 Now instead of having n+1 queries to the database by using the dataloader, the only SQL queries sent to the database are:
 
 ```SQL
-SELECT * FROM items
-SELECT * FROM users WHERE id IN (?, ?, ?, ?, ?, ...)
+SELECT * FROM parts
+SELECT * FROM cars WHERE id IN (?, ?, ?, ?, ?, ...)
 ```
 
 which is significantly better.
-
-### EagerLoader
-
-Fluent provides a way to eagerly load relationship which will solve the N+1 problem by joining the SQL statement.
-
-However, it forces you fetch the relationship **regardless** whether it is requested in the GraphQL operation which can be considered **overfetching**.
-
-```swift Resolver.swift
-struct Resolver {
-    func items(ctx: Context, _: NoArguments) async throws -> [Item] {
-        try await Item.query(on: ctx.req.d).with(\.$user).all()
-    }
-}
-```
-
-```swift Item+GraphQL.swift
-extension Item {
-    func owner(_: Context, _: NoArguments) async -> User? {
-        return $user
-    }
-}
-```
-
-Whether it is a better option is up to you and your use cases, but do keep in mind that GraphQL promotes the avoidance of overfetching.
