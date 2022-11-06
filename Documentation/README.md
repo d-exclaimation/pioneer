@@ -1,5 +1,5 @@
 ---
-icon: home-fill
+icon: rocket
 title: Introduction
 ---
 
