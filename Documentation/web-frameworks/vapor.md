@@ -252,5 +252,5 @@ app.group("graphql") { group in
 The [Vapor](https://github.com/vapor/vapor) integration include other benefits such as:
 
 - Includes all security measurements done by Pioneer automatically (i.e. [CSRF Prevention](/features/graphql-over-http#csrf-and-xs-search))
-- Extensions for `CORSMiddleware.Configuration` for allowing Cloud based [GraphQL IDE](/features/graphql-ide)s
 - Automatically operation check for HTTP methods using the given [HTTPStrategy](/features/graphql-over-http/#http-strategy)
+- Extensions for `CORSMiddleware.Configuration` for allowing Cloud based [GraphQL IDE](/features/graphql-ide)s
