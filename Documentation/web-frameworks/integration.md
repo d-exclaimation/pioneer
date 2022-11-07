@@ -161,7 +161,7 @@ This is part is relatively simple, send back the web-framework response that con
 
 The HTML for each type of IDE are available as computed properties of Pioneer. The URL for the Cloud IDEs are accessible property.
 
-All that is needed is to serve this HTML and redirect if the IDE option is a redirect using the url given.
+All that is needed is to serve this HTML and redirect if the IDE option is a redirect using the URL given.
 
 ==- Example
 
@@ -195,3 +195,9 @@ extension Pioneer {
 ```
 
 ===
+
+### Implemeting GraphQL over WebSocket
+
+!!!danger
+**TODO**: This section has not been written yet
+!!!
