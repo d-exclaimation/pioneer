@@ -1,6 +1,6 @@
 ---
 icon: arrow-switch
-order: 70
+order: 9
 ---
 
 # GraphQL Over WebSocket
@@ -13,21 +13,14 @@ To perform GraphQL over WebSocket, there need to be a sub protocol to define ope
 
 The newer sub-protocol is [graphql-ws](https://github.com/enisdenjo/graphql-ws). Aimed mostly on solving most of the problem with the [subscriptions-transport-ws](#subscriptions-transport-ws).
 
-!!!success GraphQL IDEs :heart: graphql-ws
-All major GraphQL IDEs (such as GraphiQL, Apollo Sandbox, BananaCakePop, etc.) has full support for `graphql-ws`.
-
-!!!warning Incompatibilty
-The [graphql-playground](https://github.com/graphql/graphql-playground) has been retired and will not support `graphql-ws`. More explaination [here](https://github.com/graphql/graphql-playground/issues/1143).
-!!!
-
 #### Usage
 
 You can to use this sub-protocol by specifying when initializing Pioneer.
 
-```swift
+```swift #3
 let server = Pioneer(
-  ...
-  websocketProtocol: .graphqlWs
+    ...,
+    websocketProtocol: .graphqlWs
 )
 ```
 
@@ -41,18 +34,18 @@ A good amount of other server implementations on many languages have also yet to
 
 The older standard is [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws). This is a sub-protocol from the team at Apollo GraphQL, that was created along side [apollo-server](https://github.com/apollographql/apollo-server) and [apollo-client](https://github.com/apollographql/apollo-client). Some clients and servers still use this to perform operations through websocket especially subscriptions.
 
-!!!warning Legacy
-In the GraphQL ecosystem, subscriptions-transport-ws is somewhat considered a legacy protocol. More explaination [here](#consideration).
+!!!warning
+In the GraphQL ecosystem, subscriptions-transport-ws is considered a legacy protocol. More explaination [here](#consideration).
 !!!
 
 #### Usage
 
 By default, Pioneer will already use this sub-protocol to perform GraphQL operations through websocket.
 
-```swift
+```swift #3
 let server = Pioneer(
-  ...
-  websocketProtocol: .subscriptionsTransportWs
+    ...,
+    websocketProtocol: .subscriptionsTransportWs
 )
 ```
 
@@ -68,7 +61,7 @@ We also recommend using the newer sub-protocol [graphql-ws](#graphql-ws) when po
 
 You can also choose to disable GraphQL over WebSocket all together, which you can do by specifiying in the Pioneer initializer.
 
-```swift
+```swift #3
 let server = Pioneer(
     ...,
     websocketProcotol: .disable
@@ -77,49 +70,6 @@ let server = Pioneer(
 
 ## Queries and Mutation over Websocket
 
-While the primary operation going through websocket is Subscription, Queries and Mutation can be accepted through websocket and process properly as long as it follows the sub-protocol [above](#websocket-subprotocol).
+While the primary operation going through websocket is Subscription, Queries and Mutation can be accepted through WebSocket and process properly as long as it follows the sub-protocol [above](#websocket-subprotocol).
 
-This also include introspection query.
-
-!!!info Websocket Context
-Any operation going through websocket uses the websocket context builder instead of the regular context builder.
-
-[!ref Websocket Context](/guides/advanced/context/#websocket-context)
-!!!
-
-## Manual WebSocket Routing
-
-In cases where the routing configuration by Pioneer when using [`.applyMiddleware`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/applymiddleware(on:at:bodystrategy:)) is insufficient to your need, you can opt out and manually set your routes, have Pioneer still handle GraphQL operation, and even execute code on the incoming request before Pioneer handles the GraphQL operation(s).
-
-To do that, you can utilize the newly added [`.webSocketHandler(req:)`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/websockethandler(req:)) method from Pioneer, which will handle incoming `Request`, upgrade to WebSocket, and handle WebSocket messages as well.
-
-!!!success Manual HTTP Routing
-Pioneer also provide handler to manually setting routes for HTTP
-
-[!ref Manual HTTP Routing](/features/graphql-over-http/#manual-http-routing)
-!!!
-
-!!!warning Upgrade Response
-Different from its HTTP counterpart, this handler is only used for upgrading the request not handling each GraphQL operation through WebSocket.
-
-Therefore, this handler can only properly function under **GET** request and is not for intercepting any GraphQL operation(s) going through WebSocket.
-!!!
-
-```swift
-let app = try Application(.detect())
-let server = try Pioneer(...)
-
-app.group("api") {
-    app.get("graphql", "subscription") { req async throws in
-        // Do something before the upgrade start
-        return try await server.webSocketHandler(req: req)
-    }
-}
-```
-
-### Consideration
-
-The [`.webSocketHandler(req:)`](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/websockethandler(req:)) method has some behavior to be aware about. Given that it is a method from the Pioneer struct, it still uses the configuration set when creating the Pioneer server, such as:
-
-- It will still use the [WebsocketProtocol](#websocket-subprotocol) and check if the upgrade request is valid / allowed to go through.
-  - For example, this handler won't accept **GET** request and perform the upgrade to WebSocket if the provided `Sec-Websocket-Protocol` header value does not match the required value for each websocket subprotocol.
+This also include **introspection** query.

@@ -5,6 +5,11 @@ order: 90
 
 # EventStream
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
+
 Swift 5.5 brought in a reactive stream like feature in the form of a protocol named `AsyncSequence`.
 
 [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) required a implementaion of `EventStream` built with any reactive stream like data structure to process subscription operations.

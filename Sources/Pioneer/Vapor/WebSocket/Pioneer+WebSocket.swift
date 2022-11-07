@@ -55,7 +55,7 @@ extension Pioneer {
         }
 
         // Task for consuming WebSocket messages to avoid cyclic references and provide cleaner code
-        let task = Task {
+        let receiving = Task {
             let stream = AsyncStream(String.self) { con in 
                 ws.onText { con.yield($1) }
 
@@ -85,7 +85,7 @@ extension Pioneer {
         // Task for closing websocket and disposing any references
         Task {
             try await ws.onClose.get()
-            task.cancel()
+            receiving.cancel()
             closeClient(cid: cid, keepAlive: keepAlive, timeout: timeout)
         }
     }

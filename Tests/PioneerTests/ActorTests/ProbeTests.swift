@@ -48,9 +48,18 @@ final class ProbeTests: XCTestCase {
 
     /// Setup a Process using a custom test consumer
     func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestConsumer)  {
-        let req = Request.init(application: app, on: app.eventLoopGroup.next())
-        let consumer = TestConsumer.init(group: app.eventLoopGroup.next())
-        return (.init(id: UUID(), io: consumer, payload: [:], ev: req.eventLoop, context: { _, _ in }), consumer)
+        let req = Request(application: app, on: app.eventLoopGroup.next())
+        let consumer = TestConsumer()
+        return (
+            .init(
+                id: UUID(), 
+                io: consumer, 
+                payload: [:], 
+                ev: req.eventLoop,
+                context: { _, _ in }
+            ), 
+            consumer
+        )
     }
 
     /// Probe
@@ -64,7 +73,7 @@ final class ProbeTests: XCTestCase {
 
         await probe.outgoing(with: "1", to: process, given: message)
 
-        try? await Task.sleep(nanoseconds: 1_000_000)
+        try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
         
         let results = await con.waitAll()
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {

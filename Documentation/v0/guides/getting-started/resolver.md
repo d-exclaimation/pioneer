@@ -5,6 +5,10 @@ order: 80
 
 # Resolvers and Context
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 Now, let's get into the resolvers (and context as well), the main logic of the API.
 
 Graphiti require a seperate top level structure acting as the resolver and a context type be given to these resolver functions.
@@ -28,7 +32,7 @@ The context here will very simple which only grab the `Request` and `Response` s
 Since `v0.6.0`, Pioneer can accept async and/or throwing context builder, and this applies to the websocket context builder as well (since `v0.7.0`)
 !!!
 
-[!ref Context Building](/guides/advanced/context)
+[!ref Context Building](../../guides/advanced/context)
 
 ## Resolver
 
@@ -124,14 +128,14 @@ Pioneer can only accept `EventStream` built with `AsyncEventStream`, which is an
 
 Learn why on:
 
-[!ref EventStream](/features/async-event-stream.md)
+[!ref EventStream](../../features/async-event-stream.md)
 
 !!!
 
 !!!success AsyncPubSub
 Pioneer brings a data structure that acts like a in memory PubSub for managing topic/trigger based `AsyncSequence` using Swift `actors` and `AsyncStream`.
 
-The [AsyncPubSub](/guides/advanced/subscriptions/#asyncpubsub) can generate a new consumer `AsyncStream` of a certain type from a single Source stream differentiated through the trigger string.
+The [AsyncPubSub](../../guides/advanced/subscriptions/#asyncpubsub) can generate a new consumer `AsyncStream` of a certain type from a single Source stream differentiated through the trigger string.
 
 ==- Example code
 
@@ -165,7 +169,7 @@ extension User {
 !!!warning N+1 problem
 In an actual application where this request is made to database, it's best to avoid directly making a request in a relationship resolver and use a [Dataloader](https://github.com/GraphQLSwift/DataLoader) instead which helps to avoid unnecessary request for fetching the exact same data.
 
-[!ref N+1 problem](/guides/advanced/fluent/#n1-problem)
+[!ref N+1 problem](../../guides/advanced/fluent/#n1-problem)
 
 ==- Dataloader example
 

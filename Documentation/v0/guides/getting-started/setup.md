@@ -5,6 +5,10 @@ order: 100
 
 # Setup
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 In this guide, we will be using [Graphiti](https://github.com/GraphQLSwift/Graphiti) and setting up Vapor from scratch without using any template.
 
 ## Prerequisites

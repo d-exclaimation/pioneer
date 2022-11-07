@@ -5,6 +5,10 @@ order: 70
 
 # Schema
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 This section is going to be specific to the GraphQL schema library you are using. In this case, we are using Graphiti and for the most part, Pioneer has no impact on the schema building process beside adding a few extensions to existing data structures.
 
 I am going to ignore the error handling portion and assume the schema will be constructed with no errors. Obviously, feel free to change this and add your error handling logic if necessary.

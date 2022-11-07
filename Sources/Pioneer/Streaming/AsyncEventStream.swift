@@ -25,7 +25,7 @@ public final class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStre
         /// as using `map` will make the type too complicated to be casted to any meaningful value
         /// Performance and efficiency has been tested to mostly not affected but do keep in mind to try to find a better solution.
         let stream = AsyncThrowingStream(To.self) { continuation in
-            let task = Task.init {
+            let task = Task {
                 do {
                     for try await each in self.sequence {
                         let res = try closure(each)

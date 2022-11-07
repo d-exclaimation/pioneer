@@ -5,6 +5,10 @@ order: 80
 
 # Fluent
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 Fluent is the most common choice of connecting to a database from a Vapor application. There can be some confusion on how to connect Fluent entities into a GraphQL Schema, so here are some information to help tackle any of those issue.
 
 ## GraphQL ID

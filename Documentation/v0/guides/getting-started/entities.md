@@ -5,6 +5,10 @@ order: 90
 
 # Entities
 
+!!!warning 
+You're viewing documentation for a previous version of this software. Switch to the [latest stable version](/)
+!!!
+
 Continuing from the setup, now we will be declaring entities for the GraphQL API.
 
 Let's say for this example, we will have a user management system where the API can be used to create, find, update, and delete user profile(s).
@@ -91,7 +95,7 @@ extension User {
 
 In a real application, you want these `User`(s) to be stored in a persistent database like PostgreSQL or something similar. For this example, we will be simplying the workflow by just building one in memory.
 
-[!ref Fluent FAQ](/guides/advanced/fluent)
+[!ref Fluent FAQ](../../guides/advanced/fluent)
 
 We will be taking advantange of Swift 5.5 `actor` which a structure suitable for cocurrent state management.
 
