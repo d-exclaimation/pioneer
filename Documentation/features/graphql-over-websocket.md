@@ -17,7 +17,7 @@ The newer sub-protocol is [graphql-ws](https://github.com/enisdenjo/graphql-ws).
 
 You can to use this sub-protocol by specifying when initializing Pioneer.
 
-```swift
+```swift #3
 let server = Pioneer(
   ...
   websocketProtocol: .graphqlWs
@@ -42,7 +42,7 @@ In the GraphQL ecosystem, subscriptions-transport-ws is considered a legacy prot
 
 By default, Pioneer will already use this sub-protocol to perform GraphQL operations through websocket.
 
-```swift
+```swift #3
 let server = Pioneer(
   ...
   websocketProtocol: .subscriptionsTransportWs
@@ -61,7 +61,7 @@ We also recommend using the newer sub-protocol [graphql-ws](#graphql-ws) when po
 
 You can also choose to disable GraphQL over WebSocket all together, which you can do by specifiying in the Pioneer initializer.
 
-```swift
+```swift #3
 let server = Pioneer(
     ...,
     websocketProcotol: .disable

@@ -11,12 +11,12 @@ GraphQL spec define how a GraphQL operation is supposed to be performed through 
 
 Pioneer have a feature to specify how operations can be handled through HTTP. There are situations where a GraphQL API should not perform something like mutations through HTTP **GET**, or the user of the library preffered just using HTTP **POST** for all operations (excluding subscriptions).
 
-`HTTPStrategy` is a enum that can be passed in as one of the arguments when initializing Pioneer to specify which approach you prefer.
+[HTTPStrategy](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/httpstrategy) is a enum that can be passed in as one of the arguments when initializing Pioneer to specify which approach you prefer.
 
-```swift
+```swift #3
 Pioneer(
     ...,
-    httpStrategy: .onlyPost
+    httpStrategy: .csrfPrevention
 )
 ```
 
@@ -26,7 +26,7 @@ Here are the available strategies:
 | ------------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `onlyPost`               | -                                                                                  | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"]   |
 | `onlyGet`                | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | -                                                                                    |
-| `queryOnlyGet` (default) | [!badge variant="success" text="Query"]                                            | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"]   |
+| `queryOnlyGet` | [!badge variant="success" text="Query"]                                            | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"]   |
 | `mutationOnlyPost`       | [!badge variant="success" text="Query"] [!badge variant="warning" text="Mutation"] | [!badge variant="warning" text="Mutation"]                                           |
 | `splitQueryAndMutation`  | [!badge variant="success" text="Query"]                                            | [!badge variant="warning" text="Mutation"]                                           |
 | `csrfPrevention`         | [!badge variant="success" text="*Query"]                                           | [!badge variant="success" text="*Query"] [!badge variant="warning" text="*Mutation"] |
@@ -58,8 +58,8 @@ To avoid CSRF (and also XS-Search attacks), GraphQL servers should refuse to exe
 
 Pioneer uses the same mechanic to prevent these types of attacks as [Apollo Server](https://www.apollographql.com/docs/apollo-server/), described [here](https://www.apollographql.com/docs/apollo-server/security/cors#preventing-cross-site-request-forgery-csrf).
 
-!!!success CSRF Protected
-If you set the http strategy to `.queryOnlyGet` (which is the default) or `.onlyPost` and as long as you ensure that only mutations can have side effects, you are somewhat protected from the "side effects" aspect of CSRFs even without enabling CSRF protection.
+!!!success
+If you set the http strategy to `.queryOnlyGet` or `.onlyPost` and as long as you ensure that only mutations can have side effects, you are somewhat protected from the "side effects" aspect of CSRFs even without enabling CSRF protection.
 !!!
 
 To enable it, just change the [HTTPStrategy](#http-strategy) to `.csrfPrevention`, which will add additional restrictions to any GraphQL request going through HTTP.
