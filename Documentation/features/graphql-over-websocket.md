@@ -19,8 +19,8 @@ You can to use this sub-protocol by specifying when initializing Pioneer.
 
 ```swift #3
 let server = Pioneer(
-  ...
-  websocketProtocol: .graphqlWs
+    ...,
+    websocketProtocol: .graphqlWs
 )
 ```
 
@@ -44,8 +44,8 @@ By default, Pioneer will already use this sub-protocol to perform GraphQL operat
 
 ```swift #3
 let server = Pioneer(
-  ...
-  websocketProtocol: .subscriptionsTransportWs
+    ...,
+    websocketProtocol: .subscriptionsTransportWs
 )
 ```
 
@@ -70,6 +70,6 @@ let server = Pioneer(
 
 ## Queries and Mutation over Websocket
 
-While the primary operation going through websocket is Subscription, Queries and Mutation can be accepted through websocket and process properly as long as it follows the sub-protocol [above](#websocket-subprotocol).
+While the primary operation going through websocket is Subscription, Queries and Mutation can be accepted through WebSocket and process properly as long as it follows the sub-protocol [above](#websocket-subprotocol).
 
-This also include introspection query.
+This also include **introspection** query.

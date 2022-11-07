@@ -314,7 +314,7 @@ try app.run()
 
 ### Pioneer as Vapor middleware
 
-Finally, apply Pioneer to Vapor as a [middleware]().
+Finally, apply Pioneer to Vapor as a [middleware](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/vapormiddleware).
 
 ```swift #18-25 main.swift
 import Pioneer
@@ -354,7 +354,7 @@ try app.run()
 
 ## 8: Adding subscriptions
 
-Subscriptions is a feature of GraphQL which allow real-time stream of data. This is usually done through WebSocket using an [additional protocol](). 
+Subscriptions is a feature of GraphQL which allow real-time stream of data. This is usually done through WebSocket using an [additional protocol](/features/graphql-over-websocket.md). 
 
 ### Enabling GraphQL over WebSocket
 
@@ -515,7 +515,7 @@ func schema() throws -> Schema<Resolver, Context> {
 
 Due to the nature of subscription which goes through WebSocket instead of HTTP, the context is built with different types of information i.e. there is no `Response` object for WebSocket operation.
 
-Pioneer allow a different [WebSocket context builder]() which gives a different set of arguments catered towards what will be available on a WebSocket operation.
+Pioneer's [Vapor](https://github.com/vapor/vapor) integration allow a different WebSocket **context builder** which gives a different set of arguments catered towards what will be available on a WebSocket operation.
 
 !!!success
 Pioneer will try to use the same context builder if not explicit given a different one for WebSocket. It will try to maintain all relevant information and inject that values into the `Request` object.
