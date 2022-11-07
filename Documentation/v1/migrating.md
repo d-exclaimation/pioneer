@@ -117,6 +117,12 @@ app.middleware.use(
 )
 ```
 
+### Same path for all
+
+Pioneer [**v0**](/v0/guides/getting-started/server) uses 3 different paths for GraphQL over HTTP, GraphQL over WebSocket, and GraphQL IDE hosting.
+
+In [**v1**](/), Pioneer will use the same path for all of those, and will instead determine from the request whether is a GraphQL over HTTP request, a GraphQL over WebSocket upgrade request, or a GraphQL IDE request.
+
 ## Other changes
 
 ### WebSocket callbacks

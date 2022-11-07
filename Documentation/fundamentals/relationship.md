@@ -126,7 +126,7 @@ struct Resolver {
 
 The graph will executed that `Resolver.parts` function which will make a request to the database to get all items.
 
-Let's assume the database is an SQL database and the following SQL statements created when resolving the query are:
+Let's assume the database is a SQL database and the following SQL statements created when resolving the query are:
 
 ```SQL #
 SELECT * FROM parts
@@ -154,7 +154,7 @@ The package [Dataloader](https://github.com/GraphQLSwift/DataLoader) implement t
 
 After that, we can create a function to build a new dataloader for each operation, and update the relationship resolver to use the loader
 
-```swift #3-4,8-20,24-34
+```swift #3-4,8-18,22-32
 struct Context {
     var db: Database
     var carLoader: DataLoader<Car.ID, Car?>
@@ -191,7 +191,7 @@ extension Part {
 ```
 
 !!!warning
-It's best to create a loader for each operation as its cache will be valid only for that operation and doesn't create a **out-of-sync** cache problem on subsequent operation.
+It's best to create a loader for each operation as its cache will be valid only for that operation and doesn't create a **out-of-sync** cache problem on subsequent operations.
 !!!
 
 !!!success
