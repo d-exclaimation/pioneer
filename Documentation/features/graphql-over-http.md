@@ -11,7 +11,7 @@ GraphQL spec define how a GraphQL operation is supposed to be performed through 
 
 Pioneer have a feature to specify how operations can be handled through HTTP. There are situations where a GraphQL API should not perform something like mutations through HTTP **GET**, or the user of the library preffered just using HTTP **POST** for all operations (excluding subscriptions).
 
-[HTTPStrategy](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/httpstrategy-swift.enum) is a enum that can be passed in as one of the arguments when initializing Pioneer to specify which approach you prefer.
+[HTTPStrategy](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpstrategy-swift.enum) is a enum that can be passed in as one of the arguments when initializing Pioneer to specify which approach you prefer.
 
 ```swift #3
 Pioneer(
@@ -62,7 +62,7 @@ Pioneer uses the same mechanic to prevent these types of attacks as [Apollo Serv
 If you set the http strategy to `.queryOnlyGet` or `.onlyPost` and as long as you ensure that only mutations can have side effects, you are somewhat protected from the "side effects" aspect of CSRFs even without enabling CSRF protection.
 !!!
 
-To enable it, just change the [HTTPStrategy](#http-strategy) to [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention), which will add additional restrictions to any GraphQL request going through HTTP.
+To enable it, just change the [HTTPStrategy](#http-strategy) to [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention), which will add additional restrictions to any GraphQL request going through HTTP.
 
 ```swift
 let server = Pioneer(

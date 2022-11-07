@@ -314,7 +314,7 @@ try app.run()
 
 ### Pioneer as Vapor middleware
 
-Finally, apply Pioneer to Vapor as a [middleware](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/vapormiddleware).
+Finally, apply Pioneer to Vapor as a [middleware](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/vapormiddleware).
 
 ```swift #18-25 main.swift
 import Pioneer
