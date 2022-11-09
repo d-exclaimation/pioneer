@@ -290,7 +290,7 @@ After the upgrade is done, there's only a few things to do:
 
 ==- Example
 
-```swift #
+```swift #7-15,24,27-28,31-56,59-64
 import class WebFramework.Request
 import class WebFramework.Response
 import class WebFramework.WebSocket
@@ -316,9 +316,11 @@ extension Pioneer {
     ) -> Void {
         let cid = UUID()
 
+        // Keep alive and timeout task
         let keepAlive = keepAlive(using: ws)
         let timeout = timeout(using: ws, keepAlive: keepAlive)
 
+        // Consuming incoming message
         let receiving = Task {
             let stream = AsyncStream(String.self) { con in 
                 ws.onMessage(con.yield)
@@ -346,6 +348,7 @@ extension Pioneer {
             }
         }
 
+        // Closing task
         Task {
             try await ws.onClose.get()
             receiving.cancel()
