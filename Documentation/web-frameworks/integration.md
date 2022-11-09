@@ -41,7 +41,7 @@ struct HTTPGraphQLRequest {
 The important part is parsing into [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest). A recommended approach in parsing is:
 
 1. Parse [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) from the body of a request. (Usually for **POST**)
-2. If it's in the body, get the values from the query/search parameters. (Usually for **GET**)
+2. If it's not in the body, get the values from the query/search parameters. (Usually for **GET**)
     - The query string should be under `query`
     - The operation name should be under `operationName`
     - The variables should be under `variables` as JSON string
@@ -198,6 +198,161 @@ extension Pioneer {
 
 ### Implemeting GraphQL over WebSocket
 
-!!!danger
-**TODO**: This section has not been written yet
-!!!
+
+Implementing the WebSocket layer can be tricky to do. Pioneer already provide all the callbacks need to setup GraphQL over WebSocket, the only thing missing is to connect that to the WebSocket portion of the web-framework.
+
+#### Upgrading HTTP Request into WebSocket
+
+It is important that the desired web-framework can be used to perform upgrade to WebSocket from a regular HTTP requests. 
+
+The only thing needed to be done before the upgrade is done, is to check whether the `Sec-WebSocket-Protocol` header value is matching the WebSocket protocol name
+
+==- Example
+
+```swift #6-12
+import class WebFramework.Request
+import struct WebFramework.BadRequestError
+import struct Pioneer.Pioneer
+
+extension Pioneer {
+    func shouldUpgrade(req: Request) async throws -> HTTPHeaders {
+        guard let req.headers[.secWebSocketProtocol].first(where: websocketProtocol.isValid) else {
+            throw BadRequestError()
+        }
+
+        return req.headers
+    }
+}
+```
+
+===
+
+#### Context and Guard
+
+Before proceeding, similarly to HTTP, context is a crutial part of the GraphQL operation. By convention for WebSocket, it's best to allow user of the integration to compute the context from the request, the initial payload, and the GraphQL operation itself.
+
+The only other addition is WebSocket guard. It is also desirable for the user to be able to perform action just after the initialisation process using the request and the initial payload.
+
+==- Example
+
+```swift #7-8
+import class WebFramework.Request
+import struct Pioneer.Pioneer
+import struct Pioneer.GraphQLRequest
+import enum Pioneer.Payload
+
+extension Pioneer {
+    typealias WebFrameworkWebSocketContext = @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
+    typealias WebFrameworkWebSocketGuard = @Sendable (Request, Payload) async throws -> Void
+}
+```
+
+===
+
+#### Making WebSocket WebSocketable
+
+In order for Pioneer to use the web-framework specific implementation of WebSocket. The web-framework WebSocket object must conforms the [WebSocketable](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/websocketable) protocol.
+
+==- Example
+
+```swift #3-5,7-9
+import enum NIOWebSocket.WebSocketErrorCode
+import class WebFramework.WebSocket
+
+extension WebSocket: WebSocketable {
+    public func out<S>(_ msg: S) where S: Collection, S.Element == Character {
+        send(msg)
+    }
+
+    public func terminate(code: WebSocketErrorCode) async throws {
+        try await close(code: code)
+    }
+}
+```
+
+===
+
+
+#### Setting up GraphQL over WebSocket 
+
+After the upgrade is done, there's only a few things to do:
+
+- Create a new `UUID` to uniquely identify the connection.
+- Setup `Task`s for keeping the connection alive and timeout connection if initialisation didn't happen.
+    - This can be performed using the [.keepAlive](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/keepalive(using:)) and the [.timeout](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/timeout(using:keepalive)) method.
+    - [.timeout](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/timeout(using:keepalive)) might want to be called after [.keepAlive](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/keepalive(using:)), because it optionally require the keep alive task as an argument.
+- Creating a task or a stream to consume the incoming WebSocket messages
+    - [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) method is used here.
+    - For consuming the incoming message, if in the web-framework it is done in a callback, it is best to pipe that value into an AsyncStream first and iterate through the AsyncStream before calling the [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) method.
+- Setting up callback for when the connection has been closed.
+    - [.closeClient](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) method is used here.
+    - It is also recommended if possible to stop the consuming incoming message here as well.
+
+==- Example
+
+```swift #
+import class WebFramework.Request
+import class WebFramework.Response
+import class WebFramework.WebSocket
+import struct Pioneer.Pioneer
+
+extension Pioneer {
+    func wsHandler(
+        req: Request, 
+        context: @escaping WebFrameworkWebSocketContext, 
+        guard: @escaping WebFrameworkWebSocketGuard
+    ) async throws -> Response {
+        req.upgradeToWebSocket(shouldUpgrade: shouldUpgrade(req:)) { req, ws
+            onUpgrade(req: req, ws: ws, context: context, guard: `guard`)
+        }
+    }
+
+
+    func onUpgrade(
+        req: Request, 
+        ws: WebSocket, 
+        context: @escaping WebFrameworkWebSocketContext, 
+        guard: @escaping WebFrameworkWebSocketGuard
+    ) -> Void {
+        let cid = UUID()
+
+        let keepAlive = keepAlive(using: ws)
+        let timeout = timeout(using: ws, keepAlive: keepAlive)
+
+        let receiving = Task {
+            let stream = AsyncStream(String.self) { con in 
+                ws.onMessage(con.yield)
+
+                con.onTermination = { @Sendable _ in 
+                    guard ws.isClosed else { return }
+                    _ = ws.close()
+                }
+            }
+
+            for await message in stream {
+                await receiveMessage(
+                    cid: cid, io: ws, 
+                    keepAlive: keepAlive, 
+                    timeout: timeout,
+                    ev: req.eventLoop, 
+                    txt: message,
+                    context: {
+                        try await context(req, $0, $1)
+                    },
+                    check: {
+                        try await `guard`(req, $0)
+                    }
+                )
+            }
+        }
+
+        Task {
+            try await ws.onClose.get()
+            receiving.cancel()
+            closeClient(cid: cid, keepAlive: keepAlive, timeout: timeout)
+        }
+    }
+}
+```
+
+===

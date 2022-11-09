@@ -42,17 +42,9 @@ extension Pioneer {
     func onUpgrade(req: Request, ws: WebSocket, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) -> Void {
         let cid = UUID()
 
-        let keepAlive = setInterval(delay: keepAlive) {
-            if ws.isClosed {
-                throw Abort(.conflict, reason: "WebSocket closed before termination")
-            }
-            ws.send(websocketProtocol.keepAliveMessage)
-        }
+        let keepAlive = keepAlive(using: ws)
 
-        let timeout = setTimeout(delay: timeout) {
-            try await ws.close(code: .graphqlInitTimeout)
-            keepAlive?.cancel()
-        }
+        let timeout = timeout(using: ws, keepAlive: keepAlive)
 
         // Task for consuming WebSocket messages to avoid cyclic references and provide cleaner code
         let receiving = Task {
