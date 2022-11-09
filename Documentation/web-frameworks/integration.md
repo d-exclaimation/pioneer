@@ -255,7 +255,7 @@ In order for Pioneer to use the web-framework specific implementation of WebSock
 
 ==- Example
 
-```swift #3-5,7-9
+```swift #5-7,9-11
 import enum NIOWebSocket.WebSocketErrorCode
 import class WebFramework.WebSocket
 
