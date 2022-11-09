@@ -128,30 +128,32 @@ In [**v1**](/), Pioneer will use the same path for all of those, and will instea
 ### New defaults
 
 Pioneer will now defaults to 
-- [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention) for its [HTTPStrategy](/features/graphql-over-http/#http-strategy)
-- [.sandbox](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/ide/sandbox) for its [WebSocket Protocol](/features/graphql-over-websocket/#websocket-subprotocol)
+- [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention) for its [HTTPStrategy](/features/graphql-over-http/#http-strategy)
+- [.sandbox](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/ide/sandbox) for its [WebSocket Protocol](/features/graphql-over-websocket/#websocket-subprotocol)
 - `30` seconds for the keep alive interval for GraphQL over WebSocket
 
 ### WebSocket callbacks
 
 Some WebSocket callbacks are now exposed as functions in Pioneer. These can be used to add a custom WebSocket layer.
 
-- [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer)
+- [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
 	- Callback to be called for each WebSocket message
-- [.initialiseClient](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer)
+- [.initialiseClient](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
 	- Callback after getting a GraphQL over WebSocket initialisation message according to the given protocol
-- [.executeLongOperation](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer)
+- [.executeLongOperation](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
 	- Callback to run long running operation using Pioneer
-- [.executeShortOperation](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer)
+- [.executeShortOperation](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
 	- Callback to run short lived operation using Pioneer
 
 ### Pioneer capabilities
 
 Some other capabilities of Pioneer is now exposed:
 
-- [.allowed](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/allowed(from:allowing:)), Check if a GraphQL request is allowed given the allowed list of operations
+- [.allowed](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/allowed(from:allowing:)), Check if a GraphQL request is allowed given the allowed list of operations
 
-- [.csrfVulnerable](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/csrfvulnerable(given:)), Check if the headers given show signs of CSRF and XS-Search vulnerability
+- [.csrfVulnerable](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/csrfvulnerable(given:)), Check if the headers given show signs of CSRF and XS-Search vulnerability
+
+- [.executeHTTPGraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/csrfvulnerable(given:)), Execute an operation for a given [HTTPGraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpgraphqlrequest) and returns  [HTTPGraphQLResponse](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpgraphqlresponse)
 
 ### ConnectionParams to Payload
 
@@ -172,7 +174,7 @@ These are simplified list of things that changed
 - Manually perform CSRF vulnerability checks and HTTP Strategy check
 - Uses 1 path for all types of operations
 - Open opportunity for other web framework integrations
-- Changed defaults to [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention) for HTTP strategy, [.graphqlWs](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/websocketprotocol-swift.enum/graphqlws) for WebSocket protocol, and [.sandbox](https://swiftpackageindex.com/d-exclaimation/pioneer/0.10.1/documentation/pioneer/pioneer/ide/sandbox) for GraphQL IDE.
+- Changed defaults to [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention) for HTTP strategy, [.graphqlWs](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/websocketprotocol-swift.enum/graphqlws) for WebSocket protocol, and [.sandbox](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/ide/sandbox) for GraphQL IDE.
 
 [!badge variant="danger" text="Removed"](#tradeoff)
 

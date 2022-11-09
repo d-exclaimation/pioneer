@@ -125,6 +125,38 @@ public struct Pioneer<Resolver, Context> {
         }
     }
 
+    /// Execute operation through Pioneer for a HTTPGraphQLRequest and return an HTTPGraphQLResponse
+    /// - Parameters:
+    ///   - req: The HTTP GraphQL Request for this operation
+    ///   - context: The context for the operation
+    ///   - eventLoop: The event loop used to execute the operation asynchronously
+    /// - Returns: A HTTPGraphQLResponse
+    public func executeHTTPGraphQLRequest(for req: HTTPGraphQLRequest, with context: Context, using eventLoop: EventLoopGroup) async -> HTTPGraphQLResponse {
+        let gql = req.request
+        let headers = req.headers
+
+        // CSRF and XS-Search attacks prevention
+        guard !csrfVulnerable(given: headers) else {
+            let error = GraphQLError(message: "Operation has been blocked as a potential Cross-Site Request Forgery (CSRF).")
+            return .init(result: .init(data: nil, errors: [error]), status: .badRequest)
+        }
+
+        // HTTP Strategy checks
+        guard allowed(from: gql, allowing: httpStrategy.allowed(for: req.method)) else {
+            let error = GraphQLError(message: "Operation of this type is not allowed and has been blocked")
+            return .init(result: .init(data: nil, errors: [error]), status: .badRequest)
+        }
+
+        // Validation rules
+        let errors = validationRules(using: schema, for: gql)
+        guard errors.isEmpty else {
+            return .init(result: .init(data: nil, errors: errors), status: .badRequest)
+        }
+
+        let result = await executeOperation(for: gql, with: context, using: eventLoop)
+        return .init(result: result, status: .ok)
+    }
+
 
     /// Handle messages that follow the websocket protocol for a specific client using Pioneer.Probe 
     /// - Parameters:

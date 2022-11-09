@@ -29,49 +29,22 @@ extension Pioneer {
     ///   - using: The custom content encoder
     /// - Returns: A response from the GraphQL operation execution properly formatted
     public func httpHandler(req: Request, using encoder: ContentEncoder, context: @escaping VaporHTTPContext) async throws -> Response {
-        // Check for CSRF Prevention
-        guard !csrfVulnerable(given: req.headers) else {
-            return try GraphQLError(
-                message: "Operation has been blocked as a potential Cross-Site Request Forgery (CSRF)."
-            )
-            .response(with: .badRequest)
-        }
-        do {
-            let gql = try req.graphql
-            return try await handle(req: req, from: gql, allowing: httpStrategy.allowed(for: req.method), using: encoder, context: context)
-        } catch let error as AbortError {
-            return try GraphQLError(message: error.reason).response(with: error.status)
-        } catch {
-            return try error.graphql.response(with: .internalServerError)
-        }
-    }
-
-    /// Handle execution for GraphQL operation
-    /// - Parameters:
-    ///   - req: The HTTP Request
-    ///   - gql: The GraphQL request for the operation
-    ///   - allowing: The allowed operation type
-    /// - Returns: A response with proper http status code and a well formatted body
-    internal func handle(req: Request, from gql: GraphQLRequest, allowing: [OperationType], using encoder: ContentEncoder, context: @escaping VaporHTTPContext) async throws -> Response {
-        guard allowed(from: gql, allowing: allowing) else {
-            return try GraphQLError(message: "Operation of this type is not allowed and has been blocked")
-                .response(with: .badRequest)
-        }
-        let errors = validationRules(using: schema, for: gql)
-        guard errors.isEmpty else {
-            return try errors.response(with: .badRequest)
-        }
-
         let res = Response()
         do {
+            // Parsing GraphQLRequest and Context 
+            let gql = try req.graphql
             let context = try await context(req, res)
-            let result = await executeOperation(for: gql, with: context, using: req.eventLoop)
-            try res.content.encode(result, using: encoder)
+            let httpReq = HTTPGraphQLRequest(request: gql, headers: req.headers, method: req.method)
+
+            // Executing into GraphQLResult
+            let httpRes = await executeHTTPGraphQLRequest(for: httpReq, with: context, using: req.eventLoop)
+            try res.content.encode(httpRes.result, using: encoder)
+            res.status = httpRes.status
             return res
         } catch let error as AbortError {
             return try error.response(using: res)
         } catch {
-            return try error.graphql.response(using: res)
+            return try error.graphql.response(with: .internalServerError)
         }
     }
 }

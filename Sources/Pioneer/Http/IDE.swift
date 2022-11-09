@@ -31,7 +31,7 @@ extension Pioneer {
             case bananaCakePop
 
             /// URL for Cloud-based IDE
-            var url: String {
+            public var url: String {
                 switch (self) {
                     case .apolloSandbox:
                         return "https://studio.apollographql.com/sandbox/explorer"
@@ -40,10 +40,11 @@ extension Pioneer {
                 }
             }
         }
+
     }
         
     /// GraphQL Playground HTML
-    internal var playgroundHtml: String {
+    public var playgroundHtml: String {
         let graphqlPlayground = """
         <!DOCTYPE html>
         <html>
@@ -114,7 +115,7 @@ extension Pioneer {
     }
 
     /// GraphiQL HTML
-    internal var graphiqlHtml: String {
+    public var graphiqlHtml: String {
         let fetcher: String = def {
             switch websocketProtocol {
             case .subscriptionsTransportWs:
@@ -230,7 +231,7 @@ extension Pioneer {
     }
     
     /// Embedded Apollo Sandbox HTML
-    internal var embeddedSandboxHtml: String {
+    public var embeddedSandboxHtml: String {
         """
         <!DOCTYPE html>
         <html>
