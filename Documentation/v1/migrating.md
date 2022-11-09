@@ -19,7 +19,7 @@ Pioneer [v1](/) will still have first-party integration for [Vapor](https://gith
 
 Pioneer will no longer add routes to a [Vapor](https://github.com/vapor/vapor) Application with the `.applyMiddleware` function.
 
-Instead, Pioneer will have a [Vapor](https://github.com/vapor/vapor) integration module that extends [Pioneer]() with [VaporGraphQLMiddleware]() which can be use like a regular [Vapor](https://github.com/vapor/vapor) middleware.
+Instead, Pioneer will have a [Vapor](https://github.com/vapor/vapor) integration module that extends [Pioneer](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) with [VaporGraphQLMiddleware](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/vaporgraphqlmiddleware) which can be use like a regular [Vapor](https://github.com/vapor/vapor) middleware.
 
 +++ v1
 
