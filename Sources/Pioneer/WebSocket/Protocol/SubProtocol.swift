@@ -15,7 +15,7 @@ protocol SubProtocol {
     static func decode<Resolver, Context>(_ data: Data) -> Pioneer<Resolver, Context>.Intent
 
     /// Protocol specific initialization after acknowledgement message
-    static func initialize(ws: ProcessingConsumer)
+    static func initialize(_ io: WebSocketable)
 
     /// Next data typename for this sub-protocol
     static var next: String { get }
@@ -23,6 +23,8 @@ protocol SubProtocol {
     static var complete: String { get }
     /// Error typename for this sub-protocol
     static var error: String { get }
+    /// Pong type namefor this sub-protocol
+    static var pong: String { get }
     /// Keep alive message being sent on an interval to keep connection going
     static var keepAliveMessage: String { get }
 }

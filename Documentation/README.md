@@ -1,87 +1,28 @@
 ---
-icon: home
-title: Welcome
+icon: rocket
+title: Introduction
 ---
 
-# Welcome to Pioneer
+# Introduction to Pioneer
 
-[Pioneer](https://github.com/d-exclaimation/pioneer) is a simple GraphQL :unicorn_face: server built for Swift and Vapor that works with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
+!!!success 📣 Pioneer v1 is generally available!
+<small>See what's new!</small>
+<br/>
+<small>Docs for Pioneer v0 are [available here](/v0/features/async-await)</small>
+!!!
 
-![Pioneer](pioneer-banner.png)
+Pioneer is an open-source, spec-compliant GraphQL server that's compatible with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). 
 
-No complicated setup required to use Pioneer. It is as easy as plugging it into an existing Vapor application (it might even looked familiar).
+![Pioneer and GraphQL as a layer between your Swift backend and your Web, iOS, and Android frontend](/static/pioneer-graphql.png)
 
-Pioneer will configure all the necessary things to build a GraphQL API such as:
+=== 🪛 Straightforward setup
+Just plug it in and start working immediately 
+=== 🌐 Universal compability
+Compability with any data source, any GraphQL client, any GraphQL schema built on top of [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL)
+=== 🕊 Subscriptions capable
+Subscriptions using GraphQL over WebSocket protocols such as [graphql-ws](https://github.com/enisdenjo/graphql-ws) and [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws)
+=== 🚀 Wide range of features
+HTTP resolving strategy, extensive context building, [AsyncEventStream](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asynceventstream) and [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub)
+===
 
-- Handling operations through HTTP :incoming_envelope: (**GET** and **POST**).
-- Adding GraphQL IDE like [GraphiQL](https://github.com/graphql/graphiql) with subscriptions support.
-- Handling subscriptions through WebSocket :dove_of_peace:
-
-## Quick Start
-
-You can add Pioneer into any existing Vapor application with any GraphQL schema library made from [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) like [Graphiti](https://github.com/GraphQLSwift/Graphiti).
-
-[!ref Getting Started](./guides/getting-started/setup.md)
-
-Add this line to add Pioneer as one of your dependencies.
-
-```swift
-.package(url: "https://github.com/d-exclaimation/pioneer", from: "0.10.0")
-```
-
-Go to the `main.swift` or any Swift file where you apply your Vapor routing like your `routes.swift` file.
-
-Next, contruct an new Pioneer instance with your flavour of configuration and apply it to any `RoutesBuilder`.
-
-+++ Barebone Setup
-
-```swift main.swift
-import Vapor
-import Pioneer
-import Graphiti
-
-let app = try Application(.detect())
-
-let server = Pioneer(
-    schema: Schema<Void, Resolver> {
-        ...
-    },
-    resolver: Resolver(),
-    websocketProtocol: .graphqlWs
-)
-
-server.applyMiddleware(on: app) // <- Apply routing to the Application directly
-
-defer {
-    app.shutdown()
-}
-
-try app.run()
-```
-
-+++ Vapor template setup
-
-```swift routes.swift
-import Vapor
-import Pioneer
-import Graphiti
-
-let server = Pioneer(
-    schema: Schema<Void, Resolver> {
-        ...
-    },
-    resolver: Resolver(),
-    websocketProtocol: .graphqlWs
-)
-
-func routes(_ app: Application) throws {
-    app.get("hello") { req -> String in
-        return "Hello, world!"
-    }
-
-    server.applyMiddleware(on: app) // <- Apply routing to the Application directly
-}
-
-```
-
-+++
+[!ref Get started!](/getting-started)

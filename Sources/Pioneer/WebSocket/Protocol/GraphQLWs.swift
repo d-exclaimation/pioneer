@@ -51,9 +51,9 @@ enum GraphQLWs: SubProtocol {
         }
     }
 
-    static func initialize(ws: ProcessingConsumer) {
+    static func initialize(_ io: WebSocketable) {
         let ack = GraphQLMessage(type: ConnectionAck)
-        ws.send(msg: ack.jsonString)
+        io.out(ack.jsonString)
     }
 
     static var next: String { Next }
@@ -61,6 +61,8 @@ enum GraphQLWs: SubProtocol {
     static var complete: String { Complete }
 
     static var error: String { Error }
+
+    static var pong: String { Pong }
 
     static var keepAliveMessage: String {
         GraphQLMessage(type: Ping)

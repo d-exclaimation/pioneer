@@ -82,8 +82,8 @@ final class HTTPQueryTests: XCTestCase {
         defer {
             app.shutdown()
         }
-        server.applyMiddleware(on: app)
-
+        
+        app.middleware.use(server.vaporMiddleware(), at: .beginning)
 
         let body0 = ByteBuffer(data: gql0.json ?? .init())
         
@@ -158,7 +158,7 @@ final class HTTPQueryTests: XCTestCase {
         }
 
         try app.testable().test(.POST, "/graphql") { res in
-            XCTAssertEqual(res.status, .unsupportedMediaType)
+            XCTAssertEqual(res.status, .badRequest)
         }
     }
 
@@ -183,7 +183,8 @@ final class HTTPQueryTests: XCTestCase {
         defer {
             app.shutdown()
         }
-        server.applyMiddleware(on: app)
+
+        app.middleware.use(server.vaporMiddleware(), at: .beginning)
 
 
         try app.testable().test(
@@ -241,7 +242,13 @@ final class HTTPQueryTests: XCTestCase {
         try app.testable().test(
             .GET, "/graphql"
         ) { res in 
-            XCTAssertEqual(res.status, .badRequest)
+            XCTAssertEqual(res.status, .ok)
+        }
+
+        try app.testable().test(
+            .GET, "/graphql/wrong"
+        ) { res in
+            XCTAssertEqual(res.status, .notFound)
         }
     }
 }

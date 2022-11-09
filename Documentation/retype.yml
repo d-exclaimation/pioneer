@@ -9,9 +9,6 @@ links:
 - text: Home
   link: /
   icon: home
-- text: Getting Started
-  link: guides/getting-started/setup/
-  icon: zap
 - text: Github
   link: https://github.com/d-exclaimation/pioneer
   icon: mark-github

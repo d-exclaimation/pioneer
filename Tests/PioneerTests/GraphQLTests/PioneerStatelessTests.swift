@@ -87,8 +87,7 @@ final class PioneerStatelessTests: XCTestCase {
         for i in gql.indices {
             let curr = gql[i]
             let expect = expectation[i]
-            let res = try await executeGraphQL(schema: pioneer.schema, request: curr.query, resolver: pioneer.resolver, context: (), eventLoopGroup: group)
-
+            let res = await pioneer.executeOperation(for: curr, with: (), using: group)
             XCTAssertEqual(res, expect)
         }
     }

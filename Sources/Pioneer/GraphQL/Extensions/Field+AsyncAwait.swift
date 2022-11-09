@@ -25,7 +25,7 @@ public extension Graphiti.Field where FieldType : Encodable {
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     await function(type)(context, arguments, eventLoopGroup)
                 }
             }
@@ -39,7 +39,7 @@ public extension Graphiti.Field where FieldType : Encodable {
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     await function(type)(context, arguments, eventLoopGroup)
                 }
             }
@@ -56,7 +56,7 @@ public extension Graphiti.Field where FieldType : Encodable {
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     try await function(type)(context, arguments, eventLoopGroup)
                 }
             }
@@ -70,7 +70,7 @@ public extension Graphiti.Field where FieldType : Encodable {
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     try await function(type)(context, arguments, eventLoopGroup)
                 }
             }
@@ -92,7 +92,7 @@ public extension Graphiti.Field {
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     await function(type)(context, arguments, eventLoopGroup)
                 }
             }
@@ -107,7 +107,7 @@ public extension Graphiti.Field {
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     await function(type)(context, arguments, eventLoopGroup)
                 }
             }
@@ -125,7 +125,7 @@ public extension Graphiti.Field {
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     try await function(type)(context, arguments, eventLoopGroup)
                 }
             }
@@ -140,7 +140,7 @@ public extension Graphiti.Field {
     ) where Arguments == NoArguments {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, eventLoopGroup in
-                eventLoopGroup.task {
+                eventLoopGroup.performWithTask {
                     try await function(type)(context, arguments, eventLoopGroup)
                 }
             }

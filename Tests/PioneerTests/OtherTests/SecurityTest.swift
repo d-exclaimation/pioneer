@@ -18,7 +18,8 @@ final class SecurityTest: XCTestCase {
                 Field("hello", at: Resolver.hello)
             }
         },
-        resolver: Resolver()
+        resolver: Resolver(),
+        httpStrategy: .csrfPrevention
     )
     
     struct Resolver {
@@ -33,20 +34,20 @@ final class SecurityTest: XCTestCase {
     /// - Return false otherwise
     func testCsrfPreventionChecking() {
         let req = Request(application: application, headers: .init([]), on: application.eventLoopGroup.next())
-        let res = pioneer.isCSRFProtected(isActive: false, on: req)
-        XCTAssertTrue(res)
+        let res = pioneer.csrfVulnerable(given: req.headers)
+        XCTAssertFalse(res)
         
         let req1 = Request(application: application, headers: .init([("Apollo-Require-Preflight", "True")]), on: application.eventLoopGroup.next())
-        let res1 = pioneer.isCSRFProtected(on: req1)
-        XCTAssertTrue(res1)
+        let res1 = pioneer.csrfVulnerable(given: req1.headers)
+        XCTAssertFalse(res1)
         
         let req2 = Request(application: application, headers: .init([("X-Apollo-Operation-Name", "SomeQuery")]), on: application.eventLoopGroup.next())
-        let res2 = pioneer.isCSRFProtected(on: req2)
-        XCTAssertTrue(res2)
+        let res2 = pioneer.csrfVulnerable(given: req2.headers)
+        XCTAssertFalse(res2)
         
         let req3 = Request(application: application, method: .POST,  headers: .init([("Content-Type", "application/json")]), on: application.eventLoopGroup.next())
-        let res3 = pioneer.isCSRFProtected(on: req3)
-        XCTAssertTrue(res3)
+        let res3 = pioneer.csrfVulnerable(given: req3.headers)
+        XCTAssertFalse(res3)
         
         for unacceptable in ["text/plain", "application/x-www-form-urlencoded", "multipart/form-data"] {
             let req4 = Request(
@@ -55,8 +56,8 @@ final class SecurityTest: XCTestCase {
                 headers: .init([("Content-Type", unacceptable)]),
                 on: application.eventLoopGroup.next()
             )
-            let res4 = pioneer.isCSRFProtected(on: req4)
-            XCTAssertFalse(res4)
+            let res4 = pioneer.csrfVulnerable(given: req4.headers)
+            XCTAssertTrue(res4)
             
             let req5 = Request(
                 application: application,
@@ -64,8 +65,8 @@ final class SecurityTest: XCTestCase {
                 headers: .init([("Content-Type", unacceptable), ("Apollo-Require-Preflight", "True")]),
                 on: application.eventLoopGroup.next()
             )
-            let res5 = pioneer.isCSRFProtected(on: req5)
-            XCTAssertTrue(res5)
+            let res5 = pioneer.csrfVulnerable(given: req5.headers)
+            XCTAssertFalse(res5)
             
             let req6 = Request(
                 application: application,
@@ -73,8 +74,8 @@ final class SecurityTest: XCTestCase {
                 headers: .init([("Content-Type", unacceptable), ("X-Apollo-Operation-Name", "SomeQuery")]),
                 on: application.eventLoopGroup.next()
             )
-            let res6 = pioneer.isCSRFProtected(on: req6)
-            XCTAssertTrue(res6)
+            let res6 = pioneer.csrfVulnerable(given: req6.headers)
+            XCTAssertFalse(res6)
         }
     }
 }
