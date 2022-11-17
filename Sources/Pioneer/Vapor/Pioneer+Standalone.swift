@@ -37,16 +37,11 @@ extension Pioneer {
             app.shutdown()
         }
 
-        app.middleware = Middlewares()
-        app.middleware.use(ErrorMiddleware.default(environment: app.environment))
+        app.logger = .init(label: "pioneer-graphql")
         app.middleware.use(middleware)
 
         if let cors = cors {
             app.middleware.use(cors, at: .beginning)
-        }
-        
-        if env == "development" {
-            print("🚀 Server ready at: http://\(host):\(port)/")
         }
 
         try app.run()
