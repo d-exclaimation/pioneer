@@ -5,8 +5,10 @@
 //  Created by d-exclaimation on 00:02.
 //
 
+import struct Vapor.Middlewares
 import class Vapor.Application
 import class Vapor.CORSMiddleware
+import class Vapor.ErrorMiddleware
 import enum Vapor.PathComponent
 import enum Vapor.HTTPMethod
 import enum Vapor.HTTPBodyStreamStrategy
@@ -35,7 +37,9 @@ extension Pioneer {
             app.shutdown()
         }
 
-        app.middleware.use(middleware, at: .beginning)
+        app.middleware = Middlewares()
+        app.middleware.use(ErrorMiddleware.default(environment: app.environment))
+        app.middleware.use(middleware)
 
         if let cors = cors {
             app.middleware.use(cors, at: .beginning)
