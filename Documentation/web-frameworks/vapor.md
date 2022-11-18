@@ -9,6 +9,25 @@ Pioneer will have a built-in **first-party** integration with [Vapor](https://gi
 
 This integration added a couple additional benefits.
 
+```swift #15
+import Pioneer
+import Vapor
+
+let app = try Application(.detect())
+
+let server = Pioneer(
+    schema: schema,
+    resolver: Resolver(),
+    websocketProtocol: .graphqlWs,
+    introspection: true,
+    playground: .sandbox
+)
+
+app.middleware.use(
+    server.vaporMiddleware()
+)
+```
+
 ## Context
 
 ### HTTP-based Context

@@ -27,7 +27,7 @@ extension Pioneer {
         port: Int = 4000, 
         host: String = "127.0.0.1", 
         env: String = "development",
-        cors: CORSMiddleware? = nil
+        cors: CORSMiddleware.Configuration? = nil
     ) throws {
         let app = try Application(
             .specified(port: port, host: host, env: env)
@@ -41,7 +41,7 @@ extension Pioneer {
         app.middleware.use(middleware)
 
         if let cors = cors {
-            app.middleware.use(cors, at: .beginning)
+            app.middleware.use(CORSMiddleware(configuration: cors), at: .beginning)
         }
 
         try app.run()
@@ -67,7 +67,7 @@ extension Pioneer {
         context: @escaping VaporHTTPContext,
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
-        cors: CORSMiddleware? = nil
+        cors: CORSMiddleware.Configuration? = nil
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
@@ -102,7 +102,7 @@ extension Pioneer {
         body: HTTPBodyStreamStrategy = .collect, 
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
-        cors: CORSMiddleware? = nil
+        cors: CORSMiddleware.Configuration? = nil
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
@@ -134,7 +134,7 @@ extension Pioneer {
         at path: PathComponent = "graphql",
         body: HTTPBodyStreamStrategy = .collect, 
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
-        cors: CORSMiddleware? = nil
+        cors: CORSMiddleware.Configuration? = nil
     ) throws where Context == Void {
         try vaporServer(
             middleware: vaporMiddleware(
@@ -169,7 +169,7 @@ extension Pioneer {
         context: @escaping VaporHTTPContext,
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
-        cors: CORSMiddleware? = nil
+        cors: CORSMiddleware.Configuration? = nil
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
@@ -204,7 +204,7 @@ extension Pioneer {
         body: HTTPBodyStreamStrategy = .collect, 
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
-        cors: CORSMiddleware? = nil
+        cors: CORSMiddleware.Configuration? = nil
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
@@ -236,7 +236,7 @@ extension Pioneer {
         at path: [PathComponent],
         body: HTTPBodyStreamStrategy = .collect, 
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
-        cors: CORSMiddleware? = nil
+        cors: CORSMiddleware.Configuration? = nil
     ) throws where Context == Void {
         try vaporServer(
             middleware: vaporMiddleware(

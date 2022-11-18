@@ -41,7 +41,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.2.1"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.67.1"),
-        .package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0-beta")
+        .package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0")
     ],
     targets: [
         .target(
@@ -271,27 +271,28 @@ For further reading, the team at [Apollo GraphQL](https://www.apollographql.com/
 
 Now, it's time to integrate Pioneer into the existing Vapor application using the resolver and schema declared before.
 
-### Basic Vapor application
-
-First, let's setup a basic Vapor application.
-
-```swift # main.swift
-import Vapor
-
-let app = try Application(.detect())
-
-defer {
-    app.shutdown()
-}
-
-try app.run()
-```
-
 ### Pioneer configuration
 
-Now, create an instance of Pioneer with the desired configuration.
+First, create an instance of Pioneer with the desired configuration.
 
-```swift #1,6-12 main.swift
+```swift #
+import Pioneer
+
+let server = try Pioneer(
+    schema: schema(),
+    resolver: Resolver(),
+    httpStrategy: .csrfPrevention,
+    introspection: true,
+    playground: .sandbox
+)
+```
+
+
+### Basic Vapor application
+
+Next, let's setup a basic Vapor application.
+
+```swift #2,4,14-16,18 main.swift
 import Pioneer
 import Vapor
 
@@ -311,6 +312,32 @@ defer {
 
 try app.run()
 ```
+
+!!!success
+Pioneer can also run as a [standalone server](/web-frameworks/standalone) without needing to setup a Vapor application.
+
+==- Using standalone
+```swift #11-16 main.swift
+import Pioneer
+
+let server = try Pioneer(
+    schema: schema(),
+    resolver: Resolver(),
+    httpStrategy: .csrfPrevention,
+    introspection: true,
+    playground: .sandbox
+)
+
+try server.standaloneServer(
+    at: "graphql",
+    context: { req, res in
+        Context(req, res)
+    }
+)
+
+```
+===
+!!!
 
 ### Pioneer as Vapor middleware
 

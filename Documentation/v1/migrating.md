@@ -12,7 +12,7 @@ One of the big goal of [v1](/) is to bring fully bring a stable release of Pione
 Pioneer also now no longer a [Vapor](https://github.com/vapor/vapor)-only library and exposes more of its internal functions, structs, protocols, and classes which will allow integrations with other web frameworks.
 
 !!!success
-Pioneer [v1](/) will still have first-party integration for [Vapor](https://github.com/vapor/vapor).
+Pioneer [v1](/) will still have first-party integration for [Vapor](/web-frameworks/vapor).
 !!!
 
 ### Middleware
@@ -98,22 +98,22 @@ Pioneer now properly implement a WebSocket initialisation guard, which will fire
 
 ```swift #14-16
 let server = Pioneer(
-	schema: schema,
-	resolver: resolver
+    schema: schema,
+    resolver: resolver
 )
 
 app.middleware.use(
-	server.vaporMiddleware(
-		context: { req, res in
-			...
+    server.vaporMiddleware( 
+        context: { req, res in
+            ...
 		},
-		websocketContext: { req, payload, gql in
-			...
-		},
-		websocketGuard: { req, payload in 
-			...
-		}
-	)
+        websocketContext: { req, payload, gql in
+            ...
+        },
+        websocketGuard: { req, payload in
+            ...
+        }
+    )
 )
 ```
 
@@ -122,6 +122,35 @@ app.middleware.use(
 Pioneer [**v0**](/v0/guides/getting-started/server) uses 3 different paths for GraphQL over HTTP, GraphQL over WebSocket, and GraphQL IDE hosting.
 
 In [**v1**](/), Pioneer will use the same path for all of those, and will instead determine from the request whether is a GraphQL over HTTP request, a GraphQL over WebSocket upgrade request, or a GraphQL IDE request.
+
+
+### Standalone server
+
+Pioneer will also now include option to run [standalone](/web-frameworks/standalone).
+
+```swift #6-16
+let server = Pioneer(
+    schema: schema,
+    resolver: resolver
+)
+
+try server.standaloneServer(
+    context: { req, res in
+        ...
+	},
+    websocketContext: { req, payload, gql in
+        ...
+    },
+    websocketGuard: { req, payload in
+        ...
+    }
+)
+```
+
+
+!!!success
+Under the hood, the standalone server uses the [Vapor](/web-frameworks/vapor) integration.
+!!!
 
 ## Other changes
 

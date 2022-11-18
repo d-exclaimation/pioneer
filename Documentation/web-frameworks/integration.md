@@ -47,7 +47,7 @@ The important part is parsing into [GraphQLRequest](https://swiftpackageindex.co
     - The variables should be under `variables` as JSON string
         - This is probably percent encoded, and also need to be parse into `[String: Map]?` if available
     - As long the query string is accessible, the request is not malformed and we can construct a [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) using that.
-3. If [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) can't be retreive by both approach 1 and 2, the request is malformed and the response should have status code of 404 Bad Request.
+3. If [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) can't be retreive by both approach 1 and 2, the request is malformed and the response could also have status code of 400 Bad Request.
 
 ==- Example
 
