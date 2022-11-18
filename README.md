@@ -11,7 +11,7 @@ Pioneer is an open-source, [spec-compliant](https://github.com/d-exclaimation/gr
 ## Setup
 
 ```swift
-.package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0-beta")
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0")
 ```
 
 ## Swift for GraphQL
