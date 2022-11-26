@@ -48,6 +48,12 @@ public struct GraphQLMessage: Codable {
         public var id: String?
         public var type: String
         public var payload: Map?
+
+        init(id: String? = nil, type: String, payload: Map? = nil) {
+            self.id = id
+            self.type = type
+            self.payload = payload
+        }
     }
 
     static func errors(id: String? = nil, type: String, _ error: [GraphQLError]) -> Variance {

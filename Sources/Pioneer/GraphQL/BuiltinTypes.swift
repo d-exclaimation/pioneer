@@ -92,6 +92,11 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
         /// The detailed reasoning why conversion failed
         public var reason: String
 
+        public init(id: String, reason: String) {
+            self.id = id
+            self.reason = reason
+        }
+
         public var localizedDescription: String {
             "ID.ConversionError ('\(id)'): \"\(reason)\""
         }
