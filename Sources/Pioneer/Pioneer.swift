@@ -71,7 +71,7 @@ public struct Pioneer<Resolver, Context> {
         self.timeout = timeout
 
 
-        let proto: SubProtocol.Type = def {
+        let proto: SubProtocol.Type = expression {
             switch websocketProtocol {
             case .graphqlWs:
                 return GraphQLWs.self

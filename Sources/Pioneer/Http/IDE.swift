@@ -116,7 +116,7 @@ extension Pioneer {
 
     /// GraphiQL HTML
     public var graphiqlHtml: String {
-        let fetcher: String = def {
+        let fetcher: String = expression {
             switch websocketProtocol {
             case .subscriptionsTransportWs:
                 return """
