@@ -1,0 +1,198 @@
+import { Callout } from 'nextra-theme-docs'
+import { Tab, Tabs } from 'nextra-theme-docs'
+
+# Migrating to v1
+
+One of the big goal of [v1](/) is to bring fully bring a stable release of Pioneer with all the features and changes added in the past year, and allow Pioneer to be more customisable, and more compatible with more server-side Swift frameworks and libraries.
+
+## Decoupling from Vapor
+
+Pioneer also now no longer a [Vapor](https://github.com/vapor/vapor)-only library and exposes more of its internal functions, structs, protocols, and classes which will allow integrations with other web frameworks.
+
+<Callout type="info" emoji="🎉">
+Pioneer [v1](/) will still have first-party integration for [Vapor](/docs/web-frameworks/vapor).
+</Callout>
+
+### Middleware
+
+Pioneer will no longer add routes to a [Vapor](https://github.com/vapor/vapor) Application with the `.applyMiddleware` function.
+
+Instead, Pioneer will have a [Vapor](https://github.com/vapor/vapor) integration module that extends [Pioneer](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) with [VaporGraphQLMiddleware](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/vaporgraphqlmiddleware) which can be use like a regular [Vapor](https://github.com/vapor/vapor) middleware.
+
+<Tabs items={['v1', 'v0']}>
+<Tab>
+
+```swift {8} showLineNumbers copy
+let app = try Application(.detect())
+
+let server = Pioneer(
+	schema: schema,
+	resolver: resolver
+)
+
+app.middleware.use(server.vaporMiddleware())
+```
+
+</Tab>
+<Tab>
+
+```swift {8} showLineNumbers copy
+let app = try Application(.detect())
+
+let server = Pioneer(
+	schema: schema,
+	resolver: resolver
+)
+
+server.applyMiddleware(on: app)
+```
+
+</Tab>
+</Tabs>
+
+### Context Builder
+
+Alongside being a middleware, all context builder and guard functions are passed into the middleware instead of directly to Pioneer. This allow Pioneer be decoupled from Vapor but still allow integration with Vapor's `Request` and `Response` in the context builder.
+
+<Tabs items={['v1', 'v0']}>
+<Tab>
+
+```swift {8-13} showLineNumbers copy
+let server = Pioneer(
+	schema: schema,
+	resolver: resolver
+)
+
+app.middleware.use(
+	server.vaporMiddleware(
+		context: { req, res in
+			...
+		},
+		websocketContext: { req, payload, gql in
+			...
+		}
+	)
+)
+```
+
+</Tab>
+<Tab>
+
+
+```swift {4-9} showLineNumbers copy
+let server = Pioneer(
+	schema: schema,
+	resolver: resolver,
+	contextBuilder: { req, res in 
+		...
+	},
+	websocketContextBuilder: { req, params, gql in 
+		...
+	}
+)
+
+server.applyMiddleware(on: app)
+```
+
+</Tab>
+</Tabs>
+
+### WebSocket Guard
+
+Pioneer now properly implement a WebSocket initialisation guard, which will fire for each new GraphQL over WebSocket connection that initialise properly. This allow user configured authorization of each WebSocket connection.
+
+```swift {14-16} showLineNumbers copy
+let server = Pioneer(
+    schema: schema,
+    resolver: resolver
+)
+
+app.middleware.use(
+    server.vaporMiddleware( 
+        context: { req, res in
+            ...
+		},
+        websocketContext: { req, payload, gql in
+            ...
+        },
+        websocketGuard: { req, payload in
+            ...
+        }
+    )
+)
+```
+
+### Same path for all
+
+Pioneer **v0** uses 3 different paths for GraphQL over HTTP, GraphQL over WebSocket, and GraphQL IDE hosting.
+
+In [**v1**](/), Pioneer will use the same path for all of those, and will instead determine from the request whether is a GraphQL over HTTP request, a GraphQL over WebSocket upgrade request, or a GraphQL IDE request.
+
+
+### Standalone server
+
+Pioneer will also now include option to run [standalone](/docs/web-frameworks/standalone).
+
+```swift {6-16} showLineNumbers copy
+let server = Pioneer(
+    schema: schema,
+    resolver: resolver
+)
+
+try server.standaloneServer(
+    context: { req, res in
+        ...
+	},
+    websocketContext: { req, payload, gql in
+        ...
+    },
+    websocketGuard: { req, payload in
+        ...
+    }
+)
+```
+
+
+<Callout type="info" emoji="︎🤝">
+Under the hood, the standalone server uses the [Vapor](/docs/web-frameworks/vapor) integration.
+</Callout>
+
+## Other changes
+
+### New defaults
+
+Pioneer will now defaults to 
+- [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention) for its [HTTPStrategy](/docs/features/graphql-over-http/#http-strategy)
+- [.sandbox](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/ide/sandbox) for its [WebSocket Protocol](/docs/features/graphql-over-websocket/#websocket-subprotocol)
+- `30` seconds for the keep alive interval for GraphQL over WebSocket
+
+### WebSocket callbacks
+
+Some WebSocket callbacks are now exposed as functions in Pioneer. These can be used to add a custom WebSocket layer.
+
+- [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
+	- Callback to be called for each WebSocket message
+- [.initialiseClient](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
+	- Callback after getting a GraphQL over WebSocket initialisation message according to the given protocol
+- [.executeLongOperation](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
+	- Callback to run long running operation using Pioneer
+- [.executeShortOperation](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
+	- Callback to run short lived operation using Pioneer
+
+### Pioneer capabilities
+
+Some other capabilities of Pioneer is now exposed:
+
+- [.allowed](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/allowed(from:allowing:)), Check if a GraphQL request is allowed given the allowed list of operations
+
+- [.csrfVulnerable](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/csrfvulnerable(given:)), Check if the headers given show signs of CSRF and XS-Search vulnerability
+
+- [.executeHTTPGraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/csrfvulnerable(given:)), Execute an operation for a given [HTTPGraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpgraphqlrequest) and returns  [HTTPGraphQLResponse](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpgraphqlresponse)
+
+### ConnectionParams to Payload
+
+The type `ConnectionParams` is renamed to `Payload`
+
+```swift showLineNumbers copy
+typealias Payload = [String: Map]?
+```

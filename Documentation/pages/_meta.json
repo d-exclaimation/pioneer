@@ -1,0 +1,30 @@
+{
+  "index": {
+    "title": "Pioneer",
+    "type": "page",
+    "display": "hidden"
+  },
+  "docs": {
+    "title": "Documentation",
+    "type": "page",
+    "href": "docs"
+  },
+  "api": {
+    "title": "API References ↗",
+    "type": "page",
+    "href": "https://swiftpackageindex.com/d-exclaimation/pioneer/main/documentation/pioneer",
+    "newWindow": true
+  },
+  "v1": {
+    "title": "Legacy docs ↗",
+    "type": "page",
+    "href": "https://pioneer-graphql.netlify.app/v0/features/async-await/",
+    "newWindow": true
+  },
+  "contact": {
+    "title": "Contact ↗",
+    "type": "page",
+    "href": "https://twitter.com/d_exclaimation",
+    "newWindow": true
+  }
+}
