@@ -1,0 +1,34 @@
+import {Callout} from 'nextra-theme-docs'
+import Features from 'components/features'
+
+{
+// wrapped with {} to mark it as javascript so mdx will not put it under a p tag
+}
+      
+{
+  <div className="flex flex-row items-center justify-center w-full">
+    <img className="w-32 hidden md:block md:w-40" src="/pioneer.png"/>
+    <div className="flex flex-col items-center md:items-start justify-center">
+      <h1 className="font-extrabold text-4xl md:text-5xl mt-8">Pioneer</h1>
+      <span className="text-lg my-5 text-gray-600 md:!text-2xl">GraphQL server for Swift</span>
+    </div>
+  </div>
+}
+
+<Features/>
+
+## Setup
+
+```swift copy
+.package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0")
+```
+
+- [Documentation](https://pioneer.dexclaimation.com/docs)
+- [Getting started](https://pioneer.dexclaimation.com/docs/getting-started)
+- [API References](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation)
+- [Example](https://github.com/d-exclaimation/pioneer-example)
+
+### Attribution
+
+- This project is heavily inspired by [Apollo Server](https://github.com/apollographql/apollo-server), and it would not have been possible without the work put into [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL).
+- Website is heavily inspired by [Vercel](https://vercel.com/)'s [SWR](https://swr.vercel.app/) site.

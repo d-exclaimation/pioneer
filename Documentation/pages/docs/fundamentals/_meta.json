@@ -1,0 +1,9 @@
+{
+  "context": "Context",
+  "subscriptions": "Subscriptions",
+  "relationship": "Relationship",
+  "faq": {
+    "title": "FAQ",
+    "href": "https://github.com/d-exclaimation/pioneer/discussions/categories/q-a"
+  }
+}

@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./Documentation/static/pioneer-banner.png"/>
+    <img src="./Documentation/public/pioneer-banner.png"/>
 </p>
 
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dswift-versions&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
@@ -14,16 +14,10 @@ Pioneer is an open-source, [spec-compliant](https://github.com/d-exclaimation/gr
 .package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0")
 ```
 
-## Swift for GraphQL
-
-Pioneer is a layer on top of a web server for handling all GraphQL operations through HTTP and WebSocket utilising the new concurrency features in Swift 5.5.
-
-It can work with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) and work with any GraphQL client even with WebSocket.
-
 ## Usage/Examples
 
-- [Documentation](https://pioneer-graphql.netlify.app)
-- [Getting started](https://pioneer-graphql.netlify.app/getting-started)
+- [Documentation](https://pioneer.dexclaimation.com/docs)
+- [Getting started](https://pioneer.dexclaimation.com/docs/getting-started)
 - [API References](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation)
 - [Example](https://github.com/d-exclaimation/pioneer-example)
 
