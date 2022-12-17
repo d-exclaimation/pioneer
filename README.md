@@ -14,12 +14,6 @@ Pioneer is an open-source, [spec-compliant](https://github.com/d-exclaimation/gr
 .package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0")
 ```
 
-## Swift for GraphQL
-
-Pioneer is a layer on top of a web server for handling all GraphQL operations through HTTP and WebSocket utilising the new concurrency features in Swift 5.5.
-
-It can work with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL) and work with any GraphQL client even with WebSocket.
-
 ## Usage/Examples
 
 - [Documentation](https://pioneer.dexclaimation.com/docs)
