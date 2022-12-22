@@ -157,14 +157,18 @@ The custom request will similar to the request used to upgrade to websocket but 
 
 The connection params is given during websocket initialization from [`payload` as part of `ConnectionInit` message](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit) inside an established WebSocket connection.
 
-<Callout type="warning">
-Given that the `payload` parameter is custom each client, it does not have any strong typing, so you would have to work with `Map` enum.
+<Callout type="info">
+    The given `payload` is not statically typed. However, you can decode it to a custom payload type using the `.decode(_)` method
 </Callout>
 
-```swift {2-3} showLineNumbers copy filename="Getting some values"
+```swift {1-3,6-7} showLineNumbers copy filename="Getting some values"
+struct AuthPayload: Decodable {
+    var authorization: String
+}
+
 func someHeader(ctx: Context, _: NoArguments) async -> String? {
-    guard .string(let token) = ctx.params?["Authorization"] else { ... }
-    return token
+    guard let payload = ctx.payload.decode(AuthPayload.self) else { ... }
+    return payload.authorization
 }
 ```
 
