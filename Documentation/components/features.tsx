@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import styles from "./features.module.css";
 
 const Feature = ({ text }: { text: string }) => (
@@ -30,14 +31,18 @@ export default () => {
       <div className="hidden md:block mx-auto max-w-full w-[880px] text-center px-4 mb-10">
         <div className={styles.features}>
           {FEATURES.map((feature) => (
-            <Feature text={feature} />
+            <Fragment key={feature}>
+              <Feature text={feature} />
+            </Fragment>
           ))}
         </div>
       </div>
       <div className="md:hidden mx-auto max-w-full w-[880px] text-center px-4 mb-10">
         <div className={styles.features}>
           {FEATURES_SM.map((feature) => (
-            <Feature text={feature} />
+            <Fragment key={feature}>
+              <Feature text={feature} />
+            </Fragment>
           ))}
         </div>
       </div>
