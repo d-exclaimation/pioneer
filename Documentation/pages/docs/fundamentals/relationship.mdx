@@ -159,7 +159,7 @@ struct Context {
 }
 
 extension Car {
-    func loader(ev: EventLoop, db: Database) -> DataLoader<Car.ID, Car?> {
+    static func loader(ev: EventLoop, db: Database) -> DataLoader<Car.ID, Car?> {
         .init(on: ev) { keys in
             let cars = try? await db.find(Car.self).filter { keys.contains($0.id) }
             return keys.map { key in
@@ -173,7 +173,7 @@ extension Car {
 }
 
 extension Part {
-   func loader(ev: EventLoop, db: Database) -> DataLoader<Car.ID, [Part]> {
+   static func loader(ev: EventLoop, db: Database) -> DataLoader<Car.ID, [Part]> {
         .init(on: ev) { keys in
             let all = try? await db.find(Part.self).filter { keys.contains($0.carId) }
             return keys.map { key in
