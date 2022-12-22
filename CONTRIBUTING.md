@@ -184,12 +184,15 @@ Thank you for your contributions!
 
 Updating documentation should go through similar process with any [pull request](#pull-requests). However, passing test is not a requirement (If tests somehow failed, open an [issue](#how-do-i-submit-a-good-bug-report)).
 
-The documentation is built with [Retype](https://retype.com). All you need to see the documentation are:
+The documentation is a [Next.js](https://nextjs.org) site built with [Nextra](https://nextra.site).
 
-- Install `retype` CLI
-- Go to the documentation directory
-- Run `retype watch`
-- Run `retype build` to check for compilation errors
+Here are the requirements for the documentation:
+
+- [Node.js](https://nodejs.org/), Next.js uses Node.js.
+- [`pnpm`](https://pnpm.io/), the documentation is using `pnpm` instead of regular `npm`.
+
+To develop the documentation locally:
+- Run `pnpm dev` (If the mdx styling is off, try deleting the node_modules or removing `_app.tsx` and bringing it back)
 
 ## Styleguides
 
