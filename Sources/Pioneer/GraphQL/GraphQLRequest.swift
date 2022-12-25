@@ -10,8 +10,8 @@ import GraphQL
 
 /// GraphQL Request according to the spec
 public struct GraphQLRequest: Codable {
-    private enum Key: String, CodingKey {
-        case query, operationName, variables
+    private enum Key: String, CodingKey, CaseIterable {
+        case query, operationName, variables, extensions
     }
 
     /// Query string
@@ -20,6 +20,8 @@ public struct GraphQLRequest: Codable {
     public var operationName: String?
     /// Variables seperated and assign to constant in the query
     public var variables: [String: Map]?
+    /// Extensions for the request
+    public var extensions: [String: Map]? = nil
 
     /// Parsed GraphQL Document from request
     public var ast: Document?
@@ -31,14 +33,32 @@ public struct GraphQLRequest: Codable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Key.self)
-        let query = try container.decode(String.self, forKey: .query)
-        let operationName = try? container.decodeIfPresent(String.self, forKey: .operationName)
-        let variables = try? container.decodeIfPresent([String: Map].self, forKey: .variables)
-        self.init(query: query, operationName: operationName, variables: variables)
+        guard container.contains(.query) else {
+            throw ParsingIssue.missingQuery
+        }
+        do {
+            let query = try container.decode(String.self, forKey: .query)
+            let operationName = try container.decodeIfPresent(String?.self, forKey: .operationName)
+            let variables = try container.decodeIfPresent([String: Map]?.self, forKey: .variables)
+            let extensions = try container.decodeIfPresent([String: Map]?.self, forKey: .extensions)
+            self.init(
+                query: query, 
+                operationName: operationName ?? nil, 
+                variables: variables ?? nil, 
+                extensions: extensions ?? nil
+            )
+        } catch {
+            throw ParsingIssue.invalidForm
+        }
     }
     
 
-    public init(query: String, operationName: String? = nil, variables: [String: Map]? = nil) {
+    public init(
+        query: String, 
+        operationName: String? = nil, 
+        variables: [String: Map]? = nil,
+        extensions: [String: Map]? = nil
+    ) {
         self.query = query
         self.operationName = operationName
         self.variables = variables
@@ -50,6 +70,7 @@ public struct GraphQLRequest: Codable {
         try container.encode(query, forKey: .query)
         try container.encodeIfPresent(operationName, forKey: .operationName)
         try container.encodeIfPresent(variables, forKey: .variables)
+        try container.encodeIfPresent(extensions, forKey: .extensions)
     }   
 
     /// Getting parsed operationType
@@ -83,4 +104,13 @@ public struct GraphQLRequest: Codable {
             }
         }
     }
+
+    /// Known possible failure in parsing GraphQLRequest
+    public enum ParsingIssue: Error {
+        case missingQuery
+        case invalidForm
+    }
+
+    /// GraphQL over HTTP spec accept-type
+    static var acceptType = "application/graphql-response+json"
 }
