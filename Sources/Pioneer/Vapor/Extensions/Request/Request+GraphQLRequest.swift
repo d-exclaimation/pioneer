@@ -28,12 +28,22 @@ extension Request {
                 return GraphQLRequest(query: query, operationName: operationName, variables: variables)
 
             case .POST:
+                let accept = self.headers[.accept]
+                guard !self.headers[.contentType].isEmpty else {
+                    throw Abort(.badRequest, reason: "Invalid content-type")
+                }
                 do {
                     return try self.content.decode(GraphQLRequest.self)
-                } catch {
-                    throw Abort(.badRequest,
-                        reason: "Unable to parse query and identify operation"
+                } catch GraphQLRequest.ParsingIssue.missingQuery {
+                    throw Abort(accept.contains(GraphQLRequest.acceptType) ? .badRequest : .ok,
+                        reason: "Missing query parameter"
                     )
+                } catch GraphQLRequest.ParsingIssue.invalidForm {
+                    throw Abort(accept.contains(GraphQLRequest.acceptType) ? .badRequest : .ok, 
+                        reason: "Invalid GraphQL request form"
+                    )
+                } catch {
+                    throw Abort(.badRequest, reason: "Unable to parse JSON")
                 }
 
             default:
