@@ -40,6 +40,10 @@ extension Pioneer {
             let httpRes = await executeHTTPGraphQLRequest(for: httpReq, with: context, using: req.eventLoop)
             try res.content.encode(httpRes.result, using: encoder)
             res.status = httpRes.status
+
+            if req.headers[.accept].contains(GraphQLRequest.acceptType) {
+                res.headers.replaceOrAdd(name: .contentType, value: "\(GraphQLRequest.acceptType); charset=utf-8, \(GraphQLRequest.acceptType)")
+            }
             return res
         } catch let error as AbortError {
             return try error.response(using: res)
