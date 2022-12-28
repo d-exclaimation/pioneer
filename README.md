@@ -6,7 +6,7 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fd-exclaimation%2Fpioneer%2Fbadge%3Ftype%3Dplatforms&style=flat-square)](https://swiftpackageindex.com/d-exclaimation/pioneer)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fd-exclaimation%2Fpioneer%2Fbadge%3Fref%3Dmain&style=flat-square)](https://actions-badge.atrox.dev/d-exclaimation/pioneer/goto?ref=main)
 
-Pioneer is an open-source, [spec-compliant](https://github.com/d-exclaimation/graphql-http/blob/with-pioneer/implementations/pioneer-swift/README.md) GraphQL server that's compatible with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). 
+Pioneer is an open-source, [spec-compliant](https://github.com/graphql/graphql-http#servers) GraphQL server that's compatible with any GraphQL schema built with [GraphQLSwift/GraphQL](https://github.com/GraphQLSwift/GraphQL). 
 
 ## Setup
 
