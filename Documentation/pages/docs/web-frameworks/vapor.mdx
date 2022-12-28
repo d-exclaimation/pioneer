@@ -35,6 +35,7 @@ Pioneer provide a similar solution to `@apollo/server/express4` for building con
 This request and response will be request-specific / different for each GraphQL HTTP request.
 </Callout>
 
+
 ```swift {16-18} showLineNumbers copy
 import Pioneer
 import Vapor
@@ -57,6 +58,26 @@ app.middleware.use(
     )
 )
 ```
+
+<Callout type="info">
+Context builder can be asynchronous and/or throwing.
+
+If the context builder throws, it will prevent the operation from being executed
+
+```swift {4-6} showLineNumbers copy
+app.middleware.use(
+    server.vaporMiddleware(
+        context: { req, _ async throws in
+            guard let user = await auth(req) else {
+                throw Abort(.badRequest) // Response status code of 400
+            }
+            return Context(req: req)
+        }
+    )
+)
+```
+
+</Callout>
 
 #### Request (HTTP)
 
