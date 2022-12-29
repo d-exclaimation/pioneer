@@ -14,6 +14,27 @@ Pioneer is an open-source, [spec-compliant](https://github.com/graphql/graphql-h
 .package(url: "https://github.com/d-exclaimation/pioneer", from: "1.0.0")
 ```
 
+### Quick start
+
+```swift
+import Graphiti
+import Pioneer
+
+struct Resolver { ... }
+
+let schema = try Schema<Resolver, Void> { ... }
+
+let server = Pioneer(
+    schema: schema,
+    resolver: .init()
+)
+
+try server.standaloneServer(
+    port: 4000,
+    host: "127.0.0.1"
+)
+```
+
 ## Usage/Examples
 
 - [Documentation](https://pioneer.dexclaimation.com/docs)

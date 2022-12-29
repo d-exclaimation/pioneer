@@ -1,0 +1,84 @@
+import { Callout } from 'nextra-theme-docs'
+
+# GraphQL Middleware
+
+<Callout type="warning" emoji="🚧">
+**Work in progress** <br/>
+Resolver-based middleware is still a work in progress. 
+It is currently only supported as extensions to [Graphiti](https://github.com/GraphQLSwift/Graphiti), and only available in `v1.2.0-beta.1` or higher.
+</Callout>
+
+Middleware are useful reusable code that can be easily attached to resolvers. 
+By using middleware we can extract the commonly used code from our resolvers and then declaratively attach it whenever it's needed.
+
+## Creating a middleware
+
+GraphQL middleware is a function that takes 2 arguments:
+ 1. Resolver parameters - _the same as resolvers (root, args, context)_
+ 2. Next function - _used to control the execution of the next middleware and the resolver to which it is attached_
+
+```swift {3,5-6} showLineNumbers copy
+public func Trace<Root, Args, Returned>() -> GraphQLMiddleware<Root, Context, Args, Returned> {
+    return { params, next in
+        let before = Date()
+        let res = try await next()
+        let after = Date()
+        params.ctx.logger.info("Operation takes \(after.timeIntervalSince(before))s")
+        return res
+    }
+}
+```
+
+### Intercepting the resolver
+
+Middleware also has the ability to intercept the result of a resolver's execution.
+
+As an example would be an auth guard:
+
+```swift {3-5} showLineNumbers copy
+public func Auth<Root, Args, Returned>() -> GraphQLMiddleware<Root, Context, Args, Returned> {
+    return { params, next in
+        guard case .some = params.ctx.user else {
+            throw GraphQLError(message: "Not authenticated") 
+        }
+        return try await next()
+    }
+}
+```
+
+Another one would be a cache interceptor:
+
+```swift {5-7} showLineNumbers copy
+public func Cached<Root, Returned: RESPValueConvertible>(
+  key: String
+) -> GraphQLMiddleware<Root, Context, NoArguments, Returned> {
+    return { params, next in
+        guard let cache = try? await redis.get(key, as: Returned.self).get() else {
+          return cache
+        }
+        return try await next()
+    }
+}
+```
+
+## Attaching Middleware
+
+Attaching middlewares can be done through the `use` parameter from `Field`. The order of the middleware is also important.
+
+```swift {4-5,12-13} showLineNumbers copy
+Query {
+    Field("books", 
+        at: Resolver.books, 
+        // Trace -> Cached -> Resolver -> Cached -> Trace
+        use: [Trace(), Cached(key: "query:books")] 
+    )
+}
+
+Mutation {
+    Field("createBook"
+        at: Resolver.createBook,
+        // Auth -> Trace -> Resolver -> Trace -> Auth
+        use: [Auth(), Trace()]
+    )
+}
+```
