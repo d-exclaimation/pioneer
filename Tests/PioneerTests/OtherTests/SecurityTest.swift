@@ -1,14 +1,14 @@
 //  SecurityTest.swift
-//  
+//
 //
 //  Created by d-exclaimation on 25/06/22.
 //
 
 import Foundation
-import Vapor
-import XCTest
 import Graphiti
 @testable import Pioneer
+import Vapor
+import XCTest
 
 final class SecurityTest: XCTestCase {
     private let application = Application(.testing)
@@ -21,11 +21,11 @@ final class SecurityTest: XCTestCase {
         resolver: Resolver(),
         httpStrategy: .csrfPrevention
     )
-    
+
     struct Resolver {
         func hello(_: Void, _: NoArguments) -> String { "Hello" }
     }
-    
+
     /// CSRF Prevention // Protection should
     /// - Return true if protection is inactive
     /// - Return false if protection is active and request has no required headers
@@ -36,19 +36,19 @@ final class SecurityTest: XCTestCase {
         let req = Request(application: application, headers: .init([]), on: application.eventLoopGroup.next())
         let res = pioneer.csrfVulnerable(given: req.headers)
         XCTAssertFalse(res)
-        
+
         let req1 = Request(application: application, headers: .init([("Apollo-Require-Preflight", "True")]), on: application.eventLoopGroup.next())
         let res1 = pioneer.csrfVulnerable(given: req1.headers)
         XCTAssertFalse(res1)
-        
+
         let req2 = Request(application: application, headers: .init([("X-Apollo-Operation-Name", "SomeQuery")]), on: application.eventLoopGroup.next())
         let res2 = pioneer.csrfVulnerable(given: req2.headers)
         XCTAssertFalse(res2)
-        
-        let req3 = Request(application: application, method: .POST,  headers: .init([("Content-Type", "application/json")]), on: application.eventLoopGroup.next())
+
+        let req3 = Request(application: application, method: .POST, headers: .init([("Content-Type", "application/json")]), on: application.eventLoopGroup.next())
         let res3 = pioneer.csrfVulnerable(given: req3.headers)
         XCTAssertFalse(res3)
-        
+
         for unacceptable in ["text/plain", "application/x-www-form-urlencoded", "multipart/form-data"] {
             let req4 = Request(
                 application: application,
@@ -58,7 +58,7 @@ final class SecurityTest: XCTestCase {
             )
             let res4 = pioneer.csrfVulnerable(given: req4.headers)
             XCTAssertTrue(res4)
-            
+
             let req5 = Request(
                 application: application,
                 method: .POST,
@@ -67,7 +67,7 @@ final class SecurityTest: XCTestCase {
             )
             let res5 = pioneer.csrfVulnerable(given: req5.headers)
             XCTAssertFalse(res5)
-            
+
             let req6 = Request(
                 application: application,
                 method: .POST,

@@ -5,12 +5,12 @@
 //  Created by d-exclaimation on 4:30 PM.
 //
 
-import enum NIOHTTP1.HTTPMethod
 import enum GraphQL.OperationType
+import enum NIOHTTP1.HTTPMethod
 
-extension Pioneer {
+public extension Pioneer {
     /// HTTP Operation and routing strategy for GraphQL
-    public enum HTTPStrategy {
+    enum HTTPStrategy {
         /// Only allow `POST` GraphQL Request, most common choice
         case onlyPost
         /// Only allow `GET` GraphQL Request, not recommended for most
@@ -25,7 +25,7 @@ extension Pioneer {
         case csrfPrevention
         /// Allow all operation through `GET` and `POST`.
         case both
-    
+
         /// Get the allowed operation for aa type of HTTPMethod
         /// - Parameter method: The HTTP Method this operation is executed
         /// - Returns: A list of allowed GraphQL Operation Type

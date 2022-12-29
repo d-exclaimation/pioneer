@@ -7,8 +7,8 @@
 
 import Foundation
 import GraphQL
-import XCTest
 @testable import Pioneer
+import XCTest
 
 final class AsyncPubSubTests: XCTestCase {
     /// AsyncPubSub getting `AsyncStream` and publishing data
@@ -20,7 +20,7 @@ final class AsyncPubSubTests: XCTestCase {
         let trigger = "1"
         let exp0 = XCTestExpectation()
         let exp1 = XCTestExpectation()
-        
+
         let task = Task {
             let stream = pubsub.asyncStream(Int.self, for: trigger)
             for await each in stream {
@@ -30,7 +30,7 @@ final class AsyncPubSubTests: XCTestCase {
                 return
             }
         }
-        
+
         let task1 = Task {
             let stream = pubsub.asyncStream(Int.self, for: trigger)
             for await each in stream {
@@ -40,18 +40,18 @@ final class AsyncPubSubTests: XCTestCase {
                 return
             }
         }
-        
+
         try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
-        
+
         await pubsub.publish(for: trigger, payload: "invalid")
         await pubsub.publish(for: trigger, payload: 0)
-        
+
         wait(for: [exp0, exp1], timeout: 2)
-        
+
         task.cancel()
         task1.cancel()
     }
-    
+
     /// AsyncPubSub closing all consumer for a specific trigger
     /// - Should close all consumer with the same trigger
     /// - Should never receive anything from any consumer
@@ -60,7 +60,7 @@ final class AsyncPubSubTests: XCTestCase {
         let trigger = "1"
         let exp0 = XCTestExpectation()
         let exp1 = XCTestExpectation()
-        
+
         let task = Task {
             let stream = pubsub.asyncStream(Bool.self, for: trigger)
             for await _ in stream {
@@ -68,7 +68,7 @@ final class AsyncPubSubTests: XCTestCase {
             }
             exp0.fulfill()
         }
-        
+
         let task1 = Task {
             let stream = pubsub.asyncStream(Bool.self, for: trigger)
             for await _ in stream {
@@ -76,19 +76,19 @@ final class AsyncPubSubTests: XCTestCase {
             }
             exp1.fulfill()
         }
-        
+
         try? await Task.sleep(nanoseconds: 500_000)
-        
+
         await pubsub.close(for: trigger)
-        
+
         wait(for: [exp0, exp1], timeout: 2)
-        
+
         task.cancel()
         task1.cancel()
     }
 
     func testAsyncStream() async throws {
-        let stream1 = EventStream<Int>.async { con in 
+        let stream1 = EventStream<Int>.async { con in
             con.yield(1)
             con.finish()
         }
@@ -97,7 +97,7 @@ final class AsyncPubSubTests: XCTestCase {
             XCTAssertEqual(each, 1)
         }
 
-        let stream2 = AsyncEventStream<Int, AsyncThrowingStream<Int, Error>> { con in 
+        let stream2 = AsyncEventStream<Int, AsyncThrowingStream<Int, Error>> { con in
             con.yield(1)
             con.finish()
         }

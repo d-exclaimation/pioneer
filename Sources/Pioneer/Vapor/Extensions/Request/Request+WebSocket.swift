@@ -7,9 +7,9 @@
 
 import class Vapor.Request
 
-extension Request {
+public extension Request {
     /// Check if ths request is an upgrade to WebSocket request
-    public var isWebSocketUpgrade: Bool {
+    var isWebSocketUpgrade: Bool {
         guard let connection = headers.first(name: .connection), let upgrade = headers.first(name: .upgrade) else {
             return false
         }

@@ -7,25 +7,25 @@
 //
 
 import Foundation
-import XCTest
-import GraphQL
 import Graphiti
+import GraphQL
 import NIO
 @testable import Pioneer
+import XCTest
 
 struct TestResolver1 {
-    func sync(context: (), arguments: NoArguments) -> Int { 0 }
+    func sync(context _: (), arguments _: NoArguments) -> Int { 0 }
 
     struct Arg0: Codable { var allowed: Bool }
 
-    func syncWithArg(context: (), arguments: Arg0) -> Int { arguments.allowed ? 1 : 0 }
+    func syncWithArg(context _: (), arguments: Arg0) -> Int { arguments.allowed ? 1 : 0 }
 
-    func async(context: (), arguments: NoArguments) async throws -> Int {
+    func async(context _: (), arguments _: NoArguments) async throws -> Int {
         try await Task.sleep(nanoseconds: 1000 * 1000 * 300)
         return 2
     }
 
-    func asyncMessage(context: (), arguments: NoArguments) async throws -> Message {
+    func asyncMessage(context _: (), arguments _: NoArguments) async throws -> Message {
         try await Task.sleep(nanoseconds: 1000 * 1000 * 300)
         return Message(content: "Hello")
     }
@@ -75,14 +75,14 @@ final class PioneerStatelessTests: XCTestCase {
         let gql = [
             "query { sync }",
             "query { syncWithArg(allowed: true) }",
-            "query { async }"
+            "query { async }",
         ].map { GraphQLRequest(query: $0, operationName: nil, variables: nil) }
 
         let expectation = [
             Map.dictionary(["sync": Map.number(0)]),
             ["syncWithArg": .number(1)],
-            ["async": .number(2)]
-        ].map { GraphQLResult.init(data: $0) }
+            ["async": .number(2)],
+        ].map { GraphQLResult(data: $0) }
 
         for i in gql.indices {
             let curr = gql[i]
@@ -91,5 +91,4 @@ final class PioneerStatelessTests: XCTestCase {
             XCTAssertEqual(res, expect)
         }
     }
-
 }

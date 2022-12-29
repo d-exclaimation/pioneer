@@ -39,7 +39,7 @@ struct TestConsumer: WebSocketable {
         }
     }
 
-    func terminate(code: WebSocketErrorCode) async throws {}
+    func terminate(code _: WebSocketErrorCode) async throws {}
 
     func wait() async -> String {
         await withCheckedContinuation { continuation in
@@ -78,10 +78,9 @@ struct TestConsumer: WebSocketable {
         }
     }
 
-
     func waitThrowing(time: TimeInterval) async -> String? {
         let start = Date()
-        var res = Optional<String>.none
+        var res = String?.none
         while abs(start.timeIntervalSinceNow) < time {
             res = await buffer.pop()
         }

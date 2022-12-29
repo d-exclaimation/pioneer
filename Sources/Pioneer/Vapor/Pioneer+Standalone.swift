@@ -5,16 +5,15 @@
 //  Created by d-exclaimation on 00:02.
 //
 
-import struct Vapor.Middlewares
 import class Vapor.Application
 import class Vapor.CORSMiddleware
 import class Vapor.ErrorMiddleware
-import enum Vapor.PathComponent
-import enum Vapor.HTTPMethod
 import enum Vapor.HTTPBodyStreamStrategy
+import enum Vapor.HTTPMethod
+import struct Vapor.Middlewares
+import enum Vapor.PathComponent
 
-extension Pioneer {
-
+public extension Pioneer {
     /// Create an instance of Vapor server to run Pioneer
     /// - Parameters:
     ///   - middleware: The Vapor Middleware to be used
@@ -24,8 +23,8 @@ extension Pioneer {
     ///   - cors: CORS Configuration for the standalone server
     internal func vaporServer(
         middleware: VaporGraphQLMiddleware,
-        port: Int = 4000, 
-        host: String = "127.0.0.1", 
+        port: Int = 4000,
+        host: String = "127.0.0.1",
         env: String = "development",
         cors: CORSMiddleware.Configuration? = nil
     ) throws {
@@ -58,12 +57,12 @@ extension Pioneer {
     ///   - websocketContext: WebSocket context builder
     ///   - websocketGuard: WebSocket connection guard
     ///   - cors: CORS Configuration for the standalone server
-    public func standaloneServer(
-        port: Int = 4000, 
-        host: String = "127.0.0.1", 
+    func standaloneServer(
+        port: Int = 4000,
+        host: String = "127.0.0.1",
         env: String = "development",
         at path: PathComponent = "graphql",
-        body: HTTPBodyStreamStrategy = .collect, 
+        body: HTTPBodyStreamStrategy = .collect,
         context: @escaping VaporHTTPContext,
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
@@ -71,10 +70,10 @@ extension Pioneer {
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
-                body: body, 
-                at: path, 
-                context: context, 
-                websocketContext: websocketContext, 
+                body: body,
+                at: path,
+                context: context,
+                websocketContext: websocketContext,
                 websocketGuard: websocketGuard
             ),
             port: port,
@@ -94,21 +93,21 @@ extension Pioneer {
     ///   - context: HTTP context builder
     ///   - websocketGuard: WebSocket connection guard
     ///   - cors: CORS Configuration for the standalone server
-    public func standaloneServer(
-        port: Int = 4000, 
-        host: String = "127.0.0.1", 
+    func standaloneServer(
+        port: Int = 4000,
+        host: String = "127.0.0.1",
         env: String = "development",
         at path: PathComponent = "graphql",
-        body: HTTPBodyStreamStrategy = .collect, 
+        body: HTTPBodyStreamStrategy = .collect,
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
-                body: body, 
-                at: path, 
-                context: context, 
+                body: body,
+                at: path,
+                context: context,
                 websocketGuard: websocketGuard
             ),
             port: port,
@@ -127,19 +126,19 @@ extension Pioneer {
     ///   - body: The body streaming strategy
     ///   - websocketGuard: WebSocket connection guard
     ///   - cors: CORS Configuration for the standalone server
-    public func standaloneServer(
-        port: Int = 4000, 
-        host: String = "127.0.0.1", 
+    func standaloneServer(
+        port: Int = 4000,
+        host: String = "127.0.0.1",
         env: String = "development",
         at path: PathComponent = "graphql",
-        body: HTTPBodyStreamStrategy = .collect, 
+        body: HTTPBodyStreamStrategy = .collect,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
     ) throws where Context == Void {
         try vaporServer(
             middleware: vaporMiddleware(
-                body: body, 
-                at: path, 
+                body: body,
+                at: path,
                 websocketGuard: websocketGuard
             ),
             port: port,
@@ -160,12 +159,12 @@ extension Pioneer {
     ///   - websocketContext: WebSocket context builder
     ///   - websocketGuard: WebSocket connection guard
     ///   - cors: CORS Configuration for the standalone server
-    public func standaloneServer(
-        port: Int = 4000, 
-        host: String = "127.0.0.1", 
+    func standaloneServer(
+        port: Int = 4000,
+        host: String = "127.0.0.1",
         env: String = "development",
         at path: [PathComponent],
-        body: HTTPBodyStreamStrategy = .collect, 
+        body: HTTPBodyStreamStrategy = .collect,
         context: @escaping VaporHTTPContext,
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
@@ -173,10 +172,10 @@ extension Pioneer {
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
-                body: body, 
-                at: path, 
-                context: context, 
-                websocketContext: websocketContext, 
+                body: body,
+                at: path,
+                context: context,
+                websocketContext: websocketContext,
                 websocketGuard: websocketGuard
             ),
             port: port,
@@ -196,21 +195,21 @@ extension Pioneer {
     ///   - context: HTTP context builder
     ///   - websocketGuard: WebSocket connection guard
     ///   - cors: CORS Configuration for the standalone server
-    public func standaloneServer(
-        port: Int = 4000, 
-        host: String = "127.0.0.1", 
+    func standaloneServer(
+        port: Int = 4000,
+        host: String = "127.0.0.1",
         env: String = "development",
         at path: [PathComponent],
-        body: HTTPBodyStreamStrategy = .collect, 
+        body: HTTPBodyStreamStrategy = .collect,
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
     ) throws {
         try vaporServer(
             middleware: vaporMiddleware(
-                body: body, 
-                at: path, 
-                context: context, 
+                body: body,
+                at: path,
+                context: context,
                 websocketGuard: websocketGuard
             ),
             port: port,
@@ -229,19 +228,19 @@ extension Pioneer {
     ///   - body: The body streaming strategy
     ///   - websocketGuard: WebSocket connection guard
     ///   - cors: CORS Configuration for the standalone server
-    public func standaloneServer(
-        port: Int = 4000, 
-        host: String = "127.0.0.1", 
+    func standaloneServer(
+        port: Int = 4000,
+        host: String = "127.0.0.1",
         env: String = "development",
         at path: [PathComponent],
-        body: HTTPBodyStreamStrategy = .collect, 
+        body: HTTPBodyStreamStrategy = .collect,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
     ) throws where Context == Void {
         try vaporServer(
             middleware: vaporMiddleware(
-                body: body, 
-                at: path, 
+                body: body,
+                at: path,
                 websocketGuard: websocketGuard
             ),
             port: port,

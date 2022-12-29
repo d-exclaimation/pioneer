@@ -13,7 +13,7 @@ public extension EventStream {
     ///   - elementType: The type of element the AsyncEventStream produces
     ///   - limit: The maximum number of elements to hold in the buffer
     ///   - build: A custom closure that yields values to the AsyncEventStream
-    static func `async`(
+    static func async(
         _ elementType: Element.Type = Element.self,
         bufferingPolicy limit: AsyncThrowingStream<Element, Error>.Continuation.BufferingPolicy = .unbounded,
         _ build: (AsyncThrowingStream<Element, Error>.Continuation) -> Void

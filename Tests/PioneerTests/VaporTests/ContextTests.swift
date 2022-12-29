@@ -5,12 +5,12 @@
 //  Created by d-exclaimation on 18:06.
 //
 
-import XCTest
 import Graphiti
-import Vapor
 import NIOFoundationCompat
-import XCTVapor
 @testable import Pioneer
+import Vapor
+import XCTest
+import XCTVapor
 
 final class ContextTests: XCTestCase {
     private let server: Pioneer<Resolver, Context> = Pioneer(
@@ -20,7 +20,7 @@ final class ContextTests: XCTestCase {
             Query {
                 Field("test", at: Resolver.test)
             }
-        }, 
+        },
         resolver: .init(),
         httpStrategy: .both,
         introspection: true
@@ -50,7 +50,7 @@ final class ContextTests: XCTestCase {
         app.middleware.use(
             server.vaporMiddleware(
                 at: "graphql",
-                context: { req, res in 
+                context: { req, res in
                     guard let authorization = req.headers[.authorization].first else {
                         throw Abort(.unauthorized, reason: "Cannot authoriza user")
                     }
@@ -63,19 +63,19 @@ final class ContextTests: XCTestCase {
         )
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { test }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
             headers: .init([("Authorization", "Bearer Hello")])
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssertEqual(res.headers[.authorization].first, .some("Bearer Hello"))
             XCTAssert(res.body.string.contains("Hello"))
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { test }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .unauthorized)
         }
     }

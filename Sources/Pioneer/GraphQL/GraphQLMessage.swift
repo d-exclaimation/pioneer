@@ -27,11 +27,11 @@ public struct GraphQLMessage: Codable {
     static func from(type: String, id: String? = nil, _ gql: GraphQL.GraphQLResult) -> GraphQLMessage {
         let errors = parseError(gql.errors)
         switch (gql.data, errors) {
-        case (.some(let data), .some(let errors)):
+        case let (.some(data), .some(errors)):
             return .init(id: id, type: type, payload: ["data": data, "errors": errors])
-        case (.some(let data), .none):
+        case let (.some(data), .none):
             return .init(id: id, type: type, payload: ["data": data])
-        case (.none, .some(let errors)):
+        case let (.none, .some(errors)):
             return .init(id: id, type: type, payload: ["errors": errors])
         case (.none, .none):
             return .init(id: id, type: type)
@@ -76,6 +76,6 @@ extension Encodable {
 
     /// Any encodable into JSON String otherwise null is returned
     var jsonString: String {
-        json.flatMap { String(data: $0, encoding: .utf8)} ?? "null"
+        json.flatMap { String(data: $0, encoding: .utf8) } ?? "null"
     }
 }

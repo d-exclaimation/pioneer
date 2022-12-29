@@ -5,46 +5,45 @@
 //  Created by d-exclaimation on 14:17.
 //
 
-extension Pioneer {
+public extension Pioneer {
     /// GraphQL Hosted IDE
-    public enum IDE: Equatable {
+    enum IDE: Equatable {
         @available(*, deprecated, message: "Use `GraphiQL or Apollo Sandbox instead`")
         case playground
-        
+
         /// GraphiQL Browser IDE
         case graphiql
-        
+
         /// Embedded Apollo Sandbox
         case sandbox
-        
+
         /// Redirect to a cloud based IDE
         case redirect(to: Cloud)
-        
+
         /// Disabled any IDEs
         case disable
-        
+
         public enum Cloud {
             /// Cloud version of Apollo Sandbox
             case apolloSandbox
-            
+
             /// Cloud version of Banana Cake Pop
             case bananaCakePop
 
             /// URL for Cloud-based IDE
             public var url: String {
-                switch (self) {
-                    case .apolloSandbox:
-                        return "https://studio.apollographql.com/sandbox/explorer"
-                    case .bananaCakePop:
-                        return "https://eat.bananacakepop.com"
+                switch self {
+                case .apolloSandbox:
+                    return "https://studio.apollographql.com/sandbox/explorer"
+                case .bananaCakePop:
+                    return "https://eat.bananacakepop.com"
                 }
             }
         }
-
     }
-        
+
     /// GraphQL Playground HTML
-    public var playgroundHtml: String {
+    var playgroundHtml: String {
         let graphqlPlayground = """
         <!DOCTYPE html>
         <html>
@@ -115,7 +114,7 @@ extension Pioneer {
     }
 
     /// GraphiQL HTML
-    public var graphiqlHtml: String {
+    var graphiqlHtml: String {
         let fetcher: String = expression {
             switch websocketProtocol {
             case .subscriptionsTransportWs:
@@ -124,9 +123,9 @@ extension Pioneer {
                 <script>
                     const url = window.location.href;
                     const subscriptionUrl = window.location.href.replace("http", "ws");
-                
+
                     const legacyClient = new window.SubscriptionsTransportWs.SubscriptionClient(subscriptionUrl, { reconnect: true });
-                
+
                     const fetcher = GraphiQL.createFetcher({
                         url,
                         legacyClient,
@@ -229,9 +228,9 @@ extension Pioneer {
         </html>
         """
     }
-    
+
     /// Embedded Apollo Sandbox HTML
-    public var embeddedSandboxHtml: String {
+    var embeddedSandboxHtml: String {
         """
         <!DOCTYPE html>
         <html>

@@ -7,9 +7,9 @@
 
 import struct GraphQL.GraphQLError
 
-extension Error {
+public extension Error {
     /// Get the GraphQLError version of this error
-    public var graphql: GraphQLError {
+    var graphql: GraphQLError {
         self as? GraphQLError ?? .init(self)
     }
 }

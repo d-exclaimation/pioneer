@@ -7,7 +7,7 @@
 
 import enum NIOWebSocket.WebSocketErrorCode
 
-/// Any WebSocket output that can send messages and be terminated 
+/// Any WebSocket output that can send messages and be terminated
 public protocol WebSocketable {
     /// Send a messsage to this websocket consumer
     /// - Parameter msg: The message to be sent
@@ -15,5 +15,5 @@ public protocol WebSocketable {
 
     /// Close the connection
     /// - Parameter code: Error code to close the connection
-    func terminate(code: WebSocketErrorCode) async throws 
+    func terminate(code: WebSocketErrorCode) async throws
 }

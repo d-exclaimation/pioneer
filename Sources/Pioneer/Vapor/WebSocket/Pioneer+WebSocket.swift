@@ -5,20 +5,20 @@
 //  Created by d-exclaimation on 11:36 AM.
 //
 
-import Vapor
 import struct GraphQL.GraphQLError
+import Vapor
 
-extension Pioneer {
+public extension Pioneer {
     /// Vapor-based WebSocket Context builder
-    public typealias VaporWebSocketContext = @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
+    typealias VaporWebSocketContext = @Sendable (Request, Payload, GraphQLRequest) async throws -> Context
 
     /// Vapor-based WebSocket Guard
-    public typealias VaporWebSocketGuard = @Sendable (Request, Payload) async throws -> Void
+    typealias VaporWebSocketGuard = @Sendable (Request, Payload) async throws -> Void
 
     /// Upgrade Handler for all GraphQL through Websocket
     /// - Parameter req: Request made to upgrade to Websocket
     /// - Returns: Response to upgrade connection to Websocket
-    public func webSocketHandler(req: Request, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) async throws -> Response {
+    func webSocketHandler(req: Request, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) async throws -> Response {
         /// Explicitly handle Websocket upgrade with sub-protocol
         let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
         guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
@@ -26,20 +26,20 @@ extension Pioneer {
                 message: "Unrecognized websocket protocol. Specify the 'sec-websocket-protocol' header with '\(websocketProtocol.name)'"
             )
             .response(with: .badRequest)
-        } 
+        }
 
-        return req.webSocket(shouldUpgrade: shouldUpgrade(req:), onUpgrade: { 
-            onUpgrade(req: $0, ws: $1, context: context, guard: `guard`) 
+        return req.webSocket(shouldUpgrade: shouldUpgrade(req:), onUpgrade: {
+            onUpgrade(req: $0, ws: $1, context: context, guard: `guard`)
         })
     }
-    
+
     /// Should upgrade callback
-    func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
+    internal func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
         req.eventLoop.next().makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
     }
 
     /// On upgrade callback
-    func onUpgrade(req: Request, ws: WebSocket, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) -> Void {
+    internal func onUpgrade(req: Request, ws: WebSocket, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) {
         let cid = UUID()
 
         let keepAlive = keepAlive(using: ws)
@@ -48,10 +48,10 @@ extension Pioneer {
 
         // Task for consuming WebSocket messages to avoid cyclic references and provide cleaner code
         let receiving = Task {
-            let stream = AsyncStream(String.self) { con in 
+            let stream = AsyncStream(String.self) { con in
                 ws.onText { con.yield($1) }
 
-                con.onTermination = { @Sendable _ in 
+                con.onTermination = { @Sendable _ in
                     guard ws.isClosed else { return }
                     _ = ws.close()
                 }
@@ -59,10 +59,10 @@ extension Pioneer {
 
             for await message in stream {
                 await receiveMessage(
-                    cid: cid, io: ws, 
-                    keepAlive: keepAlive, 
+                    cid: cid, io: ws,
+                    keepAlive: keepAlive,
                     timeout: timeout,
-                    ev: req.eventLoop, 
+                    ev: req.eventLoop,
                     txt: message,
                     context: {
                         try await context(req, $0, $1)

@@ -7,11 +7,11 @@
 
 import struct OrderedCollections.OrderedDictionary
 
-extension OrderedDictionary {
+public extension OrderedDictionary {
     /// Turning OrderedDictionary into a regular one as both aren't API compatible.
-    public func unordered() -> [Key: Value] {
+    func unordered() -> [Key: Value] {
         var res = [Key: Value]()
-        forEach { (key, val) in
+        forEach { key, val in
             res[key] = val
         }
         return res

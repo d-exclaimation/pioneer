@@ -7,14 +7,13 @@
 //
 
 import Foundation
-import XCTest
-import GraphQL
 import Graphiti
+import GraphQL
 import NIO
 @testable import Pioneer
+import XCTest
 
 final class GraphitiExtensionTests: XCTestCase {
-    
     /// GraphQL Request Object
     /// 1. Should omit nil values
     func testDecodingGraphQLRequest() {

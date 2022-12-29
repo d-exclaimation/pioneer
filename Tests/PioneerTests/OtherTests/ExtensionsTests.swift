@@ -7,12 +7,12 @@
 //
 
 import Foundation
-import XCTest
-import OrderedCollections
-import NIO
-import Vapor
 import enum GraphQL.Map
+import NIO
+import OrderedCollections
 @testable import Pioneer
+import Vapor
+import XCTest
 
 final class ExtensionsTests: XCTestCase {
     private let app = Application(.testing)
@@ -24,14 +24,14 @@ final class ExtensionsTests: XCTestCase {
             case outcome(expect: XCTestExpectation)
             case none
         }
-        
+
         func call(expect: Task<XCTestExpectation, Error>) {
             pipeToSelf(future: expect) { sink, res in
-                guard case .success(let ex) = res else { return }
+                guard case let .success(ex) = res else { return }
                 await sink.outcome(expect: ex)
             }
         }
-        
+
         func outcome(expect: XCTestExpectation) {
             expect.fulfill()
         }
@@ -55,7 +55,7 @@ final class ExtensionsTests: XCTestCase {
     struct A: Decodable {
         var id: String?
     }
-    
+
     /// JSON String to Structure
     /// 1. Should be able to parse all fields if given
     /// 2. Should be able to infer Optional if not given
@@ -78,7 +78,7 @@ final class ExtensionsTests: XCTestCase {
     /// 2. Should call callback if not found
     func testDictionaryOperation() {
         var isAllowed = false
-        var dict = [String:Int]()
+        var dict = [String: Int]()
         func produce() -> Int {
             XCTAssert(isAllowed)
             return Int.random()
@@ -104,7 +104,7 @@ final class ExtensionsTests: XCTestCase {
         }
         XCTAssert(res1 == 1 && res2 == 2)
     }
-    
+
     /// Bridging between websocket context builder with context builder
     /// 1. Should set the headers and query parameters to the request
     /// 2. Should set the graphql request into request body
@@ -113,8 +113,8 @@ final class ExtensionsTests: XCTestCase {
         let connectionParams = [
             "query": Map.string("verified=true"),
             "headers": Map.dictionary([
-                "auth":  "token"
-            ])
+                "auth": "token",
+            ]),
         ]
         let originalGql = GraphQLRequest(query: "query { someField }")
         do {
@@ -145,26 +145,25 @@ final class ExtensionsTests: XCTestCase {
     /// - Should decode % to its utf-8 characters
     func testPathComponent() {
         let req0 = Request(
-            application: app, 
-            method: .GET, 
-            url: "/graphql/nested1/nested2", 
+            application: app,
+            method: .GET,
+            url: "/graphql/nested1/nested2",
             on: app.eventLoopGroup.next()
         )
         XCTAssert(req0.pathComponents.elementsEqual(["graphql", "nested1", "nested2"]))
 
-
         let req1 = Request(
-            application: app, 
-            method: .GET, 
-            url: "/graphql/nested1/nested2?query=1234&fake=1245", 
+            application: app,
+            method: .GET,
+            url: "/graphql/nested1/nested2?query=1234&fake=1245",
             on: app.eventLoopGroup.next()
         )
         XCTAssert(req1.pathComponents.elementsEqual(["graphql", "nested1", "nested2"]))
 
         let req2 = Request(
-            application: app, 
-            method: .GET, 
-            url: "/graphql%20nested1%20nested2", 
+            application: app,
+            method: .GET,
+            url: "/graphql%20nested1%20nested2",
             on: app.eventLoopGroup.next()
         )
         XCTAssert(req2.pathComponents.elementsEqual(["graphql nested1 nested2"]))
@@ -175,9 +174,9 @@ final class ExtensionsTests: XCTestCase {
     /// - Should be able to matching with .anything and .catchall
     func testPathMatching() {
         let req0 = Request(
-            application: app, 
-            method: .GET, 
-            url: "/graphql/nested1/nested2", 
+            application: app,
+            method: .GET,
+            url: "/graphql/nested1/nested2",
             on: app.eventLoopGroup.next()
         )
         XCTAssertFalse(req0.matching(path: ["graphql"]))
@@ -188,11 +187,10 @@ final class ExtensionsTests: XCTestCase {
         XCTAssert(req0.matching(path: ["graphql", .catchall]))
         XCTAssert(req0.matching(path: [.catchall]))
 
-
         let req1 = Request(
-            application: app, 
-            method: .GET, 
-            url: "/graphql/nested1/nested2?query=1234&fake=1245", 
+            application: app,
+            method: .GET,
+            url: "/graphql/nested1/nested2?query=1234&fake=1245",
             on: app.eventLoopGroup.next()
         )
         XCTAssertFalse(req1.matching(path: ["graphql"]))
@@ -203,9 +201,9 @@ final class ExtensionsTests: XCTestCase {
         XCTAssert(req1.matching(path: [.catchall]))
 
         let req2 = Request(
-            application: app, 
-            method: .GET, 
-            url: "/graphql%20nested1%20nested2", 
+            application: app,
+            method: .GET,
+            url: "/graphql%20nested1%20nested2",
             on: app.eventLoopGroup.next()
         )
         XCTAssert(req2.matching(path: ["graphql nested1 nested2"]))
@@ -215,11 +213,11 @@ final class ExtensionsTests: XCTestCase {
         XCTAssertFalse(req2.matching(path: ["graphql", .anything, "nested2"]))
         XCTAssertFalse(req2.matching(path: ["graphql", .anything, .anything]))
         XCTAssertFalse(req2.matching(path: ["graphql", .catchall]))
-        
+
         let req3 = Request(
-            application: app, 
-            method: .GET, 
-            url: "/", 
+            application: app,
+            method: .GET,
+            url: "/",
             on: app.eventLoopGroup.next()
         )
         XCTAssert(req3.matching(path: [.catchall]))

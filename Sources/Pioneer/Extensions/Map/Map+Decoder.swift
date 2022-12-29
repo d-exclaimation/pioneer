@@ -5,8 +5,8 @@
 //  Created by d-exclaimation on 22:20.
 //
 
-import class Foundation.JSONEncoder
 import class Foundation.JSONDecoder
+import class Foundation.JSONEncoder
 import enum GraphQL.Map
 
 public extension Map {
