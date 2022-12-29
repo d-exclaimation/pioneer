@@ -25,9 +25,19 @@ struct TestResolver1 {
         return 2
     }
 
+    func asyncWithMiddleware(context _: (), arguments _: NoArguments) async throws -> Bool {
+        false
+    }
+
     func asyncMessage(context _: (), arguments _: NoArguments) async throws -> Message {
         try await Task.sleep(nanoseconds: 1000 * 1000 * 300)
         return Message(content: "Hello")
+    }
+}
+
+func AlwaysFail<ObjectType, Arguments>() -> GraphQLMiddleware<ObjectType, Void, Arguments, Bool> {
+    return { info, _ in
+        return true
     }
 }
 
@@ -47,6 +57,7 @@ final class PioneerStatelessTests: XCTestCase {
             }
 
             Graphiti.Field("async", at: TestResolver1.async)
+            Graphiti.Field("asyncWithMiddleware", at: TestResolver1.asyncWithMiddleware, use: [AlwaysFail()])
             Graphiti.Field("asyncMessage", at: TestResolver1.asyncMessage)
         }
     }
@@ -90,5 +101,21 @@ final class PioneerStatelessTests: XCTestCase {
             let res = await pioneer.executeOperation(for: curr, with: (), using: group)
             XCTAssertEqual(res, expect)
         }
+    }
+
+    /// Pioneer's GraphQLMiddleware 
+    /// 1. Should intercept before the resolver
+    func testMiddleware() async throws { 
+       let gql = GraphQLRequest(
+            query: "query { asyncWithMiddleware }",
+            operationName: nil,
+            variables: nil
+        ) 
+        let expectation = GraphQLResult(data: [
+            "asyncWithMiddleware": .bool(true)
+        ])
+
+        let res = await pioneer.executeOperation(for: gql, with: (), using: group)
+        XCTAssertEqual(res, expectation)
     }
 }
