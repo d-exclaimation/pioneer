@@ -5,7 +5,7 @@
 //  Created by d-exclaimation on 17:38.
 //
 
-/// A struct to group of all parameters for a resolvers 
+/// A struct to group of all parameters for a resolvers
 public struct ResolverParameters<Root, Context, Args> {
     /// The root element
     public var root: Root
@@ -13,10 +13,10 @@ public struct ResolverParameters<Root, Context, Args> {
     public var context: Context
     /// The resolver arguments
     public var args: Args
-} 
+}
 
 /// Field resolver middleware specification
-/// 
+///
 /// - Parameters:
 ///   - params: The resolver parameters
 ///   - next: The next function to be called

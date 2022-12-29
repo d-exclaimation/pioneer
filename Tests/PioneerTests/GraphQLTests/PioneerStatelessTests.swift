@@ -32,8 +32,8 @@ struct TestResolver1 {
 }
 
 func AlwaysFail<ObjectType, Arguments>() -> GraphQLMiddleware<ObjectType, Void, Arguments, Int> {
-    return { info, _ in
-        return 0
+    return { _, _ in
+        0
     }
 }
 
@@ -100,28 +100,28 @@ final class PioneerStatelessTests: XCTestCase {
         }
     }
 
-    /// Pioneer's GraphQLMiddleware 
+    /// Pioneer's GraphQLMiddleware
     /// 1. Should intercept before the resolver
-    func testMiddleware() async throws { 
+    func testMiddleware() async throws {
         let gql0 = GraphQLRequest(
             query: "query { syncWithMiddleware }",
             operationName: nil,
             variables: nil
-        ) 
+        )
         let exp0 = GraphQLResult(data: [
-            "syncWithMiddleware": .int(0)
+            "syncWithMiddleware": .int(0),
         ])
 
         let res0 = await pioneer.executeOperation(for: gql0, with: (), using: group)
         XCTAssertEqual(res0, exp0)
 
-       let gql1 = GraphQLRequest(
+        let gql1 = GraphQLRequest(
             query: "query { asyncWithMiddleware }",
             operationName: nil,
             variables: nil
-        ) 
+        )
         let exp1 = GraphQLResult(data: [
-            "asyncWithMiddleware": .int(0)
+            "asyncWithMiddleware": .int(0),
         ])
 
         let res1 = await pioneer.executeOperation(for: gql1, with: (), using: group)

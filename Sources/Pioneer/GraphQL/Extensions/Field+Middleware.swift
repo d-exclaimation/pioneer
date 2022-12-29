@@ -5,10 +5,10 @@
 //  Created by d-exclaimation on 00:13.
 //
 
-import class Graphiti.Field
 import class Graphiti.ArgumentComponent
 import struct Graphiti.ArgumentComponentBuilder
 import typealias Graphiti.ConcurrentResolve
+import class Graphiti.Field
 import typealias Graphiti.SyncResolve
 
 public extension Field where FieldType: Encodable {
@@ -23,10 +23,10 @@ public extension Field where FieldType: Encodable {
                 let info = ResolverParameters(root: type, context: context, args: arguments)
                 let result = middlewares
                     .reversed()
-                    .reduce({ () async throws -> FieldType in 
-                        try function(type)(context, arguments) 
+                    .reduce({ () async throws -> FieldType in
+                        try function(type)(context, arguments)
                     }) { acc, middleware in
-                        return { () async throws -> FieldType in
+                        { () async throws -> FieldType in
                             try await middleware(info, acc)
                         }
                     }
@@ -51,7 +51,7 @@ public extension Field where FieldType: Encodable {
                     .reduce({ () async throws -> FieldType in
                         try function(type)(context, arguments)
                     }) { acc, middleware in
-                        return { () async throws -> FieldType in
+                        { () async throws -> FieldType in
                             try await middleware(info, acc)
                         }
                     }
@@ -73,7 +73,7 @@ public extension Field where FieldType: Encodable {
                 let result = middlewares
                     .reversed()
                     .reduce({ try await function(type)(context, arguments) }) { acc, middleware in
-                        return { () async throws -> FieldType in
+                        { () async throws -> FieldType in
                             try await middleware(info, acc)
                         }
                     }
@@ -96,7 +96,7 @@ public extension Field where FieldType: Encodable {
                 let result = middlewares
                     .reversed()
                     .reduce({ try await function(type)(context, arguments) }) { acc, middleware in
-                        return { () async throws -> FieldType in
+                        { () async throws -> FieldType in
                             try await middleware(info, acc)
                         }
                     }
