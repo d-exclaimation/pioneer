@@ -40,8 +40,8 @@ public extension Pioneer {
             try res.content.encode(httpRes.result, using: encoder)
             res.status = httpRes.status
 
-            if req.headers[.accept].contains(GraphQLRequest.acceptType) {
-                res.headers.replaceOrAdd(name: .contentType, value: "\(GraphQLRequest.acceptType); charset=utf-8, \(GraphQLRequest.acceptType)")
+            if httpReq.isAcceptingGraphQLResponse {
+                res.headers.replaceOrAdd(name: .contentType, value: "\(GraphQLRequest.mediaType); charset=utf-8, \(GraphQLRequest.mediaType)")
             }
             return res
         } catch let error as AbortError {

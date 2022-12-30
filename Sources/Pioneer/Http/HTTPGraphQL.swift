@@ -14,7 +14,7 @@ import enum NIOHTTP1.HTTPResponseStatus
 
 public extension Pioneer {
     /// HTTP-based GraphQL Response
-    struct HTTPGraphQLResponse {
+    struct HTTPGraphQLResponse: @unchecked Sendable {
         /// GraphQL Result for this response
         public var result: GraphQLResult
 
@@ -33,7 +33,7 @@ public extension Pioneer {
     }
 
     /// HTTP-based GraphQL request
-    struct HTTPGraphQLRequest {
+    struct HTTPGraphQLRequest: Sendable {
         /// GraphQL Request for this request
         public var request: GraphQLRequest
 
@@ -59,6 +59,11 @@ public extension Pioneer {
             self.request = .init(query: query, operationName: operationName, variables: variables)
             self.headers = headers
             self.method = method
+        }
+
+        /// Is request accepting GraphQL media type
+        public var isAcceptingGraphQLResponse: Bool {
+            self.headers[.accept].contains(GraphQLRequest.mediaType)
         }
     }
 }

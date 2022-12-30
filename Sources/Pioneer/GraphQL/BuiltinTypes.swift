@@ -85,7 +85,7 @@ public struct ID: Codable, ExpressibleByStringLiteral, CustomStringConvertible, 
     }
 
     /// Conversion Error for the ID scalar
-    public struct ConversionError: Error {
+    public struct ConversionError: Error, @unchecked Sendable {
         /// The ID in question as string
         public var id: String
 

@@ -9,7 +9,7 @@ import Foundation
 import GraphQL
 
 /// GraphQL Websocket Message according to all sub-protocol
-public struct GraphQLMessage: Codable {
+public struct GraphQLMessage: Codable, @unchecked Sendable {
     /// Operation based ID if any
     public var id: String?
     /// Message type specified to allow differentiation
@@ -44,7 +44,7 @@ public struct GraphQLMessage: Codable {
     }
 
     /// Variant type to escape constraint on payload, use only for cases where certain payload break the object spec
-    public struct Variance: Codable {
+    public struct Variance: Codable, @unchecked Sendable {
         public var id: String?
         public var type: String
         public var payload: Map?

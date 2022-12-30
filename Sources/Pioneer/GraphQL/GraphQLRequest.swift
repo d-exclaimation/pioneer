@@ -9,7 +9,7 @@ import Foundation
 import GraphQL
 
 /// GraphQL Request according to the spec
-public struct GraphQLRequest: Codable {
+public struct GraphQLRequest: Codable, @unchecked Sendable {
     private enum Key: String, CodingKey, CaseIterable {
         case query, operationName, variables, extensions
     }
@@ -105,11 +105,11 @@ public struct GraphQLRequest: Codable {
     }
 
     /// Known possible failure in parsing GraphQLRequest
-    public enum ParsingIssue: Error {
+    public enum ParsingIssue: Error, @unchecked Sendable {
         case missingQuery
         case invalidForm
     }
 
     /// GraphQL over HTTP spec accept-type
-    static var acceptType = "application/graphql-response+json"
+    static var mediaType = "application/graphql-response+json"
 }

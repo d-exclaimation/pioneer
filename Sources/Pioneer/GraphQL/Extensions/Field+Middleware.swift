@@ -18,22 +18,11 @@ public extension Field where FieldType: Encodable {
         use middlewares: [GraphQLMiddleware<ObjectType, Context, Arguments, FieldType>],
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
-        let resolve: ConcurrentResolve<ObjectType, Context, Arguments, FieldType> = { type in
-            { context, arguments in
-                let info = ResolverParameters(root: type, context: context, args: arguments)
-                let result = middlewares
-                    .reversed()
-                    .reduce({ () async throws -> FieldType in
-                        try function(type)(context, arguments)
-                    }) { acc, middleware in
-                        { () async throws -> FieldType in
-                            try await middleware(info, acc)
-                        }
-                    }
-                return try await result()
-            }
-        }
-        self.init(name: name, arguments: [argument()], concurrentResolve: resolve)
+        self.init(
+            name: name,
+            arguments: [argument()],
+            concurrentResolve: buildResolver(from: function, using: middlewares)
+        )
     }
 
     convenience init(
@@ -43,22 +32,11 @@ public extension Field where FieldType: Encodable {
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
-        let resolve: ConcurrentResolve<ObjectType, Context, Arguments, FieldType> = { type in
-            { context, arguments in
-                let info = ResolverParameters(root: type, context: context, args: arguments)
-                let result = middlewares
-                    .reversed()
-                    .reduce({ () async throws -> FieldType in
-                        try function(type)(context, arguments)
-                    }) { acc, middleware in
-                        { () async throws -> FieldType in
-                            try await middleware(info, acc)
-                        }
-                    }
-                return try await result()
-            }
-        }
-        self.init(name: name, arguments: arguments(), concurrentResolve: resolve)
+        self.init(
+            name: name,
+            arguments: arguments(),
+            concurrentResolve: buildResolver(from: function, using: middlewares)
+        )
     }
 
     convenience init(
@@ -67,20 +45,11 @@ public extension Field where FieldType: Encodable {
         use middlewares: [GraphQLMiddleware<ObjectType, Context, Arguments, FieldType>],
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
-        let resolve: ConcurrentResolve<ObjectType, Context, Arguments, FieldType> = { type in
-            { context, arguments in
-                let info = ResolverParameters(root: type, context: context, args: arguments)
-                let result = middlewares
-                    .reversed()
-                    .reduce({ try await function(type)(context, arguments) }) { acc, middleware in
-                        { () async throws -> FieldType in
-                            try await middleware(info, acc)
-                        }
-                    }
-                return try await result()
-            }
-        }
-        self.init(name: name, arguments: [argument()], concurrentResolve: resolve)
+        self.init(
+            name: name,
+            arguments: [argument()],
+            concurrentResolve: buildResolver(from: function, using: middlewares)
+        )
     }
 
     convenience init(
@@ -90,19 +59,10 @@ public extension Field where FieldType: Encodable {
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
-        let resolve: ConcurrentResolve<ObjectType, Context, Arguments, FieldType> = { type in
-            { context, arguments in
-                let info = ResolverParameters(root: type, context: context, args: arguments)
-                let result = middlewares
-                    .reversed()
-                    .reduce({ try await function(type)(context, arguments) }) { acc, middleware in
-                        { () async throws -> FieldType in
-                            try await middleware(info, acc)
-                        }
-                    }
-                return try await result()
-            }
-        }
-        self.init(name: name, arguments: arguments(), concurrentResolve: resolve)
+        self.init(
+            name: name,
+            arguments: arguments(),
+            concurrentResolve: buildResolver(from: function, using: middlewares)
+        )
     }
 }
