@@ -5,16 +5,16 @@
 //  Created by d-exclaimation on 22:16.
 //
 
-import enum NIOHTTP1.HTTPResponseStatus
-import enum NIOHTTP1.HTTPMethod
+import struct GraphQL.GraphQLError
+import struct GraphQL.GraphQLResult
 import enum GraphQL.Map
 import struct NIOHTTP1.HTTPHeaders
-import struct GraphQL.GraphQLResult
-import struct GraphQL.GraphQLError
+import enum NIOHTTP1.HTTPMethod
+import enum NIOHTTP1.HTTPResponseStatus
 
-extension Pioneer {
+public extension Pioneer {
     /// HTTP-based GraphQL Response
-    public struct HTTPGraphQLResponse {
+    struct HTTPGraphQLResponse: @unchecked Sendable {
         /// GraphQL Result for this response
         public var result: GraphQLResult
 
@@ -33,11 +33,11 @@ extension Pioneer {
     }
 
     /// HTTP-based GraphQL request
-    public struct HTTPGraphQLRequest {
+    struct HTTPGraphQLRequest: Sendable {
         /// GraphQL Request for this request
         public var request: GraphQLRequest
 
-        /// HTTP headers given in this request 
+        /// HTTP headers given in this request
         public var headers: HTTPHeaders
 
         /// HTTP method for this request
@@ -53,12 +53,17 @@ extension Pioneer {
             query: String,
             operationName: String? = nil,
             variables: [String: Map]? = nil,
-            headers: HTTPHeaders, 
-            method: HTTPMethod    
+            headers: HTTPHeaders,
+            method: HTTPMethod
         ) {
             self.request = .init(query: query, operationName: operationName, variables: variables)
             self.headers = headers
             self.method = method
+        }
+
+        /// Is request accepting GraphQL media type
+        public var isAcceptingGraphQLResponse: Bool {
+            self.headers[.accept].contains(GraphQLRequest.mediaType)
         }
     }
 }

@@ -1,5 +1,5 @@
 //  PubSub.swift
-//  
+//
 //
 //  Created by d-exclaimation on 20/06/22.
 //
@@ -12,13 +12,13 @@ public protocol PubSub {
     ///   - type: DataType of this AsyncStream
     ///   - trigger: The topic string used to differentiate what data should this stream be accepting
     func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type, for trigger: String) -> AsyncStream<DataType>
-    
+
     /// Publish a new data into the pubsub for a specific trigger.
     /// - Parameters:
     ///   - trigger: The trigger this data will be published to
     ///   - payload: The data being emitted
     func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async
-    
+
     /// Close a specific trigger and deallocate every consumer of that trigger
     /// - Parameter trigger: The trigger this call takes effect on
     func close(for trigger: String) async

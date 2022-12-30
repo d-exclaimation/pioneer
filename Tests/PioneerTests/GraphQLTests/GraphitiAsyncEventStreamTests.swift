@@ -7,11 +7,11 @@
 //
 
 import Foundation
-import XCTest
 import Graphiti
 import GraphQL
 import NIO
 @testable import Pioneer
+import XCTest
 
 /// Simple message type with a custom computed properties
 struct Message: Codable, Identifiable {
@@ -22,7 +22,7 @@ struct Message: Codable, Identifiable {
         var formatting: String
     }
 
-    func description(context: Void, arguments: Arg) async throws -> String {
+    func description(context _: Void, arguments: Arg) async throws -> String {
         switch arguments.formatting.lowercased() {
         case "inline":
             return "msg(\(id)): \(content)"
@@ -40,7 +40,7 @@ struct Message: Codable, Identifiable {
 struct TestResolver {
     let pubsub = AsyncPubSub()
 
-    func hello(context: Void, arguments: NoArguments) -> String {
+    func hello(context _: Void, arguments _: NoArguments) -> String {
         "Hello GraphQL!!"
     }
 
@@ -48,13 +48,13 @@ struct TestResolver {
         var string: String
     }
 
-    func randomMessage(context: Void, arguments: Arg1) async throws -> Message {
+    func randomMessage(context _: Void, arguments: Arg1) async throws -> Message {
         let message = Message(content: arguments.string)
         await pubsub.publish(for: "*", payload: message)
         return message
     }
 
-    func onMessage(context: Void, arguments: NoArguments) -> EventStream<Message> {
+    func onMessage(context _: Void, arguments _: NoArguments) -> EventStream<Message> {
         let stream: AsyncStream<Message> = pubsub.asyncStream(for: "*")
         return stream.toEventStream()
     }
@@ -100,7 +100,7 @@ final class GraphitiTests: XCTestCase {
         }
 
         let start = Date()
-        
+
         let query = """
         subscription {
             onMessage {
@@ -110,7 +110,7 @@ final class GraphitiTests: XCTestCase {
         """
 
         // -- Performing Subscriptions --
-        
+
         let subscriptionResult = try schema
             .subscribe(request: query, resolver: resolver, context: (), eventLoopGroup: group)
             .wait()
@@ -122,21 +122,21 @@ final class GraphitiTests: XCTestCase {
         guard let asyncStream = subscription.asyncStream() else {
             return XCTFail("Stream failed to be casted into proper types \(subscription))")
         }
-        
+
         // -- End --
 
         let expectation = XCTestExpectation(description: "Received a single message")
-        
+
         // -- Consuming stream --
-        
+
         let task = Task.init {
             for try await future in asyncStream {
                 let message = try await future.get()
                 let expected = GraphQLResult(data: [
                     "onMessage": [
                         "id": "bob",
-                        "content": "Bob"
-                    ]
+                        "content": "Bob",
+                    ],
                 ])
                 if message == expected {
                     expectation.fulfill()
@@ -146,7 +146,7 @@ final class GraphitiTests: XCTestCase {
         }
 
         // -- End --
-        
+
         Task.init {
             try await Task.sleep(nanoseconds: 200_000_000)
             await resolver.pubsub.publish(for: "*", payload: Message(id: "bob", content: "Bob"))

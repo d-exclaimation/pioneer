@@ -6,15 +6,15 @@
 //
 
 import Foundation
-import GraphQL
 import Graphiti
+import GraphQL
 
 public typealias NoArgs = NoArguments
 
 /// The ID scalar type represents a unique identifier, often used to refetch an object or as the key for a cache.
 ///
 /// The ID type is serialized in the same way as a String; however, defining it as an ID signifies that it is not intended to be human‐readable.
-public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible, Hashable, Sendable {
+public struct ID: Codable, ExpressibleByStringLiteral, CustomStringConvertible, Hashable, Sendable {
     /// Inner string properties
     private var id: String
 
@@ -23,7 +23,7 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     }
 
     public init(uuid: UUID) {
-        self.id = uuid.uuidString
+        id = uuid.uuidString
     }
 
     public init(stringLiteral value: String) {
@@ -56,7 +56,7 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     /// Create a new ID from random letter
     public static func random(length: Int = 10) -> Self {
         let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        let random = (0..<length).compactMap { _ in letters.randomElement() }
+        let random = (0 ..< length).compactMap { _ in letters.randomElement() }
         return .init(.init(random))
     }
 
@@ -64,7 +64,7 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     public var count: Int {
         id.count
     }
-    
+
     /// String value of this ID type
     public var string: String {
         id
@@ -78,14 +78,14 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     /// Get a UUID from this ID scalar
     /// - Returns: The UUID object if possible otherwise throw an error
     public func toUUID() throws -> UUID {
-        guard let uuid = self.uuid else {
+        guard let uuid = uuid else {
             throw ConversionError(id: id, reason: "Cannot convert this ID that is not in UUID string format to UUID")
         }
         return uuid
     }
 
     /// Conversion Error for the ID scalar
-    public struct ConversionError: Error {
+    public struct ConversionError: Error, @unchecked Sendable {
         /// The ID in question as string
         public var id: String
 
@@ -103,13 +103,12 @@ public struct ID : Codable, ExpressibleByStringLiteral, CustomStringConvertible,
     }
 }
 
-
 public extension String {
     /// ID from this string
     var id: ID {
         .init(self)
     }
-    
+
     /// ID from this string
     func toID() -> ID {
         .init(self)
@@ -117,13 +116,13 @@ public extension String {
 }
 
 public extension UUID {
-        /// ID from this string
+    /// ID from this string
     var id: ID {
-        .init(self.uuidString)
+        .init(uuidString)
     }
-    
+
     /// ID from this string
     func toID() -> ID {
-        .init(self.uuidString)
+        .init(uuidString)
     }
 }

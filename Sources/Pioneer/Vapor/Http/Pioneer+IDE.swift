@@ -11,17 +11,17 @@ extension Pioneer {
     /// - Parameter req: The HTTP request being made
     /// - Returns: A response with the GraphQL IDE
     public func ideHandler(req: Request) -> Response {
-        switch (playground) {
-            case .playground:
-                return serve(html: playgroundHtml)
-            case .graphiql:
-                return serve(html: graphiqlHtml)
-            case .sandbox:
-                return serve(html: embeddedSandboxHtml)
-            case .redirect(to: let cloud):
-                return req.redirect(to: cloud.url, type: .permanent)
-            case .disable:
-                return Response(status: .notFound)
+        switch playground {
+        case .playground:
+            return serve(html: playgroundHtml)
+        case .graphiql:
+            return serve(html: graphiqlHtml)
+        case .sandbox:
+            return serve(html: embeddedSandboxHtml)
+        case let .redirect(to: cloud):
+            return req.redirect(to: cloud.url, type: .permanent)
+        case .disable:
+            return Response(status: .notFound)
         }
     }
 
@@ -33,6 +33,6 @@ extension Pioneer {
             status: .ok,
             headers: HTTPHeaders([(HTTPHeaders.Name.contentType.description, "text/html")]),
             body: Response.Body(string: html)
-        ) 
+        )
     }
 }

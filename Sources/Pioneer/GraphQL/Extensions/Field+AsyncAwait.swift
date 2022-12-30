@@ -6,8 +6,8 @@
 //
 
 import Graphiti
-import protocol NIO.EventLoopGroup
 import GraphQL
+import protocol NIO.EventLoopGroup
 
 /// Async-await non-throwing  GraphQL resolver function
 public typealias AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments, EventLoopGroup) async -> FieldType
@@ -15,7 +15,7 @@ public typealias AsyncAwaitResolveWithEventLoop<ObjectType, Context, Arguments, 
 /// Async-await throwing  GraphQL resolver function
 public typealias AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, FieldType> = (ObjectType) -> (Context, Arguments, EventLoopGroup) async throws -> FieldType
 
-public extension Graphiti.Field where FieldType : Encodable {
+public extension Graphiti.Field where FieldType: Encodable {
     // -- (context, args, eventLoop) async -> result
 
     convenience init(
@@ -44,7 +44,7 @@ public extension Graphiti.Field where FieldType : Encodable {
                 }
             }
         }
-        self.init(name, at: resolve, {})
+        self.init(name, at: resolve) {}
     }
 
     // -- (context, args, eventLoop) async throws -> result
@@ -75,11 +75,9 @@ public extension Graphiti.Field where FieldType : Encodable {
                 }
             }
         }
-        self.init(name, at: resolve, {})
+        self.init(name, at: resolve) {}
     }
-
 }
-
 
 public extension Graphiti.Field {
     // -- (context, args, eventLoop) async -> result
@@ -112,7 +110,7 @@ public extension Graphiti.Field {
                 }
             }
         }
-        self.init(name, at: resolve, as: `as`, {})
+        self.init(name, at: resolve, as: `as`) {}
     }
 
     // -- (context, args, eventLoop) async throws -> result
@@ -132,7 +130,7 @@ public extension Graphiti.Field {
         }
         self.init(name, at: resolve, as: `as`, argument)
     }
-    
+
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncAwaitThrowingResolveWithEventLoop<ObjectType, Context, Arguments, ResolveType>,
@@ -145,7 +143,6 @@ public extension Graphiti.Field {
                 }
             }
         }
-        self.init(name, at: resolve, as: `as`, {})
+        self.init(name, at: resolve, as: `as`) {}
     }
-
 }

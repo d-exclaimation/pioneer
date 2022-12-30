@@ -7,11 +7,11 @@
 //
 
 import Foundation
-import XCTest
-import Vapor
-import GraphQL
 import Graphiti
+import GraphQL
 @testable import Pioneer
+import Vapor
+import XCTest
 
 final class ProbeTests: XCTestCase {
     private let app = Application(.testing)
@@ -47,17 +47,17 @@ final class ProbeTests: XCTestCase {
     }
 
     /// Setup a Process using a custom test consumer
-    func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestConsumer)  {
+    func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestConsumer) {
         let req = Request(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer()
         return (
             .init(
-                id: UUID(), 
-                io: consumer, 
-                payload: [:], 
+                id: UUID(),
+                io: consumer,
+                payload: [:],
                 ev: req.eventLoop,
                 context: { _, _ in }
-            ), 
+            ),
             consumer
         )
     }
@@ -74,7 +74,7 @@ final class ProbeTests: XCTestCase {
         await probe.outgoing(with: "1", to: process, given: message)
 
         try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
-        
+
         let results = await con.waitAll()
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {
             return XCTFail("No completion")
@@ -145,7 +145,7 @@ final class ProbeTests: XCTestCase {
         guard let message = res.data(using: .utf8)?.to(GraphQLMessage.self) else {
             return XCTFail("Unparseable data")
         }
-        guard let payload = message.payload, case .array(let errors) = payload["errors"] else {
+        guard let payload = message.payload, case let .array(errors) = payload["errors"] else {
             return XCTFail("No payload")
         }
         XCTAssert(!errors.isEmpty)

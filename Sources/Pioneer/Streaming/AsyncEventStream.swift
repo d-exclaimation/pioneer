@@ -37,7 +37,7 @@ public final class AsyncEventStream<Element, Sequence: AsyncSequence>: EventStre
                 }
             }
 
-            continuation.onTermination = { @Sendable _ in 
+            continuation.onTermination = { @Sendable _ in
                 task.cancel()
             }
         }
@@ -59,6 +59,3 @@ public extension AsyncEventStream where Sequence == AsyncThrowingStream<Element,
         self.init(from: .init(elementType, bufferingPolicy: limit, build))
     }
 }
-
-
-

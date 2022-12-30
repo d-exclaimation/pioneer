@@ -5,13 +5,11 @@
 //  Created by d-exclaimation on 9:46 PM.
 //
 
-
 import GraphQL
 import protocol NIO.EventLoopGroup
 
-
 /// Execute request-response based GraphQL Operation
-/// 
+///
 /// - Parameters:
 ///   - schema: GraphQL Schema used to execute request
 ///   - request: Query request string
@@ -41,7 +39,6 @@ public func executeGraphQL(
         operationName: operationName
     ).get()
 }
-
 
 /// Execute streaming based GraphQL Operation
 ///

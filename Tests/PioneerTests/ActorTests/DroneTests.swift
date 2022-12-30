@@ -7,12 +7,12 @@
 //
 
 import Foundation
-import XCTest
-import NIOWebSocket
-import Vapor
-import GraphQL
 import Graphiti
+import GraphQL
+import NIOWebSocket
 @testable import Pioneer
+import Vapor
+import XCTest
 
 final class DroneTests: XCTestCase {
     private let app = Application(.testing)
@@ -20,12 +20,12 @@ final class DroneTests: XCTestCase {
     deinit {
         app.shutdown()
     }
-    
+
     /// Simple Test Resolver
     class Resolver {
         /// Unused Query resolver, only here to satisfy Schema
         func hello(_: Void, _: NoArguments) -> String { "Hello World!" }
-        
+
         /// Simple 1 messaage subscriptions
         /// Should:
         ///     - Send Hello and finish the stream
@@ -61,7 +61,7 @@ final class DroneTests: XCTestCase {
             )
         }
     }
-    
+
     /// Setup a GraphQLSchema, Pioneer drone, and a TestConsumer
     /// - Returns: The configured consumer and drone itself
     func setup() throws -> (TestConsumer, Pioneer<Resolver, Void>.Drone) {
@@ -74,13 +74,13 @@ final class DroneTests: XCTestCase {
                 SubscriptionField("delayed", as: String.self, atSub: Resolver.delayed)
             }
         }.schema
-        let req = Request.init(application: app, on: app.eventLoopGroup.next())
+        let req = Request(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer()
         let process = Pioneer<Resolver, Void>.WebSocketClient(
-            id: UUID(), 
-            io: consumer, 
+            id: UUID(),
+            io: consumer,
             payload: nil,
-            ev: req.eventLoop, 
+            ev: req.eventLoop,
             context: { _, _ in }
         )
         let drone: Pioneer<Resolver, Void>.Drone = .init(

@@ -7,13 +7,13 @@
 
 import class GraphQL.EventStream
 
-extension AsyncSequence {
-    public typealias Termination = AsyncThrowingStream<Element, Error>.Continuation.Termination
-    
+public extension AsyncSequence {
+    typealias Termination = AsyncThrowingStream<Element, Error>.Continuation.Termination
+
     /// Convert Any AsyncSequence to an EventStream for GraphQL Streaming.
     ///
     /// - Returns: EventStream implementation for AsyncSequence.
-    public func toEventStream() -> EventStream<Element> {
+    func toEventStream() -> EventStream<Element> {
         AsyncEventStream<Element, Self>(from: self)
     }
 
@@ -21,7 +21,7 @@ extension AsyncSequence {
     ///
     /// - Parameters:
     ///   - onTermination: onTermination callback
-    public func toEventStream(
+    func toEventStream(
         onTermination callback: @Sendable @escaping (Termination) -> Void
     ) -> EventStream<Element> {
         let stream = AsyncThrowingStream<Element, Error> { continuation in
@@ -48,13 +48,12 @@ extension AsyncSequence {
         return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
 
-
     /// Convert any AsyncSequence to an EventStream
     ///
     /// - Parameters:
     ///   - endValue: Ending value
     ///   - onTermination: onTermination callback
-    public func toEventStream(
+    func toEventStream(
         endValue: @escaping () -> Element,
         onTermination callback: @Sendable @escaping (Termination) -> Void
     ) -> EventStream<Element> {
@@ -83,13 +82,12 @@ extension AsyncSequence {
         return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
 
-
     /// Convert any AsyncSequence to an EventStream
     ///
     /// - Parameters:
     ///   - initialValue: Initial value from subscriptions
     ///   - onTermination: onTermination callback
-    public func toEventStream(
+    func toEventStream(
         initialValue: Element,
         onTermination callback: @Sendable @escaping (Termination) -> Void
     ) -> EventStream<Element> {
@@ -124,7 +122,7 @@ extension AsyncSequence {
     ///   - initialValue: Initial value from subscriptions
     ///   - endValue: Ending value
     ///   - onTermination: onTermination callback
-    public func toEventStream(
+    func toEventStream(
         initialValue: Element,
         endValue: @escaping () -> Element,
         onTermination callback: @Sendable @escaping (Termination) -> Void
@@ -154,13 +152,13 @@ extension AsyncSequence {
         }
         return AsyncEventStream<Element, AsyncThrowingStream<Element, Error>>(from: stream)
     }
-    
+
     /// Convert any AsyncSequence to an EventStream
     ///
     /// - Parameters:
     ///   - initialValue: Initial value from subscriptions
     ///   - endValue: Ending value
-    public func toEventStream(
+    func toEventStream(
         initialValue: Element,
         endValue: @escaping () -> Element
     ) -> EventStream<Element> {

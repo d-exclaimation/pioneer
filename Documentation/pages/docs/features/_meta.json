@@ -1,5 +1,6 @@
 {
   "graphql-over-http": "GraphQL over HTTP",
   "graphql-over-websocket": "GraphQL over WebSocket",
-  "graphql-ide": "GraphQL IDE"
+  "graphql-ide": "GraphQL IDE",
+  "graphql-middleware": "GraphQL Middleware"
 }

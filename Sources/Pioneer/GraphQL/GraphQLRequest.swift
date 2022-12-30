@@ -9,7 +9,7 @@ import Foundation
 import GraphQL
 
 /// GraphQL Request according to the spec
-public struct GraphQLRequest: Codable {
+public struct GraphQLRequest: Codable, @unchecked Sendable {
     private enum Key: String, CodingKey, CaseIterable {
         case query, operationName, variables, extensions
     }
@@ -42,27 +42,26 @@ public struct GraphQLRequest: Codable {
             let variables = try container.decodeIfPresent([String: Map]?.self, forKey: .variables)
             let extensions = try container.decodeIfPresent([String: Map]?.self, forKey: .extensions)
             self.init(
-                query: query, 
-                operationName: operationName ?? nil, 
-                variables: variables ?? nil, 
+                query: query,
+                operationName: operationName ?? nil,
+                variables: variables ?? nil,
                 extensions: extensions ?? nil
             )
         } catch {
             throw ParsingIssue.invalidForm
         }
     }
-    
 
     public init(
-        query: String, 
-        operationName: String? = nil, 
+        query: String,
+        operationName: String? = nil,
         variables: [String: Map]? = nil,
-        extensions: [String: Map]? = nil
+        extensions _: [String: Map]? = nil
     ) {
         self.query = query
         self.operationName = operationName
         self.variables = variables
-        self.ast = try? parse(source: .init(body: query))
+        ast = try? parse(source: .init(body: query))
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -71,7 +70,7 @@ public struct GraphQLRequest: Codable {
         try container.encodeIfPresent(operationName, forKey: .operationName)
         try container.encodeIfPresent(variables, forKey: .variables)
         try container.encodeIfPresent(extensions, forKey: .extensions)
-    }   
+    }
 
     /// Getting parsed operationType
     public var operationType: OperationType? {
@@ -80,11 +79,11 @@ public struct GraphQLRequest: Codable {
             .compactMap { def -> OperationDefinition? in
                 def as? OperationDefinition
             }
-            
+
         guard let operationName = operationName else {
             return operations.first?.operation
         }
-        
+
         return operations
             .first {
                 guard let name = $0.name?.value else { return false }
@@ -106,11 +105,11 @@ public struct GraphQLRequest: Codable {
     }
 
     /// Known possible failure in parsing GraphQLRequest
-    public enum ParsingIssue: Error {
+    public enum ParsingIssue: Error, @unchecked Sendable {
         case missingQuery
         case invalidForm
     }
 
     /// GraphQL over HTTP spec accept-type
-    static var acceptType = "application/graphql-response+json"
+    static var mediaType = "application/graphql-response+json"
 }

@@ -5,12 +5,12 @@
 //  Created by d-exclaimation on 15:56.
 //
 
-import XCTest
 import Graphiti
-import Vapor
 import NIOFoundationCompat
-import XCTVapor
 @testable import Pioneer
+import Vapor
+import XCTest
+import XCTVapor
 
 final class HTTPQueryTests: XCTestCase {
     private let server: Pioneer<Resolver, Void> = Pioneer(
@@ -30,7 +30,7 @@ final class HTTPQueryTests: XCTestCase {
 
                 Field("error", at: Resolver.error)
             }
-        }, 
+        },
         resolver: .init(),
         httpStrategy: .both,
         introspection: true
@@ -47,7 +47,7 @@ final class HTTPQueryTests: XCTestCase {
         }
 
         func randomUsers(_: Void, args: LimitArgs) async -> [User] {
-            (0..<args.limit).map { i in
+            (0 ..< args.limit).map { i in
                 User(id: .init("\(i)"), name: "U\(i)")
             }
         }
@@ -56,7 +56,7 @@ final class HTTPQueryTests: XCTestCase {
             throw Abort(.imATeapot, reason: "Expected")
         }
     }
-    
+
     /// Pioneer when responding to POST request:
     /// - Should respond with proper data when given the proper query
     /// - Should respond with proper data when given query with variables and operation name
@@ -82,20 +82,20 @@ final class HTTPQueryTests: XCTestCase {
         defer {
             app.shutdown()
         }
-        
+
         app.middleware.use(server.vaporMiddleware(), at: .beginning)
 
         let body0 = ByteBuffer(data: gql0.json ?? .init())
-        
+
         try app.testable().test(
-            .POST, "/graphql", 
+            .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.readableBytes.description)]),
             body: body0
         ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            for i in 0..<3 {
+            for i in 0 ..< 3 {
                 XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
                 XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
             }
@@ -107,39 +107,39 @@ final class HTTPQueryTests: XCTestCase {
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.readableBytes.description)]),
             body: body1
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            for i in 0..<1 {
+            for i in 0 ..< 1 {
                 XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
                 XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
             }
         }
 
         let body2 = ByteBuffer(data: gql2.json ?? .init())
-        
+
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body2.readableBytes.description)]),
             body: body2
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            for i in 0..<2 {
+            for i in 0 ..< 2 {
                 XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
                 XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
             }
         }
 
         let body3 = ByteBuffer(data: gql3.json ?? .init())
-        
+
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body3.readableBytes.description)]),
             body: body3
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#""data":{"error":null}"#))
             XCTAssert(res.body.string.contains(#""errors":"#))
@@ -147,12 +147,12 @@ final class HTTPQueryTests: XCTestCase {
         }
 
         let body4 = ByteBuffer(data: gql4.json ?? .init())
-        
+
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body4.readableBytes.description)]),
             body: body4
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"errors":"#))
         }
@@ -186,38 +186,37 @@ final class HTTPQueryTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware(), at: .beginning)
 
-
         try app.testable().test(
             .GET, "/graphql?\(gql0)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            for i in 0..<3 {
+            for i in 0 ..< 3 {
                 XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
                 XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
             }
         }
 
         try app.testable().test(
-            .GET, "/graphql?\(gql1)" 
-        ) { res in 
+            .GET, "/graphql?\(gql1)"
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            for i in 0..<1 {
+            for i in 0 ..< 1 {
                 XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
                 XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
             }
         }
 
         try app.testable().test(
-            .GET, "/graphql?\(gql2)" 
-        ) { res in 
+            .GET, "/graphql?\(gql2)"
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"data":{"randomUsers":"#))
             XCTAssertFalse(res.body.string.contains(#""errors":"#))
-            for i in 0..<2 {
+            for i in 0 ..< 2 {
                 XCTAssert(res.body.string.contains("\"id\":\"\(i)\""))
                 XCTAssert(res.body.string.contains("\"name\":\"U\(i)\""))
             }
@@ -225,7 +224,7 @@ final class HTTPQueryTests: XCTestCase {
 
         try app.testable().test(
             .GET, "/graphql?\(gql3)"
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#""data":{"error":null}"#))
             XCTAssert(res.body.string.contains(#""errors":"#))
@@ -234,14 +233,14 @@ final class HTTPQueryTests: XCTestCase {
 
         try app.testable().test(
             .GET, "/graphql?\(gql4)"
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
             XCTAssert(res.body.string.contains(#"{"errors":"#))
         }
 
         try app.testable().test(
             .GET, "/graphql"
-        ) { res in 
+        ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 

@@ -5,12 +5,12 @@
 //  Created by d-exclaimation on 12:18 AM.
 //
 
-import NIO
 import Foundation
-import class GraphQL.GraphQLSchema
-import struct GraphQL.GraphQLResult
 import struct GraphQL.GraphQLError
+import struct GraphQL.GraphQLResult
+import class GraphQL.GraphQLSchema
 import enum GraphQL.OperationType
+import NIO
 
 /// Pioneer GraphQL Server for handling all GraphQL operations
 public struct Pioneer<Resolver, Context> {
@@ -26,7 +26,7 @@ public struct Pioneer<Resolver, Context> {
     public private(set) var introspection: Bool
     /// Allowing GraphQL IDE
     public private(set) var playground: IDE
-    /// Validation rules 
+    /// Validation rules
     public private(set) var validationRules: Validations
     /// Keep alive period
     public private(set) var keepAlive: UInt64?
@@ -69,7 +69,6 @@ public struct Pioneer<Resolver, Context> {
         self.validationRules = validationRules
         self.keepAlive = keepAlive
         self.timeout = timeout
-
 
         let proto: SubProtocol.Type = expression {
             switch websocketProtocol {
@@ -157,8 +156,7 @@ public struct Pioneer<Resolver, Context> {
         return .init(result: result, status: .ok)
     }
 
-
-    /// Handle messages that follow the websocket protocol for a specific client using Pioneer.Probe 
+    /// Handle messages that follow the websocket protocol for a specific client using Pioneer.Probe
     /// - Parameters:
     ///   - cid: The client key
     ///   - io: The client IO
@@ -168,15 +166,15 @@ public struct Pioneer<Resolver, Context> {
     ///   - txt: The message received
     ///   - context: The context builder for the client
     public func receiveMessage(
-        cid: UUID, 
+        cid: UUID,
         io: WebSocketable,
         keepAlive: Task<Void, Error>?,
-        timeout: Task<Void, Error>?, 
+        timeout: Task<Void, Error>?,
         ev: EventLoopGroup,
         txt: String,
         context: @escaping WebSocketContext,
         check: @escaping WebSocketGuard
-    ) async  {
+    ) async {
         guard let data = txt.data(using: .utf8) else {
             // Shouldn't accept any message that aren't utf8 string
             // -> Close with 1003 code
@@ -185,18 +183,17 @@ public struct Pioneer<Resolver, Context> {
         }
 
         switch websocketProtocol.parse(data) {
-
         // Initial sub-protocol handshake established
         // Dispatch process to probe so it can start accepting operations
         // Timer fired here to keep connection alive by sub-protocol standard
-        case .initial(let payload):
+        case let .initial(payload):
             do {
                 try await check(payload)
                 await initialiseClient(
-                    cid: cid, 
-                    io: io, 
-                    payload: payload, 
-                    timeout: timeout, 
+                    cid: cid,
+                    io: io,
+                    payload: payload,
+                    timeout: timeout,
                     ev: ev,
                     context: context
                 )
@@ -207,7 +204,7 @@ public struct Pioneer<Resolver, Context> {
                 // Deallocation of resources
                 await probe.disconnect(for: cid)
                 keepAlive?.cancel()
-                try? await io.terminate(code: .graphqlInvalid) 
+                try? await io.terminate(code: .graphqlInvalid)
             }
 
         // Ping is for requesting server to send a keep alive message
@@ -222,28 +219,28 @@ public struct Pioneer<Resolver, Context> {
             try? await io.terminate(code: .normalClosure)
 
         // Start -> Long running operation
-        case .start(oid: let oid, gql: let gql):
+        case let .start(oid: oid, gql: gql):
             await executeLongOperation(cid: cid, io: io, oid: oid, gql: gql)
 
         // Once -> Short lived operation
-        case .once(oid: let oid, gql: let gql):
+        case let .once(oid: oid, gql: gql):
             await executeShortOperation(cid: cid, io: io, oid: oid, gql: gql)
 
         // Stop -> End any running operation
-        case .stop(oid: let oid):
+        case let .stop(oid: oid):
             await probe.stop(
                 for: cid,
                 with: oid
             )
 
         // Error in validation should notify that no operation will be run, does not close connection
-        case .error(oid: let oid, message: let message):
+        case let .error(oid: oid, message: message):
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [.init(message: message)])
             io.out(err.jsonString)
 
         // Fatal error is an event trigger when message given in unacceptable by protocol standard
         // This message if processed any further will cause securities vulnerabilities, thus connection should be closed
-        case .fatal(message: let message):
+        case let .fatal(message: message):
             let err = GraphQLMessage.errors(type: websocketProtocol.error, [.init(message: message)])
             io.out(err.jsonString)
 
@@ -261,15 +258,15 @@ public struct Pioneer<Resolver, Context> {
     /// - Parameters:
     ///   - cid: The client key
     ///   - io: The client IO
-    ///   - payload: The initial connectionpayload 
+    ///   - payload: The initial connectionpayload
     ///   - timeout: The timeout interval for the client
     ///   - ev: Any event loop
     ///   - context: The context builder for the client
     public func initialiseClient(
-        cid: UUID, 
-        io: WebSocketable, 
-        payload: Payload, 
-        timeout: Task<Void, Error>?, 
+        cid: UUID,
+        io: WebSocketable,
+        payload: Payload,
+        timeout: Task<Void, Error>?,
         ev: EventLoopGroup,
         context: @escaping WebSocketContext
     ) async {
@@ -292,7 +289,7 @@ public struct Pioneer<Resolver, Context> {
         timeout?.cancel()
     }
 
-    /// Execute long-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult 
+    /// Execute long-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult
     /// - Parameters:
     ///   - cid: The client key
     ///   - io: The client IO for outputting errors
@@ -302,7 +299,7 @@ public struct Pioneer<Resolver, Context> {
         // Introspection guard
         guard allowed(from: gql) else {
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
-                .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
+                .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type."),
             ])
             return io.out(err.jsonString)
         }
@@ -319,7 +316,7 @@ public struct Pioneer<Resolver, Context> {
         )
     }
 
-    /// Execute short-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult 
+    /// Execute short-lived operation through Pioneer.Probe for a GraphQLRequest, context and get a well formatted GraphQlResult
     /// - Parameters:
     ///   - cid: The client key
     ///   - io: The client IO for outputting errors
@@ -329,7 +326,7 @@ public struct Pioneer<Resolver, Context> {
         // Introspection guard
         guard allowed(from: gql) else {
             let err = GraphQLMessage.errors(id: oid, type: websocketProtocol.error, [
-                .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type.")
+                .init(message: "GraphQL introspection is not allowed by Pioneer, but the query contained __schema or __type."),
             ])
             return io.out(err.jsonString)
         }

@@ -1,5 +1,5 @@
 //  Request+WebsocketContext.swift
-//  
+//
 //
 //  Created by d-exclaimation on 18/06/22.
 //
@@ -17,7 +17,7 @@ public extension Request {
         payload: Payload,
         gql: GraphQLRequest,
         contextBuilder: @Sendable @escaping (Request, Response) async throws -> Context
-    ) async throws -> Context  {
+    ) async throws -> Context {
         let uri = URI(
             scheme: url.scheme,
             host: url.host,
@@ -48,23 +48,23 @@ public extension Payload {
         guard let query = payload["query"] ?? payload["queries"] ?? payload["queryParams"] ?? payload["queryParameters"] else { return "" }
         switch query {
         // Single string query variables in form of "key1=value1&key2=value2"
-        case .string(let str):
+        case let .string(str):
             return str.contains("=") ? str : ""
         // Multiple list of query string in form of ["key=value", ...]
-        case .array(let strings):
+        case let .array(strings):
             return strings
                 .compactMap {
-                    guard case .string(let str) = $0 else {
+                    guard case let .string(str) = $0 else {
                         return nil
                     }
                     return str.contains("=") ? str : nil
                 }
                 .joined(separator: "&")
         // Multiple query strings in form of ["key": "value", ...]
-        case .dictionary(let queries):
+        case let .dictionary(queries):
             return queries
                 .map { key, val in
-                    guard case .string(let value) = val else {
+                    guard case let .string(value) = val else {
                         return "\(key)=\(val.jsonString)"
                     }
                     return "\(key)=\(value)"
@@ -74,27 +74,26 @@ public extension Payload {
             return ""
         }
     }
-    
+
     /// HTTPHeaaders from connection parameter
     var headers: HTTPHeaders {
         guard let payload = self else { return .init() }
-        guard case .dictionary(let headerDict) = payload["header"] ?? payload["headers"] else {
-            return .init(payload.map { (key, val) in
-                guard case .string(let value) = val else {
+        guard case let .dictionary(headerDict) = payload["header"] ?? payload["headers"] else {
+            return .init(payload.map { key, val in
+                guard case let .string(value) = val else {
                     return (key, val.jsonString)
                 }
                 return (key, value)
             })
         }
-        return .init(headerDict.map { (key, val) in
-            guard case .string(let value) = val else {
+        return .init(headerDict.map { key, val in
+            guard case let .string(value) = val else {
                 return (key, val.jsonString)
             }
             return (key, value)
         })
     }
 }
-
 
 extension Optional {
     /// Check if the optional is not empty

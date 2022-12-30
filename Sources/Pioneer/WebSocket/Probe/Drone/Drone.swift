@@ -5,8 +5,8 @@
 //  Created by d-exclaimation on 4:55 PM.
 //
 
-import GraphQL
 import class Graphiti.Schema
+import GraphQL
 import protocol NIO.EventLoopGroup
 
 extension Pioneer {
@@ -18,9 +18,9 @@ extension Pioneer {
         private let proto: SubProtocol.Type
 
         init(
-            _ client: WebSocketClient, 
-            schema: GraphQLSchema, 
-            resolver: Resolver, 
+            _ client: WebSocketClient,
+            schema: GraphQLSchema,
+            resolver: Resolver,
             proto: SubProtocol.Type
         ) {
             self.schema = schema
@@ -30,9 +30,9 @@ extension Pioneer {
         }
 
         init(
-            _ client: WebSocketClient, 
-            schema: Schema<Resolver, Context>, 
-            resolver: Resolver, 
+            _ client: WebSocketClient,
+            schema: Schema<Resolver, Context>,
+            resolver: Resolver,
             proto: SubProtocol.Type
         ) {
             self.schema = schema.schema
@@ -42,15 +42,16 @@ extension Pioneer {
         }
 
         // MARK: - Private mutable states
+
         private var tasks: [String: Task<Void, Error>] = [:]
-        
+
         // MARK: - Event callbacks
-        
+
         /// Start subscriptions, setup pipe pattern, and callbacks
         func start(for oid: String, given gql: GraphQLRequest) async {
             let nextTypename = proto.next
             let subscriptionResult = await subscription(gql: gql)
-            
+
             // Guard for getting the required subscriptions stream, if not send `next` with errors, and end subscription
             guard let subscription = subscriptionResult.stream else {
                 let res = GraphQL.GraphQLResult(errors: subscriptionResult.errors)
@@ -58,17 +59,16 @@ extension Pioneer {
                 client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
                 return
             }
-            
+
             // Guard for getting the async stream, if not sent `next` saying failure in convertion, and end subscription
             guard let asyncStream = subscription.asyncStream() else {
                 let res = GraphQL.GraphQLResult(errors: [
-                    .init(message: "Internal server error, failed to fetch AsyncThrowingStream")
+                    .init(message: "Internal server error, failed to fetch AsyncThrowingStream"),
                 ])
                 client.out(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
                 client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
                 return
             }
-
 
             // Transform async stream into messages and pipe back all messages into the Actor itself
             let task = asyncStream.pipe(
@@ -86,7 +86,7 @@ extension Pioneer {
             )
             tasks.update(oid, with: task)
         }
-        
+
         /// Stop subscription, shutdown task and remove it so preventing overflow of any messages
         func stop(for oid: String) {
             guard let task = tasks[oid] else { return }
@@ -94,7 +94,7 @@ extension Pioneer {
             tasks.delete(oid)
             task.cancel()
         }
-        
+
         /// Send an ending message
         /// but prevent completion message if task doesn't exist
         /// e.g: - Shutdown-ed operation
@@ -104,7 +104,7 @@ extension Pioneer {
             let message = GraphQLMessage(id: oid, type: proto.complete)
             client.out(message.jsonString)
         }
-        
+
         /// Push message to websocket connection
         /// but prevent completion message if task doesn't exist
         /// e.g: - Shutdown-ed operation
@@ -112,13 +112,13 @@ extension Pioneer {
             guard tasks.has(oid) else { return }
             client.out(msg.jsonString)
         }
-        
+
         /// Kill actor by cancelling and deallocating all stored task
         func acid() {
             tasks.values.forEach { $0.cancel() }
             tasks.removeAll()
         }
-        
+
         // MARK: - Utility methods
 
         /// Build context and execute subscription from GraphQL Resolver and Schema, await the future value and catch error into a SubscriptionResult
@@ -137,10 +137,10 @@ extension Pioneer {
         /// Execute long lived GraphQL Operation as a subscription
         private func subscribeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async throws -> SubscriptionResult {
             try await subscribeGraphQL(
-                schema: schema, 
+                schema: schema,
                 request: gql.query,
-                resolver: resolver, 
-                context: ctx, 
+                resolver: resolver,
+                context: ctx,
                 eventLoopGroup: eventLoop,
                 variables: gql.variables,
                 operationName: gql.operationName

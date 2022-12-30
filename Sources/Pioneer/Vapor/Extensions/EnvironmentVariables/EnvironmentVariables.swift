@@ -7,7 +7,7 @@
 
 import struct Vapor.Environment
 
-extension Environment {
+public extension Environment {
     /// Setup an environment by specifying the information required
     ///
     /// - Parameters:
@@ -15,14 +15,14 @@ extension Environment {
     ///   - host: Host used, default to "localhost"
     ///   - env: Runtime environment
     /// - Returns: A Environment for Vapor application
-    public static func specified(
+    static func specified(
         port: Int = 4000,
         host: String = "localhost",
         env: String = "development"
     ) throws -> Environment {
         let build = CommandLine.arguments.first ?? ""
         return try .detect(arguments: [
-            build, "serve", "--env", env, "--port", "\(port)", "--hostname", host
+            build, "serve", "--env", env, "--port", "\(port)", "--hostname", host,
         ])
     }
 }

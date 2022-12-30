@@ -1,15 +1,15 @@
 //  Response+GraphQLError.swift
-//  
+//
 //
 //  Created by d-exclaimation on 25/06/22.
 //
 
+import struct GraphQL.GraphQLError
+import struct GraphQL.GraphQLResult
+import struct NIOHTTP1.HTTPHeaders
 import protocol Vapor.AbortError
 import enum Vapor.HTTPResponseStatus
 import class Vapor.Response
-import struct NIOHTTP1.HTTPHeaders
-import struct GraphQL.GraphQLError
-import struct GraphQL.GraphQLResult
 
 extension AbortError {
     func response(using response: Response) throws -> Response {

@@ -10,10 +10,10 @@ import GraphQL
 /// Function that describe a validation rule for an operation
 public typealias ValidationRule = (ValidationContext) -> Visitor
 
-extension Pioneer {
+public extension Pioneer {
     /// Validation strategy to add custom rules that is executed before any resolver is executed
-    public enum Validations: @unchecked Sendable, ExpressibleByArrayLiteral, ExpressibleByNilLiteral {
-        public init(nilLiteral: ()) {
+    enum Validations: @unchecked Sendable, ExpressibleByArrayLiteral, ExpressibleByNilLiteral {
+        public init(nilLiteral _: ()) {
             self = .none
         }
 
@@ -32,14 +32,14 @@ extension Pioneer {
 
         public func callAsFunction(using schema: GraphQLSchema, for gql: GraphQLRequest) -> [GraphQLError] {
             guard let ast = gql.ast else { return [] }
-            switch (self) {
+            switch self {
             case .none:
                 return []
-            case .specified(let rules):
+            case let .specified(rules):
                 return validate(schema: schema, ast: ast, rules: rules)
-            case .computed(let compute):
+            case let .computed(compute):
                 return validate(schema: schema, ast: ast, rules: compute(gql))
             }
         }
-    }    
+    }
 }

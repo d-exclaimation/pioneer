@@ -6,19 +6,19 @@
 //
 
 import Foundation
-import enum NIOWebSocket.WebSocketErrorCode
 import class NIO.EventLoopFuture
 import protocol NIO.EventLoopGroup
+import enum NIOWebSocket.WebSocketErrorCode
 
-extension Pioneer {
+public extension Pioneer {
     /// WebSocket initialisation guard
-    public typealias WebSocketGuard = @Sendable (Payload) async throws -> Void
+    typealias WebSocketGuard = @Sendable (Payload) async throws -> Void
 
     /// WebSocket Context Builder
-    public typealias WebSocketContext = @Sendable (Payload, GraphQLRequest) async throws -> Context
+    typealias WebSocketContext = @Sendable (Payload, GraphQLRequest) async throws -> Context
 
     /// Full GraphQL over WebSocket Client
-    public struct WebSocketClient {
+    struct WebSocketClient {
         /// The unique key for this client
         var id: UUID
 

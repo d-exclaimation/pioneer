@@ -6,8 +6,8 @@
 //
 
 import struct Foundation.Data
-import enum NIOWebSocket.WebSocketErrorCode
 import enum GraphQL.Map
+import enum NIOWebSocket.WebSocketErrorCode
 
 /// GraphQL Over Websocket sub-protocol
 protocol SubProtocol {
@@ -60,7 +60,7 @@ extension WebSocketErrorCode {
     static var graphqlNotAuthorized: WebSocketErrorCode {
         .init(codeNumber: 4401)
     }
-    
+
     static var graphqlInitTimeout: WebSocketErrorCode {
         .init(codeNumber: 4408)
     }

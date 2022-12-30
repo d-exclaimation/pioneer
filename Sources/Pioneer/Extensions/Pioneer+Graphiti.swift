@@ -42,7 +42,7 @@ public extension Pioneer {
             timeout: timeout
         )
     }
-    
+
     /// - Parameters:
     ///   - schema: GraphQL schema used to execute operations
     ///   - resolver: Resolver used by the GraphQL schema

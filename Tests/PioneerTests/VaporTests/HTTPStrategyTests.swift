@@ -5,12 +5,12 @@
 //  Created by d-exclaimation on 18:35.
 //
 
-import XCTest
 import Graphiti
-import Vapor
 import NIOFoundationCompat
-import XCTVapor
 @testable import Pioneer
+import Vapor
+import XCTest
+import XCTVapor
 
 final class HTTPStrategyTests: XCTestCase {
     private let schema: Schema<Resolver, Void> = try! .init {
@@ -23,6 +23,7 @@ final class HTTPStrategyTests: XCTestCase {
             }
         }
     }
+
     struct Resolver {
         func fetch(_: Void, _: NoArguments) async -> Bool {
             true
@@ -47,23 +48,23 @@ final class HTTPStrategyTests: XCTestCase {
         app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .badRequest)
         }
-        
+
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
@@ -74,7 +75,7 @@ final class HTTPStrategyTests: XCTestCase {
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
@@ -93,23 +94,23 @@ final class HTTPStrategyTests: XCTestCase {
         app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-        
+
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
@@ -120,7 +121,7 @@ final class HTTPStrategyTests: XCTestCase {
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
@@ -139,23 +140,23 @@ final class HTTPStrategyTests: XCTestCase {
         app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .badRequest)
         }
-        
+
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
@@ -166,7 +167,7 @@ final class HTTPStrategyTests: XCTestCase {
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
@@ -185,23 +186,23 @@ final class HTTPStrategyTests: XCTestCase {
         app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-        
+
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
@@ -212,7 +213,7 @@ final class HTTPStrategyTests: XCTestCase {
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
@@ -231,23 +232,23 @@ final class HTTPStrategyTests: XCTestCase {
         app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .badRequest)
         }
-        
+
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
@@ -258,7 +259,7 @@ final class HTTPStrategyTests: XCTestCase {
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
@@ -277,23 +278,23 @@ final class HTTPStrategyTests: XCTestCase {
         app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-        
+
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
@@ -304,7 +305,7 @@ final class HTTPStrategyTests: XCTestCase {
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
@@ -323,14 +324,14 @@ final class HTTPStrategyTests: XCTestCase {
         app.middleware.use(server.vaporMiddleware())
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
             headers: .init([("Content-Type", "text/plain")])
         ) { res in
@@ -338,7 +339,7 @@ final class HTTPStrategyTests: XCTestCase {
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
             headers: .init([("Content-Type", "text/plain"), ("Apollo-Require-Preflight", "true")])
         ) { res in
@@ -346,7 +347,7 @@ final class HTTPStrategyTests: XCTestCase {
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("query Operation { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)&operationName=Operation",
             headers: .init([("Content-Type", "text/plain"), ("X-Apollo-Operation-Name", "Operation")])
         ) { res in
@@ -354,16 +355,16 @@ final class HTTPStrategyTests: XCTestCase {
         }
 
         try app.testable().test(
-            .GET, 
+            .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .badRequest)
         }
-        
+
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
@@ -374,16 +375,16 @@ final class HTTPStrategyTests: XCTestCase {
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
 
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-        
+
         try app.testable().test(
-            .POST, 
+            .POST,
             "/graphql",
             headers: .init([("Content-Type", "multipart/form-data"), ("Content-Length", body1.writableBytes.description)]),
             body: body1

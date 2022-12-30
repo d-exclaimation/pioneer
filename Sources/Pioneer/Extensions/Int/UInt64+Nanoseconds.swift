@@ -20,11 +20,10 @@ public extension Optional where WrappedType == UInt64 {
         s * 1_000_000
     }
 
-    
     /// Convert the given value in microseconds into nanoseconds
     /// - Parameter s: The value in microseconds
     /// - Returns: The nanoseconds result
     static func microseconds(_ s: UInt64) -> UInt64 {
-        s * 1_000
+        s * 1000
     }
 }

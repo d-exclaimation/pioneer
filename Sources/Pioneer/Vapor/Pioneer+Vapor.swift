@@ -6,17 +6,16 @@
 //
 
 import protocol Vapor.AsyncMiddleware
+import protocol Vapor.AsyncResponder
+import enum Vapor.HTTPBodyStreamStrategy
+import enum Vapor.HTTPMethod
+import enum Vapor.PathComponent
 import class Vapor.Request
 import class Vapor.Response
-import enum Vapor.PathComponent
-import enum Vapor.HTTPMethod
-import enum Vapor.HTTPBodyStreamStrategy
-import protocol Vapor.AsyncResponder
 
-extension Pioneer {
-
+public extension Pioneer {
     /// Pioneer Integration for Vapor as a Middleware
-    public struct VaporGraphQLMiddleware: AsyncMiddleware {
+    struct VaporGraphQLMiddleware: AsyncMiddleware {
         /// Service to serve by the middleware
         enum Serve {
             /// GraphQL over HTTP operation should be served
@@ -27,7 +26,7 @@ extension Pioneer {
 
             /// GraphQL IDE should be served
             case playground
-            
+
             /// No service, skip this middleware
             case ignore
         }
@@ -36,7 +35,7 @@ extension Pioneer {
         private let server: Pioneer
 
         /// The path to be served
-        private let path: [PathComponent] 
+        private let path: [PathComponent]
 
         /// The body stream strategy used
         private let body: HTTPBodyStreamStrategy
@@ -51,7 +50,7 @@ extension Pioneer {
         private let websocketGuard: VaporWebSocketGuard
 
         internal init(
-            server: Pioneer, 
+            server: Pioneer,
             path: [PathComponent],
             body: HTTPBodyStreamStrategy,
             context: @escaping VaporHTTPContext,
@@ -61,14 +60,14 @@ extension Pioneer {
             self.path = path
             self.body = body
             self.context = context
-            self.websocketContext = { 
+            self.websocketContext = {
                 try await $0.defaultWebsocketContextBuilder(payload: $1, gql: $2, contextBuilder: context)
             }
             self.websocketGuard = websocketGuard
         }
 
         internal init(
-            server: Pioneer, 
+            server: Pioneer,
             path: [PathComponent],
             body: HTTPBodyStreamStrategy,
             context: @escaping VaporHTTPContext,
@@ -113,13 +112,13 @@ extension Pioneer {
         /// - Parameter request: The incoming request
         /// - Returns: The request after the body is collected if necessary
         private func collect(_ request: Request) async throws -> Request {
-            if case .collect(let max) = body, request.body.data == nil {
+            if case let .collect(max) = body, request.body.data == nil {
                 let _ = try await request.body
                     .collect(max: max?.value ?? request.application.routes.defaultMaxBodySize.value)
                     .get()
                 return request
             }
-            return request 
+            return request
         }
 
         public func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
@@ -128,14 +127,14 @@ extension Pioneer {
             }
 
             switch try await serving(to: request) {
-                case .operation:
-                    return try await server.httpHandler(req: collect(request), context: context)
-                case .upgrade:
-                    return try await server.webSocketHandler(req: collect(request), context: websocketContext, guard: websocketGuard)
-                case .playground:
-                    return server.ideHandler(req: request)
-                case .ignore:
-                    return try await next.respond(to: request)
+            case .operation:
+                return try await server.httpHandler(req: collect(request), context: context)
+            case .upgrade:
+                return try await server.webSocketHandler(req: collect(request), context: websocketContext, guard: websocketGuard)
+            case .playground:
+                return server.ideHandler(req: request)
+            case .ignore:
+                return try await next.respond(to: request)
             }
         }
     }
@@ -147,17 +146,17 @@ extension Pioneer {
     ///   - context: HTTP context builder
     ///   - websocketGuard: WebSocket connection guard
     /// - Returns: Middleware for handling GraphQL operation
-    public func vaporMiddleware(
-        body: HTTPBodyStreamStrategy = .collect, 
+    func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect,
         at path: PathComponent = "graphql",
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
     ) -> VaporGraphQLMiddleware {
         VaporGraphQLMiddleware(
-            server: self, 
-            path: [path], 
-            body: body, 
-            context: context, 
+            server: self,
+            path: [path],
+            body: body,
+            context: context,
             websocketGuard: websocketGuard
         )
     }
@@ -170,8 +169,8 @@ extension Pioneer {
     ///   - websocketContext: WebSocket context builder
     ///   - websocketGuard: WebSocket connection guard
     /// - Returns: Middleware for handling GraphQL operation
-    public func vaporMiddleware(
-        body: HTTPBodyStreamStrategy = .collect, 
+    func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect,
         at path: PathComponent = "graphql",
         context: @escaping VaporHTTPContext,
         websocketContext: @escaping VaporWebSocketContext,
@@ -194,8 +193,8 @@ extension Pioneer {
     ///   - context: HTTP context builder
     ///   - websocketGuard: WebSocket connection guard
     /// - Returns: Middleware for handling GraphQL operation
-    public func vaporMiddleware(
-        body: HTTPBodyStreamStrategy = .collect, 
+    func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect,
         at path: [PathComponent],
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in }
@@ -217,8 +216,8 @@ extension Pioneer {
     ///   - websocketContext: WebSocket context builder
     ///   - websocketGuard: WebSocket connection guard
     /// - Returns: Middleware for handling GraphQL operation
-    public func vaporMiddleware(
-        body: HTTPBodyStreamStrategy = .collect, 
+    func vaporMiddleware(
+        body: HTTPBodyStreamStrategy = .collect,
         at path: [PathComponent],
         context: @escaping VaporHTTPContext,
         websocketContext: @escaping VaporWebSocketContext,

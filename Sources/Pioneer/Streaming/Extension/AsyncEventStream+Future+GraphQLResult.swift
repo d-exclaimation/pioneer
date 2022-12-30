@@ -5,21 +5,21 @@
 //  Created by d-exclaimation on 3:38 PM.
 //
 
-import struct GraphQL.GraphQLResult
 import class GraphQL.ConcurrentEventStream
 import class GraphQL.Future
+import struct GraphQL.GraphQLResult
 import class GraphQL.SubscriptionEventStream
 
 /// AsyncSequence for GraphQL Result
 public typealias AsyncGraphQLSequence<Sequence: AsyncSequence> = AsyncEventStream<Future<GraphQL.GraphQLResult>, Sequence>
-        where Sequence.Element == Future<GraphQL.GraphQLResult>
+    where Sequence.Element == Future<GraphQL.GraphQLResult>
 
 /// AsyncStream for GraphQL Result
 public typealias AsyncGraphQLStream = AsyncGraphQLSequence<AsyncThrowingStream<Future<GraphQL.GraphQLResult>, Error>>
 
-extension SubscriptionEventStream {
+public extension SubscriptionEventStream {
     /// Get the AsyncStream from this event stream regardless of its sequence
-    public func asyncStream() -> AsyncThrowingStream<Future<GraphQL.GraphQLResult>, Error>? {
+    func asyncStream() -> AsyncThrowingStream<Future<GraphQL.GraphQLResult>, Error>? {
         if let asyncStream = self as? AsyncGraphQLStream {
             return asyncStream.sequence
         }
@@ -30,7 +30,7 @@ extension SubscriptionEventStream {
     }
 }
 
-extension AsyncSequence where Element == Future<GraphQL.GraphQLResult> {
+public extension AsyncSequence where Element == Future<GraphQL.GraphQLResult> {
     /// Pipe the GraphQLResult AsyncSequence into an actor.
     ///
     /// - Parameters:
@@ -39,7 +39,7 @@ extension AsyncSequence where Element == Future<GraphQL.GraphQLResult> {
     ///   - error: A callback ran when an error were thrown when reading elements from this sequence.
     ///   - next: A callback ran on each element of this sequence.
     /// - Returns: The Task used to consume this AsyncSequence
-    public func pipe<ActorType: Actor>(
+    func pipe<ActorType: Actor>(
         to sink: ActorType,
         complete: @Sendable @escaping (ActorType) async -> Void,
         failure: @Sendable @escaping (ActorType, Error) async -> Void,
