@@ -21,7 +21,7 @@ public struct GraphQLRequest: Codable, @unchecked Sendable {
     /// Variables seperated and assign to constant in the query
     public var variables: [String: Map]?
     /// Extensions for the request
-    public var extensions: [String: Map]? = nil
+    public var extensions: [String: Map]?
 
     /// Parsed GraphQL Document from request
     public var ast: Document?

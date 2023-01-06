@@ -31,14 +31,14 @@ public typealias GraphQLMiddleware<Root, Context, Args, ResolveType> = (
 
 /// Build a single resolver with a single base resolver and a handful middlewares
 /// - Parameters:
-///   - function: The base resolver 
+///   - function: The base resolver
 ///   - middlewares: The middlewares to wrap the resolvers
 /// - Returns: A single resolver with middleware applied
 public func buildResolver<Root, Context, Args, ResolveType>(
     from function: @escaping SyncResolve<Root, Context, Args, ResolveType>,
     using middlewares: [GraphQLMiddleware<Root, Context, Args, ResolveType>]
 ) -> ConcurrentResolve<Root, Context, Args, ResolveType> {
-   { root in
+    { root in
         { ctx, args in
             let info = ResolverParameters(root: root, context: ctx, args: args)
             let result = middlewares
@@ -50,19 +50,19 @@ public func buildResolver<Root, Context, Args, ResolveType>(
                 }
             return try await result()
         }
-   }
+    }
 }
 
 /// Build a single resolver with a single base resolver and a handful middlewares
 /// - Parameters:
-///   - function: The base async resolver 
+///   - function: The base async resolver
 ///   - middlewares: The middlewares to wrap the resolvers
 /// - Returns: A single resolver with middleware applied
 public func buildResolver<Root, Context, Args, ResolveType>(
     from function: @escaping ConcurrentResolve<Root, Context, Args, ResolveType>,
     using middlewares: [GraphQLMiddleware<Root, Context, Args, ResolveType>]
 ) -> ConcurrentResolve<Root, Context, Args, ResolveType> {
-   { root in
+    { root in
         { ctx, args in
             let info = ResolverParameters(root: root, context: ctx, args: args)
             let result = middlewares
@@ -74,5 +74,5 @@ public func buildResolver<Root, Context, Args, ResolveType>(
                 }
             return try await result()
         }
-   }
+    }
 }

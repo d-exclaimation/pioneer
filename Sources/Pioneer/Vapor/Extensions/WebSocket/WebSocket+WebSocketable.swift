@@ -14,6 +14,6 @@ extension WebSocket: WebSocketable {
     }
 
     public func terminate(code: WebSocketErrorCode) async throws {
-        try await close(code: code)
+        try await close(code: code).get()
     }
 }
