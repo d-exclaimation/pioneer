@@ -54,14 +54,14 @@ let package = Package(
 )
 ```
 
-### Using Swift 5.5 or higher
+### Using Swift 5.5.2 or higher
 
-We will also restrict the platform of the project to macOS v12 or higher, to allow the use of Swift Concurrency.
+We will also restrict the platform of the project to macOS v10.15 or higher, to allow the use of Swift Concurrency.
 
 ```swift filename="Package.swift" {2-4} showLineNumbers copy
 let package = Package(
     platforms: [
-        .macOS(.v12)
+        .macOS(.v10_15),
     ],
     // ...
 )
