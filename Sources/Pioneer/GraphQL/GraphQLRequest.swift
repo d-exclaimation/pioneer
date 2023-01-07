@@ -105,11 +105,8 @@ public struct GraphQLRequest: Codable, @unchecked Sendable {
     }
 
     /// Known possible failure in parsing GraphQLRequest
-    public enum ParsingIssue: Error, @unchecked Sendable {
+    public enum ParsingIssue: Error, Sendable {
         case missingQuery
         case invalidForm
     }
-
-    /// GraphQL over HTTP spec accept-type
-    static var mediaType = "application/graphql-response+json"
 }

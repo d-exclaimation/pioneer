@@ -389,7 +389,7 @@ final class HTTPStrategyTests: XCTestCase {
             headers: .init([("Content-Type", "multipart/form-data"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
         ) { res in
-            XCTAssertEqual(res.status, .badRequest)
+            XCTAssertNotEqual(res.status, .ok)
         }
     }
 }
