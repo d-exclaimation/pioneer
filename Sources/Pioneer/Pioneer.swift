@@ -151,9 +151,12 @@ public struct Pioneer<Resolver, Context> {
         guard errors.isEmpty else {
             return .init(result: .init(data: nil, errors: errors), status: .badRequest)
         }
-
         let result = await executeOperation(for: gql, with: context, using: eventLoop)
-        return .init(result: result, status: .ok)
+        return .init(
+            result: result,
+            status: .ok,
+            headers: req.isAcceptingGraphQLResponse ? ["Content-Type": HTTPGraphQLRequest.contentType] : nil
+        )
     }
 
     /// Handle messages that follow the websocket protocol for a specific client using Pioneer.Probe

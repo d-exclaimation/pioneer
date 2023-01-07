@@ -31,19 +31,29 @@ public extension Pioneer {
         let res = Response()
         do {
             // Parsing GraphQLRequest and Context
-            let gql = try req.graphql
+            let httpReq = try req.httpGraphQL
             let context = try await context(req, res)
-            let httpReq = HTTPGraphQLRequest(request: gql, headers: req.headers, method: req.method)
 
             // Executing into GraphQLResult
             let httpRes = await executeHTTPGraphQLRequest(for: httpReq, with: context, using: req.eventLoop)
             try res.content.encode(httpRes.result, using: encoder)
             res.status = httpRes.status
-
-            if httpReq.isAcceptingGraphQLResponse {
-                res.headers.replaceOrAdd(name: .contentType, value: "\(GraphQLRequest.mediaType); charset=utf-8, \(GraphQLRequest.mediaType)")
+            httpRes.headers?.forEach {
+                res.headers.replaceOrAdd(name: $0, value: $1)
             }
             return res
+        } catch GraphQLRequest.ParsingIssue.missingQuery {
+            return try GraphQLError(message: "Missing query parameter")
+                .response(with: req.isAcceptingGraphQLResponse ? .badRequest : .ok)
+        } catch GraphQLRequest.ParsingIssue.invalidForm {
+            return try GraphQLError(message: "nvalid GraphQL request form")
+                .response(with: req.isAcceptingGraphQLResponse ? .badRequest : .ok)
+        } catch HTTPGraphQLRequest.Issue.invalidMethod {
+            return try GraphQLError(message: "Invalid HTTP method for a GraphQL request")
+                .response(with: .badRequest)
+        } catch HTTPGraphQLRequest.Issue.invalidContentType {
+            return try GraphQLError(message: "Invalid or missing content-type")
+                .response(with: .badRequest)
         } catch let error as AbortError {
             return try error.response(using: res)
         } catch {
