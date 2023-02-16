@@ -5,9 +5,6 @@
 //  Created by d-exclaimation on 12:30.
 //
 
-import struct GraphQL.GraphQLError
-import enum GraphQL.Map
-import struct Vapor.Abort
 import class Vapor.Request
 
 extension Request: GraphQLRequestConvertible {
