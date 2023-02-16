@@ -12,7 +12,7 @@ The newer sub-protocol is [graphql-ws](https://github.com/enisdenjo/graphql-ws).
 
 #### Usage
 
-You can to use this sub-protocol by specifying when initializing Pioneer.
+You can to use this sub-protocol by specifying when initializing Pioneer. This is the default option.
 
 ```swift {3} showLineNumbers copy
 let server = Pioneer(
@@ -25,20 +25,23 @@ let server = Pioneer(
 
 Even though the sub-protocol is the recommended and default option, there are still some consideration to take account of. Adoption for this sub-protocol are somewhat limited outside the Node.js / Javascript ecosystem or major GraphQL client libraries.
 
-A good amount of other server implementations on many languages have also yet to support this sub-protocol. So, make sure that libraries and frameworks you are using already have support for [graphql-ws](https://github.com/enisdenjo/graphql-ws). If in doubt, it's best to understand how both sub-protocols work and have options to swap between both options.
+A good amount of other server implementations on many languages have also yet to support this sub-protocol. So, make sure that libraries and frameworks you are using already have support for [graphql-ws](https://github.com/enisdenjo/graphql-ws). 
 
 ### `subscriptions-transport-ws`
 
 The older standard is [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws). This is a sub-protocol from the team at Apollo GraphQL, that was created along side [apollo-server](https://github.com/apollographql/apollo-server) and [apollo-client](https://github.com/apollographql/apollo-client). Some clients and servers still use this to perform operations through websocket especially subscriptions.
 
 <Callout type="warning">
-In the GraphQL ecosystem, subscriptions-transport-ws is considered a legacy protocol.
+In the GraphQL ecosystem, subscriptions-transport-ws is considered a legacy protocol and has been archived.
+
+Pioneer now considers this protcol as legacy, marked as deprecated, and will likely be removed in the future major releases.
+
 More explaination [here](#consideration).
 </Callout>
 
 #### Usage
 
-By default, Pioneer will already use this sub-protocol to perform GraphQL operations through websocket.
+You can to use this sub-protocol by specifying when initializing Pioneer.
 
 ```swift {3} showLineNumbers copy
 let server = Pioneer(

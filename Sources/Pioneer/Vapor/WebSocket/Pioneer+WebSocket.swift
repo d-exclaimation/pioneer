@@ -78,7 +78,7 @@ public extension Pioneer {
         Task {
             try await ws.onClose.get()
             receiving.cancel()
-            closeClient(cid: cid, keepAlive: keepAlive, timeout: timeout)
+            disposeClient(cid: cid, keepAlive: keepAlive, timeout: timeout)
         }
     }
 }

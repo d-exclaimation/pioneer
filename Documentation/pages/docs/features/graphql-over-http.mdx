@@ -82,3 +82,14 @@ It should have no impact on legitimate use of your graph except in these two cas
 - You implemented and have enabled file uploads through your GraphQL server using `multipart/form-data`.
 
 If either of these apply to you and you want to keep the prevention mechanic, you should configure the relevant clients to send a non-empty `Apollo-Require-Preflight` header along with all requests.
+
+
+## GraphQL over HTTP spec compliance
+
+As of Pioneer v1, Pioneer is spec compliant with the [GraphQL over HTTP spec](https://github.com/graphql/graphql-http#servers).
+
+### [Details on compliance](https://github.com/graphql/graphql-http/blob/main/implementations/pioneer/README.md)
+
+- **78** audits in total
+- ✅ **75** pass
+- ⚠️ **3** warnings (optional)

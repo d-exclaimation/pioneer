@@ -42,18 +42,9 @@ public extension Pioneer {
                 res.headers.replaceOrAdd(name: $0, value: $1)
             }
             return res
-        } catch GraphQLRequest.ParsingIssue.missingQuery {
-            return try GraphQLError(message: "Missing query parameter")
-                .response(with: req.isAcceptingGraphQLResponse ? .badRequest : .ok)
-        } catch GraphQLRequest.ParsingIssue.invalidForm {
-            return try GraphQLError(message: "nvalid GraphQL request form")
-                .response(with: req.isAcceptingGraphQLResponse ? .badRequest : .ok)
-        } catch HTTPGraphQLRequest.Issue.invalidMethod {
-            return try GraphQLError(message: "Invalid HTTP method for a GraphQL request")
-                .response(with: .badRequest)
-        } catch HTTPGraphQLRequest.Issue.invalidContentType {
-            return try GraphQLError(message: "Invalid or missing content-type")
-                .response(with: .badRequest)
+        } catch let v as GraphQLViolation {
+            return try GraphQLError(message: v.message)
+                .response(with: v.status(req.isAcceptingGraphQLResponse))
         } catch let error as AbortError {
             return try error.response(using: res)
         } catch {

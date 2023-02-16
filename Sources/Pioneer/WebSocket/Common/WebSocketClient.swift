@@ -18,21 +18,21 @@ public extension Pioneer {
     typealias WebSocketContext = @Sendable (Payload, GraphQLRequest) async throws -> Context
 
     /// Full GraphQL over WebSocket Client
-    struct WebSocketClient {
+    struct WebSocketClient: Identifiable {
         /// The unique key for this client
-        var id: UUID
+        public var id: UUID
 
         /// The WebSocket output
-        var io: WebSocketable
+        public var io: WebSocketable
 
         /// The payload given during initialisation
-        var payload: Payload
+        public var payload: Payload
 
         /// Any event loop
-        var ev: EventLoopGroup
+        public var ev: EventLoopGroup
 
         /// Context builder for this client
-        var contextBuilder: WebSocketContext
+        public var contextBuilder: WebSocketContext
 
         /// Create a GraphQL over WebSocket client
         /// - Parameters:
@@ -41,7 +41,7 @@ public extension Pioneer {
         ///   - payload: The payload given during initialisation
         ///   - ev: Any event loop
         ///   - context: Context builder for this client
-        init(id: UUID, io: WebSocketable, payload: Payload, ev: EventLoopGroup, context: @escaping WebSocketContext) {
+        public init(id: UUID, io: WebSocketable, payload: Payload, ev: EventLoopGroup, context: @escaping WebSocketContext) {
             self.id = id
             self.io = io
             self.payload = payload

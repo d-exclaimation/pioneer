@@ -5,8 +5,8 @@
 //  Created by d-exclaimation on 12:49 AM.
 //
 
-import Foundation
 import GraphQL
+import enum NIOHTTP1.HTTPResponseStatus
 
 /// GraphQL Request according to the spec
 public struct GraphQLRequest: Codable, @unchecked Sendable {
@@ -34,7 +34,7 @@ public struct GraphQLRequest: Codable, @unchecked Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Key.self)
         guard container.contains(.query) else {
-            throw ParsingIssue.missingQuery
+            throw GraphQLViolation.missingQuery
         }
         do {
             let query = try container.decode(String.self, forKey: .query)
@@ -48,7 +48,7 @@ public struct GraphQLRequest: Codable, @unchecked Sendable {
                 extensions: extensions ?? nil
             )
         } catch {
-            throw ParsingIssue.invalidForm
+            throw GraphQLViolation.invalidForm
         }
     }
 
@@ -102,11 +102,5 @@ public struct GraphQLRequest: Codable, @unchecked Sendable {
                 return field.name.value == "__schema" || field.name.value == "__type"
             }
         }
-    }
-
-    /// Known possible failure in parsing GraphQLRequest
-    public enum ParsingIssue: Error, Sendable {
-        case missingQuery
-        case invalidForm
     }
 }
