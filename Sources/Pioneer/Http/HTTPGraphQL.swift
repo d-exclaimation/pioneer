@@ -75,12 +75,6 @@ public struct HTTPGraphQLRequest: Sendable {
 
     /// GraphQL over HTTP spec's content type
     public static var contentType = "\(mediaType); charset=utf-8, \(mediaType)"
-
-    /// Known possible failure in converting HTTP into GraphQL over HTTP request
-    public enum Issue: Error, Sendable {
-        case invalidMethod
-        case invalidContentType
-    }
 }
 
 /// A type that can be transformed into GraphQLRequest and HTTPGraphQLRequest
@@ -101,7 +95,7 @@ public protocol GraphQLRequestConvertible {
     ///   - decodable: Decodable type
     ///   - at: Name of field to decode
     /// - Returns: The parsed payload if possible, otherwise nil
-    func urlQuery<T: Decodable>(_ decodable: T.Type, at: String) -> T?
+    func searchParams<T: Decodable>(_ decodable: T.Type, at: String) -> T?
 }
 
 public extension GraphQLRequestConvertible {
@@ -110,20 +104,20 @@ public extension GraphQLRequestConvertible {
         get throws {
             switch method {
             case .GET:
-                guard let query = urlQuery(String.self, at: "query") else {
-                    throw GraphQLRequest.ParsingIssue.missingQuery
+                guard let query = searchParams(String.self, at: "query") else {
+                    throw GraphQLViolation.missingQuery
                 }
-                let variables: [String: Map]? = self.urlQuery(String.self, at: "variables")
+                let variables: [String: Map]? = self.searchParams(String.self, at: "variables")
                     .flatMap { $0.data(using: .utf8)?.to([String: Map].self) }
-                let operationName: String? = self.urlQuery(String.self, at: "operationName")
+                let operationName: String? = self.searchParams(String.self, at: "operationName")
                 return GraphQLRequest(query: query, operationName: operationName, variables: variables)
             case .POST:
                 guard !headers[.contentType].isEmpty else {
-                    throw HTTPGraphQLRequest.Issue.invalidContentType
+                    throw GraphQLViolation.invalidContentType
                 }
                 return try body(GraphQLRequest.self)
             default:
-                throw HTTPGraphQLRequest.Issue.invalidMethod
+                throw GraphQLViolation.invalidMethod
             }
         }
     }
