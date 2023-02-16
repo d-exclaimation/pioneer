@@ -111,7 +111,7 @@ app.middleware.use(
     server.vaporMiddleware( 
         context: { req, res in
             ...
-		},
+				},
         websocketContext: { req, payload, gql in
             ...
         },
@@ -166,13 +166,18 @@ Pioneer will now defaults to
 - [.sandbox](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/ide/sandbox) for its [WebSocket Protocol](/docs/features/graphql-over-websocket/#websocket-subprotocol)
 - `30` seconds for the keep alive interval for GraphQL over WebSocket
 
+### Deprecating `subscriptions-transport-ws`
+
+As of Mar 4 2022, the [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws) has been made read-only archive and will be marked as deprecated in Pioneer. 
+Pioneer will now defaults to the [`graphql-ws`](/docs/features/graphql-over-websocket/#websocket-subprotocol) instead. 
+
 ### WebSocket callbacks
 
 Some WebSocket callbacks are now exposed as functions in Pioneer. These can be used to add a custom WebSocket layer.
 
 - [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
 	- Callback to be called for each WebSocket message
-- [.initialiseClient](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
+- [.createClient](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
 	- Callback after getting a GraphQL over WebSocket initialisation message according to the given protocol
 - [.executeLongOperation](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer)
 	- Callback to run long running operation using Pioneer

@@ -34,16 +34,10 @@ struct HTTPGraphQLRequest {
 }
 ```
 
-The important part is parsing into [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest). A recommended approach in parsing is:
+The important part is parsing into [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest). 
+This can be done by making sure the web-framework request object conforms to the [GraphQLRequestConvertible](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequestconvertible) protocol.
 
-1. Parse [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) from the body of a request. (Usually for **POST**)
-2. If it's not in the body, get the values from the query/search parameters. (Usually for **GET**)
- - The query string should be under `query`
-   - The operation name should be under `operationName`
-   - The variables should be under `variables` as JSON string <br/>
-   (_This is probably percent encoded, and also need to be parse into `[String: Map]?` if available_)
-   - As long the query string is accessible, the request is not malformed and we can construct a [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) using that.
-3. If [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) can't be retreive by both approach 1 and 2, the request is malformed and the response could also have status code of 400 Bad Request.
+After that, the [GraphQLRequest](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequest) can be accessed from the property [.graphql](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlrequestconvertible).
 
 <details>
 <summary> Example </summary>
@@ -51,36 +45,19 @@ The important part is parsing into [GraphQLRequest](https://swiftpackageindex.co
 ```swift showLineNumbers copy
 import class WebFramework.Request
 
-extension Request {
-    var graphql: HTTPGraphQLRequest? {
-        switch (method) {
-            // Parsing from body for POST
-            case .post:
-                guard let gql = try? JSONDecoder().decode(GraphQLRequest.self, from: self.body) else {
-                    return nil
-                }
-                return .init(request: gql, headers: headers, method: method)
+extension Request: GraphQLRequestConvertible {
+    public func body<T>(_ decodable: T.Type) throws -> T where T: Decodable {
+        try JSONDecoder().decode(decodable, from: body)
+    }
 
-            // Parsing from query/search params for GET
-            case .get:
-                guard let query = self.search["query"] else {
-                    return nil
-                }
-                let operationName = self.search["operationName"]
-                let variables = self.search["variables"]?
-                    .removingPercentEncoding
-                    .flatMap {
-                        $0.data(using: .utf8)
-                    }
-                    .flatMap {
-                        try? JSONDecoder().decode([String: Map].self, from: $0)
-                    }
-                let gql = GraphQLRequest(query: query, operationName: operationName, variables: variables)
-                return .init(request: gql, headers: headers, method: method)
-            
-            default:
-                return nil
-        }
+    public func searchParams<T>(_ decodable: T.Type, at: String) -> T? where T: Decodable {
+        search[at]?.removingPercentEncoding
+            .flatMap { $0.data(using: .utf8) }
+            .flatMap { try? JSONDecoder().decode(decodable, from: $0) }
+    }
+
+    public var isAcceptingGraphQLResponse: Bool {
+        headers[.accept].contains(HTTPGraphQLRequest.mediaType)
     }
 }
 ```
@@ -119,10 +96,15 @@ struct HTTPGraphQLResponse {
 }
 ```
 
+<Callout type="info">
+The property [.graphql](#mapping-into-httpgraphqlrequest) may throw a [GraphQLViolation](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/graphqlviolation) error. 
+This error should be caught, the its message and status value should be use in the response to comply with the GraphQL over HTTP specification.
+</Callout>
+
 <details>
 <summary> Example </summary>
 
-```swift {9-14,16-19,23-25} showLineNumbers copy
+```swift {9-14,16-19,23-24,26-28} showLineNumbers copy
 import class WebFramework.Request
 import class WebFramework.Response
 import struct Pioneer.Pioneer
@@ -144,6 +126,9 @@ extension Pioneer {
             res.status = httpRes.status
 
             return res
+        } catch let e as GraphQLViolation {
+            let body = try GraphQLJSONEncoder().encode(GraphQLResult(data: nil, errors: [.init(e.message)]))
+            return Response(status: e.status(req.isAcceptingGraphQLResponse), body: body)
         } catch {
             // Format error caught into GraphQLResult
             let body = try GraphQLJSONEncoder().encode(GraphQLResult(data: nil, errors: [.init(error)]))
@@ -288,7 +273,7 @@ After the upgrade is done, there's only a few things to do:
     - [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) method is used here.
     - For consuming the incoming message, if in the web-framework it is done in a callback, it is best to pipe that value into an AsyncStream first and iterate through the AsyncStream before calling the [.receiveMessage](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) method.
 - Setting up callback for when the connection has been closed.
-    - [.closeClient](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) method is used here.
+    - [.disposeClient](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer) method is used here.
     - It is also recommended if possible to stop the consuming incoming message here as well.
 
 <details>
@@ -356,7 +341,7 @@ extension Pioneer {
         Task {
             try await ws.onClose.get()
             receiving.cancel()
-            closeClient(cid: cid, keepAlive: keepAlive, timeout: timeout)
+            disposeClient(cid: cid, keepAlive: keepAlive, timeout: timeout)
         }
     }
 }
