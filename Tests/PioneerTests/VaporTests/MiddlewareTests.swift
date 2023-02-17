@@ -1,8 +1,7 @@
-import Vapor
-import XCTest
 import enum GraphQL.Map
 @testable import Pioneer
-
+import Vapor
+import XCTest
 
 final class MiddlewareTests: XCTestCase {
     private let app = Application(.testing)
@@ -12,9 +11,9 @@ final class MiddlewareTests: XCTestCase {
     /// 2. Should set the graphql request into request body
     func testDefaultWebsocketContextBuilder() async {
         let originalReq = Request(
-            application: app, 
-            method: .POST, 
-            url: "http://localhost:8080/graphql", 
+            application: app,
+            method: .POST,
+            url: "http://localhost:8080/graphql",
             on: app.eventLoopGroup.next()
         )
         let payload = [
@@ -31,7 +30,7 @@ final class MiddlewareTests: XCTestCase {
                 contextBuilder: { req, _ in req }
             )
 
-            // 1. Should set the headers 
+            // 1. Should set the headers
             guard let token = req.headers["auth"].first else {
                 return XCTFail("No headers")
             }
@@ -41,7 +40,6 @@ final class MiddlewareTests: XCTestCase {
                 return XCTFail("No query parameter")
             }
             XCTAssert(verified == "true")
-
 
             // 2. Should set the graphql request into request body
             guard let gql = try? req.content.decode(GraphQLRequest.self) else {

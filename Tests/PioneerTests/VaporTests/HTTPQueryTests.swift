@@ -7,10 +7,10 @@
 
 import Graphiti
 import NIOFoundationCompat
+@testable import Pioneer
 import Vapor
 import XCTest
 import XCTVapor
-@testable import Pioneer
 
 final class HTTPQueryTests: XCTestCase {
     private let server = Pioneer(
@@ -145,7 +145,6 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssert(res.body.string.contains(#""errors":"#))
             XCTAssert(res.body.string.contains("\(Abort(.imATeapot, reason: "Expected"))"))
         }
-        
 
         // TODO: Move to a separate test as related to GraphQL over HTTP spec
         // Test for invalid query
@@ -188,7 +187,7 @@ final class HTTPQueryTests: XCTestCase {
         }
 
         app.middleware.use(server.vaporMiddleware(), at: .beginning)
-        
+
         // Test for valid query
         try app.testable().test(
             .GET, "/graphql?\(gql0)"
@@ -237,7 +236,6 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssert(res.body.string.contains(#""errors":"#))
             XCTAssert(res.body.string.contains("\(Abort(.imATeapot, reason: "Expected"))"))
         }
-
 
         // TODO: Move to a separate test as related to GraphQL over HTTP spec
         // Test for invalid query

@@ -9,10 +9,8 @@
 import Graphiti
 import GraphQL
 import NIO
-import XCTest
 @testable import Pioneer
-
-
+import XCTest
 
 final class GraphitiTests: XCTestCase {
     /// Simple message type with a custom computed properties
@@ -61,7 +59,6 @@ final class GraphitiTests: XCTestCase {
             return stream.toEventStream()
         }
     }
-
 
     private let resolver: Resolver = .init()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)

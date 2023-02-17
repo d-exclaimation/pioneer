@@ -7,10 +7,10 @@
 
 import Graphiti
 import NIOFoundationCompat
+@testable import Pioneer
 import Vapor
 import XCTest
 import XCTVapor
-@testable import Pioneer
 
 final class HTTPStrategyTests: XCTestCase {
     private let schema: Schema<Resolver, Void> = try! .init {
@@ -103,14 +103,14 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
-        // Test mutation through GET should be allowed 
+        // Test mutation through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-        
+
         // Test query through POST should be denied
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
         try app.testable().test(
@@ -335,7 +335,6 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
-
         // Test query through GET should be allowed
         try app.testable().test(
             .GET,
@@ -361,7 +360,7 @@ final class HTTPStrategyTests: XCTestCase {
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-        
+
         // Test query with bad content type but with X-Apollo-Operation-Name should be allowed
         try app.testable().test(
             .GET,
@@ -379,7 +378,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
-        // Test query in POST should be allowed 
+        // Test query in POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
         try app.testable().test(
             .POST,

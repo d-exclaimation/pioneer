@@ -7,10 +7,10 @@
 //
 
 import Graphiti
-import XCTest
 import class GraphQL.EventStream
 import class NIO.MultiThreadedEventLoopGroup
 @testable import Pioneer
+import XCTest
 
 final class ProbeTests: XCTestCase {
     /// Simple resolver with a single subscriptions
@@ -30,7 +30,7 @@ final class ProbeTests: XCTestCase {
             SubscriptionField("simple", as: String.self, atSub: Resolver.subscription)
         }
     }.schema
-    
+
     override func tearDownWithError() throws {
         try group.syncShutdownGracefully()
     }

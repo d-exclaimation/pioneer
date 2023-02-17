@@ -12,14 +12,13 @@ import OrderedCollections
 import XCTest
 
 final class ExtensionsTests: XCTestCase {
-
     /// Pipe back Future to an actor
     /// 1. Should not fulfill under 1 second
     /// 2. Should fulfill by the Actor after the delay
     func testActorAndNIOFuture() async {
         actor Tester {
             func call(expect: Task<XCTestExpectation, Error>) {
-                pipeToSelf(future: expect) { sink, res in
+                pipeToSelf(future: expect) { _, res in
                     guard case let .success(ex) = res else { return }
                     ex.fulfill()
                 }
@@ -28,7 +27,6 @@ final class ExtensionsTests: XCTestCase {
 
         let expectation = XCTestExpectation()
         let tester = Tester()
-
 
         await tester.call(expect: .init {
             try? await Task.sleep(nanoseconds: 1000 * 1000 * 1000)
@@ -52,7 +50,6 @@ final class ExtensionsTests: XCTestCase {
             return XCTFail("Un-decodable JSON")
         }
         XCTAssert(res.id == nil)
-
 
         // Should be able to infer Optional if not given
         let json2 = "{}"

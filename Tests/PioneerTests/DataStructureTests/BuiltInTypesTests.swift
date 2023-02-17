@@ -9,8 +9,8 @@
 import Foundation
 import enum GraphQL.Map
 import enum GraphQL.OperationType
-import XCTest
 @testable import Pioneer
+import XCTest
 
 final class BuiltInTypesTests: XCTestCase {
     /// Test ID Randomised features

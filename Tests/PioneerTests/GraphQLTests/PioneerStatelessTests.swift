@@ -7,11 +7,11 @@
 //
 
 import Graphiti
-import NIO
-import XCTest
 import struct GraphQL.GraphQLResult
 import enum GraphQL.Map
+import NIO
 @testable import Pioneer
+import XCTest
 
 func AlwaysZero<ObjectType, Arguments>() -> GraphQLMiddleware<ObjectType, Void, Arguments, Int> {
     return { _, _ in 0 }
@@ -31,7 +31,7 @@ final class PioneerStatelessTests: XCTestCase {
     struct Resolver {
         func sync(context _: (), arguments _: NoArguments) -> Int { 0 }
 
-        struct Arg0: Codable { 
+        struct Arg0: Codable {
             var allowed: Bool
         }
 
@@ -47,7 +47,6 @@ final class PioneerStatelessTests: XCTestCase {
             return Message(content: "Hello")
         }
     }
-
 
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
     private let resolver = Resolver()
@@ -99,7 +98,7 @@ final class PioneerStatelessTests: XCTestCase {
             "query { sync }",
             "query { syncWithArg(allowed: true) }",
             "query { async }",
-        ].map { 
+        ].map {
             GraphQLRequest(query: $0, operationName: nil, variables: nil)
         }
 
@@ -107,7 +106,7 @@ final class PioneerStatelessTests: XCTestCase {
             Map.dictionary(["sync": Map.number(0)]),
             Map.dictionary(["syncWithArg": .number(1)]),
             Map.dictionary(["async": .number(2)]),
-        ].map { 
+        ].map {
             GraphQLResult(data: $0)
         }
 

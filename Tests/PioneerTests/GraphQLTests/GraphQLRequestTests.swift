@@ -6,12 +6,12 @@
 //  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
+import class GraphQL.Field
 import class GraphQL.OperationDefinition
 import enum GraphQL.OperationType
 import func GraphQL.parse
-import class GraphQL.Field
-import XCTest
 @testable import Pioneer
+import XCTest
 
 final class GraphQLRequestTests: XCTestCase {
     /// GraphQL Request Object

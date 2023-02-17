@@ -5,9 +5,9 @@
 //
 
 import Graphiti
-import XCTest
 import NIOHTTP1
 @testable import Pioneer
+import XCTest
 
 final class SecurityTest: XCTestCase {
     private let pioneer = try! Pioneer(

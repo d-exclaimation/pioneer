@@ -9,8 +9,8 @@
 import Graphiti
 import class GraphQL.EventStream
 import class NIO.MultiThreadedEventLoopGroup
-import XCTest
 @testable import Pioneer
+import XCTest
 
 final class DroneTests: XCTestCase {
     /// Simple Test Resolver
@@ -64,7 +64,7 @@ final class DroneTests: XCTestCase {
             SubscriptionField("delayed", as: String.self, atSub: Resolver.delayed)
         }
     }.schema
-    
+
     override func tearDownWithError() throws {
         try group.syncShutdownGracefully()
     }
@@ -95,7 +95,7 @@ final class DroneTests: XCTestCase {
         let (consumer, drone) = try setup()
 
         await drone.start(
-            for: "1", 
+            for: "1",
             given: .init(query: "subscription { simple }")
         )
 
@@ -115,7 +115,7 @@ final class DroneTests: XCTestCase {
     func testOutsideStopSubscription() async throws {
         let (consumer, drone) = try setup()
         await drone.start(
-            for: "2", 
+            for: "2",
             given: .init(query: "subscription { delayed }")
         )
         // Stop before messages were received

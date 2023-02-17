@@ -6,10 +6,10 @@
 //
 
 import Graphiti
+@testable import Pioneer
 import Vapor
 import XCTest
 import XCTVapor
-@testable import Pioneer
 
 final class ContextTests: XCTestCase {
     private let server = Pioneer(
