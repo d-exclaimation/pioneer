@@ -4,14 +4,12 @@
 //  Created by d-exclaimation on 25/06/22.
 //
 
-import Foundation
 import Graphiti
-@testable import Pioneer
-import Vapor
 import XCTest
+import NIOHTTP1
+@testable import Pioneer
 
 final class SecurityTest: XCTestCase {
-    private let application = Application(.testing)
     private let pioneer = try! Pioneer(
         schema: .init {
             Query {
@@ -33,48 +31,40 @@ final class SecurityTest: XCTestCase {
     /// - Return true if protection is active, request has acceptable content type
     /// - Return false otherwise
     func testCsrfPreventionChecking() {
-        let req = Request(application: application, headers: .init([]), on: application.eventLoopGroup.next())
-        let res = pioneer.csrfVulnerable(given: req.headers)
+        // No required headers
+        let headers = HTTPHeaders()
+        let res = pioneer.csrfVulnerable(given: headers)
         XCTAssertFalse(res)
 
-        let req1 = Request(application: application, headers: .init([("Apollo-Require-Preflight", "True")]), on: application.eventLoopGroup.next())
-        let res1 = pioneer.csrfVulnerable(given: req1.headers)
+        // Has required headers and either `Apollo-Require-Preflight` or `X-Apollo-Operation-Name`
+        let headers1 = HTTPHeaders([("Apollo-Require-Preflight", "True")])
+        let res1 = pioneer.csrfVulnerable(given: headers1)
         XCTAssertFalse(res1)
 
-        let req2 = Request(application: application, headers: .init([("X-Apollo-Operation-Name", "SomeQuery")]), on: application.eventLoopGroup.next())
-        let res2 = pioneer.csrfVulnerable(given: req2.headers)
+        // Has required headers and either `Apollo-Require-Preflight` or `X-Apollo-Operation-Name`
+        let headers2 = HTTPHeaders([("X-Apollo-Operation-Name", "SomeQuery")])
+        let res2 = pioneer.csrfVulnerable(given: headers2)
         XCTAssertFalse(res2)
 
-        let req3 = Request(application: application, method: .POST, headers: .init([("Content-Type", "application/json")]), on: application.eventLoopGroup.next())
-        let res3 = pioneer.csrfVulnerable(given: req3.headers)
+        // Has required headers and acceptable content type
+        let headers3 = HTTPHeaders([("Content-Type", "application/json")])
+        let res3 = pioneer.csrfVulnerable(given: headers3)
         XCTAssertFalse(res3)
 
         for unacceptable in ["text/plain", "application/x-www-form-urlencoded", "multipart/form-data"] {
-            let req4 = Request(
-                application: application,
-                method: .POST,
-                headers: .init([("Content-Type", unacceptable)]),
-                on: application.eventLoopGroup.next()
-            )
-            let res4 = pioneer.csrfVulnerable(given: req4.headers)
+            // Has required headers and unacceptable content type
+            let headers4 = HTTPHeaders([("Content-Type", unacceptable)])
+            let res4 = pioneer.csrfVulnerable(given: headers4)
             XCTAssertTrue(res4)
 
-            let req5 = Request(
-                application: application,
-                method: .POST,
-                headers: .init([("Content-Type", unacceptable), ("Apollo-Require-Preflight", "True")]),
-                on: application.eventLoopGroup.next()
-            )
-            let res5 = pioneer.csrfVulnerable(given: req5.headers)
+            // Has required headers, unacceptable content type and either `Apollo-Require-Preflight` or `X-Apollo-Operation-Name`
+            let headers5 = HTTPHeaders([("Content-Type", unacceptable), ("Apollo-Require-Preflight", "True")])
+            let res5 = pioneer.csrfVulnerable(given: headers5)
             XCTAssertFalse(res5)
 
-            let req6 = Request(
-                application: application,
-                method: .POST,
-                headers: .init([("Content-Type", unacceptable), ("X-Apollo-Operation-Name", "SomeQuery")]),
-                on: application.eventLoopGroup.next()
-            )
-            let res6 = pioneer.csrfVulnerable(given: req6.headers)
+            // Has required headers, unacceptable content type and either `Apollo-Require-Preflight` or `X-Apollo-Operation-Name`
+            let headers6 = HTTPHeaders([("Content-Type", unacceptable), ("X-Apollo-Operation-Name", "SomeQuery")])
+            let res6 = pioneer.csrfVulnerable(given: headers6)
             XCTAssertFalse(res6)
         }
     }

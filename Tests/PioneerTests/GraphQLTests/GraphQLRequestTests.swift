@@ -1,19 +1,19 @@
 //
-//  GraphitiExtensionTests.swift
+//  GraphQLRequestTests.swift
 //  Pioneer
 //
 //  Created by d-exclaimation on 2:48 PM.
 //  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
-import Foundation
-import Graphiti
-import GraphQL
-import NIO
-@testable import Pioneer
+import class GraphQL.OperationDefinition
+import enum GraphQL.OperationType
+import func GraphQL.parse
+import class GraphQL.Field
 import XCTest
+@testable import Pioneer
 
-final class GraphitiExtensionTests: XCTestCase {
+final class GraphQLRequestTests: XCTestCase {
     /// GraphQL Request Object
     /// 1. Should omit nil values
     func testDecodingGraphQLRequest() {
@@ -26,7 +26,10 @@ final class GraphitiExtensionTests: XCTestCase {
     /// 2. Should be parsed properly into the correct GraphQL AST
     func testGraphQLRequestSource() throws {
         let req = GraphQLRequest(query: "query { someField }", operationName: nil, variables: nil)
+        // Should have a source
         let ast = try parse(source: req.source)
+
+        // Should have a valid AST
         guard !ast.definitions.isEmpty else {
             return XCTFail("Definition is empty")
         }
@@ -47,12 +50,16 @@ final class GraphitiExtensionTests: XCTestCase {
     /// 2. Should not take account keyword given inside a string qoutes
     /// 3. Should not mistaken `__type` with `__typename`
     func testGraphQLRequestIntrospection() {
+        // Should be able to identify Introspection query 100% of the time (__schema)
         let introspection = GraphQLRequest(query: "{ __schema { queryType { name } } }", operationName: nil, variables: nil)
         XCTAssert(introspection.isIntrospection)
 
+        // Should be able to identify Introspection query 100% of the time (__type)
         let introspection2 = GraphQLRequest(query: "{ __type(name: \"Droid\") { name } }", operationName: nil, variables: nil)
         XCTAssert(introspection2.isIntrospection)
 
+        // Should not take account keyword given inside a string qoutes
+        // Should not mistaken `__type` with `__typename`
         let query = GraphQLRequest(query: "{ someField(arg0: \"No __schema allowed\") { __typename } }", operationName: nil, variables: nil)
         XCTAssert(!query.isIntrospection)
     }

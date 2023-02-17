@@ -6,20 +6,13 @@
 //  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
-import Foundation
 import Graphiti
-import GraphQL
-@testable import Pioneer
-import Vapor
 import XCTest
+import class GraphQL.EventStream
+import class NIO.MultiThreadedEventLoopGroup
+@testable import Pioneer
 
 final class ProbeTests: XCTestCase {
-    private let app = Application(.testing)
-
-    deinit {
-        app.shutdown()
-    }
-
     /// Simple resolver with a single subscriptions
     struct Resolver {
         func test(_: Void, _: NoArguments) -> String { "test" }
@@ -28,34 +21,38 @@ final class ProbeTests: XCTestCase {
         }
     }
 
-    /// Setup the GraphQL schema and Probe, then return the Probe
-    func setup() throws -> Pioneer<Resolver, Void>.Probe {
-        let schema = try Schema<Resolver, Void>.init {
-            Query {
-                Graphiti.Field("hello", at: Resolver.test)
-            }
-            Subscription {
-                SubscriptionField("simple", as: String.self, atSub: Resolver.subscription)
-            }
-        }.schema
+    private let group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
+    private let schema = try! Schema<Resolver, Void>.init {
+        Query {
+            Graphiti.Field("hello", at: Resolver.test)
+        }
+        Subscription {
+            SubscriptionField("simple", as: String.self, atSub: Resolver.subscription)
+        }
+    }.schema
+    
+    override func tearDownWithError() throws {
+        try group.syncShutdownGracefully()
+    }
 
+    /// Setup the GraphQL schema and Probe, then return the Probe
+    func setup() -> Pioneer<Resolver, Void>.Probe {
         return .init(
             schema: schema,
             resolver: Resolver(),
-            proto: SubscriptionTransportWs.self
+            proto: GraphQLWs.self
         )
     }
 
     /// Setup a Process using a custom test consumer
     func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestConsumer) {
-        let req = Request(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer()
         return (
             .init(
                 id: UUID(),
                 io: consumer,
                 payload: [:],
-                ev: req.eventLoop,
+                ev: group.next(),
                 context: { _, _ in }
             ),
             consumer
@@ -67,15 +64,14 @@ final class ProbeTests: XCTestCase {
     /// 2. The result should be in a JSON string format
     func testOutgoing() async throws {
         let (process, con) = consumer()
-        let probe = try setup()
+        let probe = setup()
 
+        // Outgoing message should pass through
         let message = GraphQLMessage(id: "1", type: "next", payload: ["data": .null, "errors": .array([])])
-
         await probe.outgoing(with: "1", to: process, given: message)
 
-        try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
-
-        let results = await con.waitAll()
+        // Should receive the message and the completion
+        let results = await con.waitAllWithValue(requirement: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {
             return XCTFail("No completion")
         }
@@ -95,10 +91,15 @@ final class ProbeTests: XCTestCase {
     /// 4. Should dispatch result into consumer as JSON string
     func testStatelessRequest() async throws {
         let (process, consumer) = consumer()
-        let probe = try setup()
+        let probe = setup()
 
+        // Connect first
         await probe.connect(with: process)
+
+        // Send a stateless request
         await probe.once(for: process.id, with: "2", given: .init(query: "query { hello }", operationName: nil, variables: nil))
+
+        // Should receive the message and the completion
         let results = await consumer.waitAllWithValue(requirement: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"2\"") }) else {
             return XCTFail("No completion")
@@ -112,6 +113,8 @@ final class ProbeTests: XCTestCase {
         XCTAssert(res.contains("\"data\":"))
         XCTAssert(res.contains("\"hello\":\"test\""))
         XCTAssert(res.contains("\"test\""))
+
+        // Check if the message contains the correct data
         guard let message = res.data(using: .utf8)?.to(GraphQLMessage.self) else {
             return XCTFail("Unparseable data")
         }
@@ -130,10 +133,15 @@ final class ProbeTests: XCTestCase {
     /// 4. Should dispatch result into consumer as JSON string but with no `data` and instead an `errors` array.
     func testInvalidStatelessRequest() async throws {
         let (process, consumer) = consumer()
-        let probe = try setup()
+        let probe = setup()
 
+        // Connect first
         await probe.connect(with: process)
+
+        // Send a stateless request (but expect an error)
         await probe.once(for: process.id, with: "3", given: .init(query: "query { idk }", operationName: nil, variables: nil))
+
+        // Should receive the message and the completion
         let results = await consumer.waitAllWithValue(requirement: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"3\"") }) else {
             return XCTFail("No completion")
@@ -142,6 +150,8 @@ final class ProbeTests: XCTestCase {
             return XCTFail("No result")
         }
         XCTAssert(res.contains("3"))
+
+        // Check if the message contains the correct errors
         guard let message = res.data(using: .utf8)?.to(GraphQLMessage.self) else {
             return XCTFail("Unparseable data")
         }

@@ -7,10 +7,10 @@
 
 import Graphiti
 import NIOFoundationCompat
-@testable import Pioneer
 import Vapor
 import XCTest
 import XCTVapor
+@testable import Pioneer
 
 final class HTTPStrategyTests: XCTestCase {
     private let schema: Schema<Resolver, Void> = try! .init {
@@ -47,6 +47,7 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
+        // Test query through GET should be denied
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -54,6 +55,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test mutation through GET should be denied
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -61,8 +63,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test query through POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -72,8 +74,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -93,6 +95,7 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
+        // Test query through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -100,15 +103,16 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through GET should be allowed 
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-
+        
+        // Test query through POST should be denied
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -118,8 +122,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test mutation through POST should be denied
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -139,6 +143,7 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
+        // Test query through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -146,6 +151,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through GET should be denied
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -153,8 +159,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test query through POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -164,8 +170,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -185,6 +191,7 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
+        // Test query through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -192,6 +199,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -199,8 +207,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test query through POST should be denied
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -210,8 +218,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -231,6 +239,7 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
+        // Test query through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -238,6 +247,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through GET should be denied
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -245,8 +255,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test query through POST should be denied
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -256,8 +266,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -277,6 +287,7 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
+        // Test query through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -284,6 +295,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -291,8 +303,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test query through POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -302,8 +314,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -323,6 +335,8 @@ final class HTTPStrategyTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware())
 
+
+        // Test query through GET should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -330,6 +344,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test query with bad content type should be denied
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
@@ -338,6 +353,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test query with bad content type but with Apollo-Require-Preflight should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
@@ -345,7 +361,8 @@ final class HTTPStrategyTests: XCTestCase {
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
-
+        
+        // Test query with bad content type but with X-Apollo-Operation-Name should be allowed
         try app.testable().test(
             .GET,
             "/graphql?query=\("query Operation { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)&operationName=Operation",
@@ -354,6 +371,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation in GET should be denied
         try app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
@@ -361,8 +379,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .badRequest)
         }
 
+        // Test query in POST should be allowed 
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -372,8 +390,8 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test mutation in POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-
         try app.testable().test(
             .POST,
             "/graphql",
@@ -383,6 +401,7 @@ final class HTTPStrategyTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test multipart/form-data in POST should be allowed since POST is not vunerble to CSRF
         try app.testable().test(
             .POST,
             "/graphql",

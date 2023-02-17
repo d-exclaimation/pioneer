@@ -5,8 +5,8 @@
 //  Created by d-exclaimation.
 //
 
-@testable import Pioneer
 import XCTest
+@testable import Pioneer
 
 final class WebSocketProtocolTests: XCTestCase {
     func testSubProtocolName() {
