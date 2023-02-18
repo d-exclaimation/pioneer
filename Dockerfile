@@ -1,7 +1,13 @@
 # Get the latest tag for Swift on Linux (non-slim one)
-FROM swift:latest
+FROM swift:latest AS latest
 
-WORKDIR /package
+WORKDIR /latest
+
+COPY Package.swift ./
+COPY Package.resolved ./
+
+# Get dependencies
+RUN swift package resolve
 
 # Get source and test code
 COPY . ./
@@ -9,5 +15,8 @@ COPY . ./
 # Build package
 RUN swift build
 
+# Test package
+RUN swift test
+
 # Run all test on Linux machine
-CMD ["swift", "test"]
+CMD ["echo", "'swift test' ran successfully on Linux"]

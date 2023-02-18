@@ -70,7 +70,7 @@ extension Pioneer {
 
             let future = execute(gql, client: client)
 
-            pipeToSelf(future: future) { sink, res in
+            pipeToSelf(future: future) { [unowned self] sink, res in
                 switch res {
                 case let .success(value):
                     await sink.outgoing(

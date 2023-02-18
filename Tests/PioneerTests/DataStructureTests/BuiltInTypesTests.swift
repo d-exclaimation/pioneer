@@ -13,8 +13,6 @@ import enum GraphQL.OperationType
 import XCTest
 
 final class BuiltInTypesTests: XCTestCase {
-    typealias Req = GraphQLRequest
-
     /// Test ID Randomised features
     func testID() throws {
         let random = ID.random()
@@ -35,31 +33,35 @@ final class BuiltInTypesTests: XCTestCase {
     }
 
     /// Test GraphQLRequest
-    func testGraphQLReques() throws {
-        let gql0 = Req(query: "query { field1 }")
+    func testGraphQLGraphQLRequestuest() throws {
+        // Correct operation type (query)
+        let gql0 = GraphQLRequest(query: "query { field1 }")
         XCTAssertFalse(gql0.isIntrospection)
         guard let type0 = gql0.operationType else {
             return XCTFail("Cannot idenfity just query")
         }
         XCTAssert(type0 == OperationType.query, "Cannot idenfity just query")
 
-        let gql1 = Req(query: "mutation { field1 }")
+        // Correct operation type (mutation)
+        let gql1 = GraphQLRequest(query: "mutation { field1 }")
         XCTAssertFalse(gql1.isIntrospection)
         guard let type1 = gql1.operationType else {
             return XCTFail("Cannot idenfity just mutation")
         }
         XCTAssert(type1 == OperationType.mutation, "Cannot idenfity just mutation")
 
-        let gql2 = Req(query: "subscription { field1 }")
+        // Correct operation type (subscription)
+        let gql2 = GraphQLRequest(query: "subscription { field1 }")
         XCTAssertFalse(gql2.isIntrospection)
         guard let type2 = gql2.operationType else {
             return XCTFail("Cannot idenfity just subscription")
         }
         XCTAssert(type2 == OperationType.subscription, "Cannot idenfity just subscription")
 
+        // Correct operation type with operation name
         let query = "subscription Op0 { field1 } mutation Op1 { field1 } query Op2 { field1 }"
         for (operationName, optype) in [("Op0", OperationType.subscription), ("Op1", OperationType.mutation), ("Op2", OperationType.query)] {
-            let gql3 = Req(query: query, operationName: operationName)
+            let gql3 = GraphQLRequest(query: query, operationName: operationName)
             XCTAssertFalse(gql3.isIntrospection)
             guard let type3 = gql3.operationType else {
                 return XCTFail("Cannot idenfity \(operationName)")
@@ -67,43 +69,48 @@ final class BuiltInTypesTests: XCTestCase {
             XCTAssert(type3 == optype, "Cannot idenfity just \(operationName)")
         }
 
+        // Should decode correctly
         let decoded0 = """
         {
             "query": "query { field1 }"
         } 
-        """.data(using: .utf8)?.to(Req.self)
+        """.data(using: .utf8)?.to(GraphQLRequest.self)
         XCTAssertEqual(decoded0?.query, "query { field1 }")
 
+        // Should decode correctly (with operation name)
         let decoded1 = """
         {
             "query": "query Name { field1 }",
             "operationName": "Name"
         } 
-        """.data(using: .utf8)?.to(Req.self)
+        """.data(using: .utf8)?.to(GraphQLRequest.self)
         XCTAssertEqual(decoded1?.query, "query Name { field1 }")
         XCTAssertEqual(decoded1?.operationName, "Name")
 
+        // Should decode correctly (with operation name and variables)
         let decoded2 = """
         {
             "query": "query Name($count: 1) { field1(count: $count) }",
             "operationName": "Name",
             "variables": { "count": 1 }
         } 
-        """.data(using: .utf8)?.to(Req.self)
+        """.data(using: .utf8)?.to(GraphQLRequest.self)
         XCTAssertEqual(decoded2?.query, "query Name($count: 1) { field1(count: $count) }")
         XCTAssertEqual(decoded2?.operationName, "Name")
         XCTAssertEqual(decoded2?.variables?["count"], Map.number(1))
 
+        // Should decode correctly (with null operation name and variables)
         let decoded3 = """
         {
             "query": "query { field1 }",
             "operationName": null,
             "variables": null
         } 
-        """.data(using: .utf8)?.to(Req.self)
+        """.data(using: .utf8)?.to(GraphQLRequest.self)
         XCTAssertEqual(decoded3?.query, "query { field1 }")
 
-        let encoded = Req(query: "query { field }").jsonString
+        // Should encode correctly
+        let encoded = GraphQLRequest(query: "query { field }").jsonString
         XCTAssertNotEqual("{}", encoded)
         XCTAssertEqual("{\"query\":\"query { field }\"}", encoded)
     }

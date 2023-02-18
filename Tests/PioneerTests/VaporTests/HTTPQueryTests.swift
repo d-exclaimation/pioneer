@@ -13,7 +13,7 @@ import XCTest
 import XCTVapor
 
 final class HTTPQueryTests: XCTestCase {
-    private let server: Pioneer<Resolver, Void> = Pioneer(
+    private let server = Pioneer(
         schema: try! Schema<Resolver, Void> {
             ID.asScalar()
 
@@ -85,8 +85,8 @@ final class HTTPQueryTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware(), at: .beginning)
 
+        // Test for valid query and the proper data
         let body0 = ByteBuffer(data: gql0.json ?? .init())
-
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.readableBytes.description)]),
@@ -101,8 +101,8 @@ final class HTTPQueryTests: XCTestCase {
             }
         }
 
+        // Test for valid query with variables and operation name
         let body1 = ByteBuffer(data: gql1.json ?? .init())
-
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.readableBytes.description)]),
@@ -117,8 +117,8 @@ final class HTTPQueryTests: XCTestCase {
             }
         }
 
+        // Test for valid query with multiple queries and operation name
         let body2 = ByteBuffer(data: gql2.json ?? .init())
-
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body2.readableBytes.description)]),
@@ -133,8 +133,8 @@ final class HTTPQueryTests: XCTestCase {
             }
         }
 
+        // Test for valid query with errors
         let body3 = ByteBuffer(data: gql3.json ?? .init())
-
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body3.readableBytes.description)]),
@@ -146,8 +146,9 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssert(res.body.string.contains("\(Abort(.imATeapot, reason: "Expected"))"))
         }
 
+        // TODO: Move to a separate test as related to GraphQL over HTTP spec
+        // Test for invalid query
         let body4 = ByteBuffer(data: gql4.json ?? .init())
-
         try app.testable().test(
             .POST, "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body4.readableBytes.description)]),
@@ -157,6 +158,7 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssert(res.body.string.contains(#"{"errors":"#))
         }
 
+        // Test for invalid request (no body)
         try app.testable().test(.POST, "/graphql") { res in
             XCTAssertEqual(res.status, .badRequest)
         }
@@ -186,6 +188,7 @@ final class HTTPQueryTests: XCTestCase {
 
         app.middleware.use(server.vaporMiddleware(), at: .beginning)
 
+        // Test for valid query
         try app.testable().test(
             .GET, "/graphql?\(gql0)"
         ) { res in
@@ -198,6 +201,7 @@ final class HTTPQueryTests: XCTestCase {
             }
         }
 
+        // Test for valid query with variables and operation name
         try app.testable().test(
             .GET, "/graphql?\(gql1)"
         ) { res in
@@ -210,6 +214,7 @@ final class HTTPQueryTests: XCTestCase {
             }
         }
 
+        // Test for valid query with multiple queries and operation name
         try app.testable().test(
             .GET, "/graphql?\(gql2)"
         ) { res in
@@ -222,6 +227,7 @@ final class HTTPQueryTests: XCTestCase {
             }
         }
 
+        // Test for valid query with errors
         try app.testable().test(
             .GET, "/graphql?\(gql3)"
         ) { res in
@@ -231,6 +237,8 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssert(res.body.string.contains("\(Abort(.imATeapot, reason: "Expected"))"))
         }
 
+        // TODO: Move to a separate test as related to GraphQL over HTTP spec
+        // Test for invalid query
         try app.testable().test(
             .GET, "/graphql?\(gql4)"
         ) { res in
@@ -238,12 +246,14 @@ final class HTTPQueryTests: XCTestCase {
             XCTAssert(res.body.string.contains(#"{"errors":"#))
         }
 
+        // Test for playground query
         try app.testable().test(
             .GET, "/graphql"
         ) { res in
             XCTAssertEqual(res.status, .ok)
         }
 
+        // Test for invalid route
         try app.testable().test(
             .GET, "/graphql/wrong"
         ) { res in

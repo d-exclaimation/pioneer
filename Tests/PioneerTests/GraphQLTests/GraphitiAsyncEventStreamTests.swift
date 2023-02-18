@@ -6,66 +6,65 @@
 //  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
-import Foundation
 import Graphiti
 import GraphQL
 import NIO
 @testable import Pioneer
 import XCTest
 
-/// Simple message type with a custom computed properties
-struct Message: Codable, Identifiable {
-    var id: String = UUID().uuidString
-    var content: String
+final class GraphitiTests: XCTestCase {
+    /// Simple message type with a custom computed properties
+    struct Message: Codable, Identifiable {
+        var id: String = UUID().uuidString
+        var content: String
 
-    struct Arg: Codable {
-        var formatting: String
-    }
+        struct Arg: Codable {
+            var formatting: String
+        }
 
-    func description(context _: Void, arguments: Arg) async throws -> String {
-        switch arguments.formatting.lowercased() {
-        case "inline":
-            return "msg(\(id)): \(content)"
-        default:
-            return """
-            Message:
-            id -> \(id)
-            > \(content)
-            """
+        func description(context _: Void, arguments: Arg) async throws -> String {
+            switch arguments.formatting.lowercased() {
+            case "inline":
+                return "msg(\(id)): \(content)"
+            default:
+                return """
+                Message:
+                id -> \(id)
+                > \(content)
+                """
+            }
         }
     }
-}
 
-/// Simple Test Resolver with a sync query, async throwing mutation, and async throwing subscriptions
-struct TestResolver {
-    let pubsub = AsyncPubSub()
+    /// Simple Test Resolver with a sync query, async throwing mutation, and async throwing subscriptions
+    struct Resolver {
+        let pubsub = AsyncPubSub()
 
-    func hello(context _: Void, arguments _: NoArguments) -> String {
-        "Hello GraphQL!!"
+        func hello(context _: Void, arguments _: NoArguments) -> String {
+            "Hello GraphQL!!"
+        }
+
+        struct Arg1: Codable {
+            var string: String
+        }
+
+        func randomMessage(context _: Void, arguments: Arg1) async throws -> Message {
+            let message = Message(content: arguments.string)
+            await pubsub.publish(for: "*", payload: message)
+            return message
+        }
+
+        func onMessage(context _: Void, arguments _: NoArguments) -> EventStream<Message> {
+            let stream: AsyncStream<Message> = pubsub.asyncStream(for: "*")
+            return stream.toEventStream()
+        }
     }
 
-    struct Arg1: Codable {
-        var string: String
-    }
-
-    func randomMessage(context _: Void, arguments: Arg1) async throws -> Message {
-        let message = Message(content: arguments.string)
-        await pubsub.publish(for: "*", payload: message)
-        return message
-    }
-
-    func onMessage(context _: Void, arguments _: NoArguments) -> EventStream<Message> {
-        let stream: AsyncStream<Message> = pubsub.asyncStream(for: "*")
-        return stream.toEventStream()
-    }
-}
-
-final class GraphitiTests: XCTestCase {
-    private let resolver: TestResolver = .init()
+    private let resolver: Resolver = .init()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
 
-    deinit {
-        try? group.syncShutdownGracefully()
+    override func tearDownWithError() throws {
+        try group.syncShutdownGracefully()
     }
 
     /// Subscription through AsyncSequence's AsyncEventStream
@@ -75,7 +74,7 @@ final class GraphitiTests: XCTestCase {
     /// 4. Should get all passed messages when consuming
     /// 5. Should get those messages in the correct order and format
     func testAsyncSequenceSubscription() throws {
-        let schema = try Schema<TestResolver, Void>.init {
+        let schema = try Schema<Resolver, Void> {
             Type(Message.self) {
                 Field("id", at: \.id)
                 Field("content", at: \.content)
@@ -85,17 +84,17 @@ final class GraphitiTests: XCTestCase {
             }
 
             Query {
-                Field("hello", at: TestResolver.hello)
+                Field("hello", at: Resolver.hello)
             }
 
             Mutation {
-                Field("randomMessage", at: TestResolver.randomMessage) {
+                Field("randomMessage", at: Resolver.randomMessage) {
                     Argument("content", at: \.string)
                 }
             }
 
             Subscription {
-                SubscriptionField("onMessage", as: Message.self, atSub: TestResolver.onMessage)
+                SubscriptionField("onMessage", as: Message.self, atSub: Resolver.onMessage)
             }
         }
 

@@ -6,21 +6,13 @@
 //  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
-import Foundation
 import Graphiti
-import GraphQL
-import NIOWebSocket
+import class GraphQL.EventStream
+import class NIO.MultiThreadedEventLoopGroup
 @testable import Pioneer
-import Vapor
 import XCTest
 
 final class DroneTests: XCTestCase {
-    private let app = Application(.testing)
-
-    deinit {
-        app.shutdown()
-    }
-
     /// Simple Test Resolver
     class Resolver {
         /// Unused Query resolver, only here to satisfy Schema
@@ -62,29 +54,33 @@ final class DroneTests: XCTestCase {
         }
     }
 
+    private var group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
+    private var schema = try! Schema<Resolver, Void> {
+        Query {
+            Field("hello", at: Resolver.hello)
+        }
+        Subscription {
+            SubscriptionField("simple", as: String.self, atSub: Resolver.simple)
+            SubscriptionField("delayed", as: String.self, atSub: Resolver.delayed)
+        }
+    }.schema
+
+    override func tearDownWithError() throws {
+        try group.syncShutdownGracefully()
+    }
+
     /// Setup a GraphQLSchema, Pioneer drone, and a TestConsumer
     /// - Returns: The configured consumer and drone itself
     func setup() throws -> (TestConsumer, Pioneer<Resolver, Void>.Drone) {
-        let schema = try Schema<Resolver, Void>.init {
-            Query {
-                Field("hello", at: Resolver.hello)
-            }
-            Subscription {
-                SubscriptionField("simple", as: String.self, atSub: Resolver.simple)
-                SubscriptionField("delayed", as: String.self, atSub: Resolver.delayed)
-            }
-        }.schema
-        let req = Request(application: app, on: app.eventLoopGroup.next())
         let consumer = TestConsumer()
-        let process = Pioneer<Resolver, Void>.WebSocketClient(
-            id: UUID(),
-            io: consumer,
-            payload: nil,
-            ev: req.eventLoop,
-            context: { _, _ in }
-        )
         let drone: Pioneer<Resolver, Void>.Drone = .init(
-            process,
+            .init(
+                id: UUID(),
+                io: consumer,
+                payload: nil,
+                ev: group.next(),
+                context: { _, _ in }
+            ),
             schema: schema,
             resolver: Resolver(),
             proto: SubscriptionTransportWs.self
@@ -98,10 +94,16 @@ final class DroneTests: XCTestCase {
     func testBestCaseSubscription() async throws {
         let (consumer, drone) = try setup()
 
-        await drone.start(for: "1", given: .init(query: "subscription { simple }", operationName: nil, variables: nil))
+        await drone.start(
+            for: "1",
+            given: .init(query: "subscription { simple }")
+        )
 
+        // Get the first message
         let result = await consumer.wait()
         XCTAssert(result.contains("payload") && result.contains("Hello") && result.contains("1"))
+
+        // Get the second message (completion)
         let completion = await consumer.wait()
         XCTAssert(completion.contains("1"))
     }
@@ -112,9 +114,15 @@ final class DroneTests: XCTestCase {
     /// 3. should not give anything even completion
     func testOutsideStopSubscription() async throws {
         let (consumer, drone) = try setup()
-        await drone.start(for: "2", given: .init(query: "subscription { delayed }", operationName: nil, variables: nil))
+        await drone.start(
+            for: "2",
+            given: .init(query: "subscription { delayed }")
+        )
+        // Stop before messages were received
         await drone.stop(for: "2")
-        let result = await consumer.waitThrowing(time: 0.3)
+
+        // Should not give anything even completion
+        let result = await consumer.waitUntil(time: 0.3)
         XCTAssert(result == nil)
     }
 
@@ -125,8 +133,12 @@ final class DroneTests: XCTestCase {
     func testKillableSubscription() async throws {
         let (consumer, drone) = try setup()
         await drone.start(for: "2", given: .init(query: "subscription { delayed }", operationName: nil, variables: nil))
+
+        // The entire drone is killed before messages were received
         await drone.acid()
-        let result = await consumer.waitThrowing(time: 0.3)
+
+        // Should not give anything even completion
+        let result = await consumer.waitUntil(time: 0.3)
         XCTAssert(result == nil)
     }
 }

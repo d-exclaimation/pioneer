@@ -6,14 +6,13 @@
 //
 
 import Graphiti
-import NIOFoundationCompat
 @testable import Pioneer
 import Vapor
 import XCTest
 import XCTVapor
 
 final class ContextTests: XCTestCase {
-    private let server: Pioneer<Resolver, Context> = Pioneer(
+    private let server = Pioneer(
         schema: try! Schema<Resolver, Context> {
             ID.asScalar()
 
@@ -47,6 +46,7 @@ final class ContextTests: XCTestCase {
             app.shutdown()
         }
 
+        // Construct context for each request
         app.middleware.use(
             server.vaporMiddleware(
                 at: "graphql",
@@ -62,6 +62,7 @@ final class ContextTests: XCTestCase {
             )
         )
 
+        // Was able to get the context and the auth header
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { test }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
@@ -72,6 +73,7 @@ final class ContextTests: XCTestCase {
             XCTAssert(res.body.string.contains("Hello"))
         }
 
+        // Was not able to get the context and the auth header
         try app.testable().test(
             .GET,
             "/graphql?query=\("query { test }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"

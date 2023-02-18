@@ -19,7 +19,7 @@ jobs:
     - run: swift test
   latest:
     container: 
-      image: swift:bionic
+      image: swift:latest
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

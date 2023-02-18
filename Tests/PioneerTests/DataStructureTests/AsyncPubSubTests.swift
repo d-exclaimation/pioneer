@@ -18,6 +18,8 @@ final class AsyncPubSubTests: XCTestCase {
     func testPublishingAndConsuming() async {
         let pubsub = AsyncPubSub()
         let trigger = "1"
+
+        // Expectations
         let exp0 = XCTestExpectation()
         let exp1 = XCTestExpectation()
 
@@ -43,7 +45,10 @@ final class AsyncPubSubTests: XCTestCase {
 
         try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
 
+        // Should be skipped due to type mismatch
         await pubsub.publish(for: trigger, payload: "invalid")
+
+        // Should be received by both and trigger the expectations
         await pubsub.publish(for: trigger, payload: 0)
 
         wait(for: [exp0, exp1], timeout: 2)
@@ -79,6 +84,8 @@ final class AsyncPubSubTests: XCTestCase {
 
         try? await Task.sleep(nanoseconds: 500_000)
 
+        // Closing should prevent any consumer to receive anything from their for await loop
+        // then exit the loop and trigger the expectation
         await pubsub.close(for: trigger)
 
         wait(for: [exp0, exp1], timeout: 2)
@@ -88,15 +95,17 @@ final class AsyncPubSubTests: XCTestCase {
     }
 
     func testAsyncStream() async throws {
-        let stream1 = EventStream<Int>.async { con in
-            con.yield(1)
-            con.finish()
-        }
-
+        // EventStream.async
+        let stream1 = EventStream<Int>
+            .async { con in
+                con.yield(1)
+                con.finish()
+            }
         for try await each in stream1.sequence {
             XCTAssertEqual(each, 1)
         }
 
+        // AsyncEventStream.async
         let stream2 = AsyncEventStream<Int, AsyncThrowingStream<Int, Error>> { con in
             con.yield(1)
             con.finish()

@@ -78,7 +78,7 @@ struct TestConsumer: WebSocketable {
         }
     }
 
-    func waitThrowing(time: TimeInterval) async -> String? {
+    func waitUntil(time: TimeInterval) async -> String? {
         let start = Date()
         var res = String?.none
         while abs(start.timeIntervalSinceNow) < time {
