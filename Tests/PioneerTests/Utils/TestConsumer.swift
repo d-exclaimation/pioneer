@@ -31,10 +31,10 @@ actor TestClient: WebSocketable {
     func pull() async -> String {
         await withCheckedContinuation { [unowned self] continuation in
             if !self.push.isEmpty {
-                continuation.resume(returning: self.push.removeFirst())
+                continuation.resume(returning: self.firstPush())
                 return
             }
-            self.pull.append { res in
+            self.nextPull { res in
                 continuation.resume(returning: res)
             }
         }
@@ -61,7 +61,15 @@ actor TestClient: WebSocketable {
         push.append(s)
     }
 
-    func empty() {
+    private func nextPull(_ fn: @escaping (String) -> Void) {
+        pull.append(fn)
+    }
+
+    private func firstPush() -> String {
+        return push.removeFirst()
+    }
+
+    private func empty() {
         pull.forEach { $0("") }
         push.removeAll()
         pull.removeAll()
