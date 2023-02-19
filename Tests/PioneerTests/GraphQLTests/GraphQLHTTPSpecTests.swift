@@ -5,9 +5,9 @@
 //  Created by d-exclaimation on 13:39.
 //
 
-import XCTest
 import NIOHTTP1
 @testable import Pioneer
+import XCTest
 
 final class GraphQLHTTPSpecTests: XCTestCase {
     struct MockRequest: GraphQLRequestConvertible, Sendable {
@@ -16,15 +16,15 @@ final class GraphQLHTTPSpecTests: XCTestCase {
         var headers: HTTPHeaders = .init()
         var method: HTTPMethod = .GET
 
-        func body<T>(_ decodable: T.Type) throws -> T where T : Decodable {
+        func body<T>(_ decodable: T.Type) throws -> T where T: Decodable {
             guard let res = json?.data(using: .utf8) else {
                 throw Err(message: "No JSON body")
             }
             return try JSONDecoder().decode(decodable, from: res)
         }
 
-        func searchParams<T>(_ decodable: T.Type, at: String) -> T? where T : Decodable {
-            search[at].flatMap{ 
+        func searchParams<T>(_ decodable: T.Type, at: String) -> T? where T: Decodable {
+            search[at].flatMap {
                 if let res = $0 as? T {
                     return res
                 }
@@ -72,7 +72,7 @@ final class GraphQLHTTPSpecTests: XCTestCase {
     }
 
     /// Test that valid POST request shouldn't violate the spec
-    func testValidHttpPost()  {
+    func testValidHttpPost() {
         // Valid POST with query only
         let req = MockRequest(
             json: """
@@ -81,7 +81,7 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .POST
         )
@@ -96,7 +96,7 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .POST
         )
@@ -112,13 +112,12 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .POST
         )
         XCTAssertNoThrow(try req3.httpGraphQL, "Should not throw any violation")
     }
-
 
     /// Test that invalid GET request should violate the spec
     func testInvalidHttpGet() {
@@ -133,8 +132,8 @@ final class GraphQLHTTPSpecTests: XCTestCase {
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.missingQuery.message, 
+                violation.message,
+                GraphQLViolation.missingQuery.message,
                 "Should be missing query"
             )
         }
@@ -157,12 +156,12 @@ final class GraphQLHTTPSpecTests: XCTestCase {
 
         XCTAssertThrowsError(try req.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidContentType.message, 
+                violation.message,
+                GraphQLViolation.invalidContentType.message,
                 "Should be missing content type"
             )
         }
@@ -176,18 +175,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .POST
         )
         XCTAssertThrowsError(try req2.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.missingQuery.message, 
+                violation.message,
+                GraphQLViolation.missingQuery.message,
                 "Should be missing query"
             )
         }
@@ -202,18 +201,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .POST
         )
         XCTAssertThrowsError(try req3.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidForm.message, 
+                violation.message,
+                GraphQLViolation.invalidForm.message,
                 "Should be invalid query type"
             )
         }
@@ -228,18 +227,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .POST
         )
         XCTAssertThrowsError(try req4.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidForm.message, 
+                violation.message,
+                GraphQLViolation.invalidForm.message,
                 "Should be invalid variables type"
             )
         }
@@ -254,18 +253,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .POST
         )
         XCTAssertThrowsError(try req5.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidForm.message, 
+                violation.message,
+                GraphQLViolation.invalidForm.message,
                 "Should be invalid operation name type"
             )
         }
@@ -283,18 +282,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .PUT
         )
         XCTAssertThrowsError(try req.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidMethod.message, 
+                violation.message,
+                GraphQLViolation.invalidMethod.message,
                 "Should be invalid method"
             )
         }
@@ -309,18 +308,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .DELETE
         )
         XCTAssertThrowsError(try req2.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidMethod.message, 
+                violation.message,
+                GraphQLViolation.invalidMethod.message,
                 "Should be invalid method"
             )
         }
@@ -335,18 +334,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .PATCH
         )
         XCTAssertThrowsError(try req3.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidMethod.message, 
+                violation.message,
+                GraphQLViolation.invalidMethod.message,
                 "Should be invalid method"
             )
         }
@@ -361,18 +360,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .HEAD
         )
         XCTAssertThrowsError(try req4.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidMethod.message, 
+                violation.message,
+                GraphQLViolation.invalidMethod.message,
                 "Should be invalid method"
             )
         }
@@ -387,18 +386,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .OPTIONS
         )
         XCTAssertThrowsError(try req5.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidMethod.message, 
+                violation.message,
+                GraphQLViolation.invalidMethod.message,
                 "Should be invalid method"
             )
         }
@@ -413,18 +412,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .TRACE
         )
         XCTAssertThrowsError(try req6.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidMethod.message, 
+                violation.message,
+                GraphQLViolation.invalidMethod.message,
                 "Should be invalid method"
             )
         }
@@ -439,18 +438,18 @@ final class GraphQLHTTPSpecTests: XCTestCase {
             }
             """,
             headers: [
-                HTTPHeaders.Name.contentType.description: "application/json"
+                HTTPHeaders.Name.contentType.description: "application/json",
             ],
             method: .CONNECT
         )
         XCTAssertThrowsError(try req7.httpGraphQL, "Should throw violation") { err in
             guard let violation = err as? GraphQLViolation else {
-                 XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
+                XCTFail("Should be a GraphQLViolation, \(err.localizedDescription)")
                 return
             }
             XCTAssertEqual(
-                violation.message, 
-                GraphQLViolation.invalidMethod.message, 
+                violation.message,
+                GraphQLViolation.invalidMethod.message,
                 "Should be invalid method"
             )
         }
