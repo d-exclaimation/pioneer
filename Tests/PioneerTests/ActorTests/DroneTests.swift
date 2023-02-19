@@ -71,8 +71,8 @@ final class DroneTests: XCTestCase {
 
     /// Setup a GraphQLSchema, Pioneer drone, and a TestConsumer
     /// - Returns: The configured consumer and drone itself
-    func setup() throws -> (TestConsumer, Pioneer<Resolver, Void>.Drone) {
-        let consumer = TestConsumer()
+    func setup() throws -> (TestClient, Pioneer<Resolver, Void>.Drone) {
+        let consumer = TestClient()
         let drone: Pioneer<Resolver, Void>.Drone = .init(
             .init(
                 id: UUID(),
@@ -100,11 +100,11 @@ final class DroneTests: XCTestCase {
         )
 
         // Get the first message
-        let result = await consumer.wait()
+        let result = await consumer.pull()
         XCTAssert(result.contains("payload") && result.contains("Hello") && result.contains("1"))
 
         // Get the second message (completion)
-        let completion = await consumer.wait()
+        let completion = await consumer.pull()
         XCTAssert(completion.contains("1"))
     }
 
@@ -122,7 +122,7 @@ final class DroneTests: XCTestCase {
         await drone.stop(for: "2")
 
         // Should not give anything even completion
-        let result = await consumer.waitUntil(time: 0.3)
+        let result = await consumer.pull(until: 0.3)
         XCTAssert(result == nil)
     }
 
@@ -138,7 +138,7 @@ final class DroneTests: XCTestCase {
         await drone.acid()
 
         // Should not give anything even completion
-        let result = await consumer.waitUntil(time: 0.3)
+        let result = await consumer.pull(until: 0.3)
         XCTAssert(result == nil)
     }
 }

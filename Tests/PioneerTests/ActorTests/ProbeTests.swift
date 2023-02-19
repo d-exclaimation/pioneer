@@ -22,9 +22,9 @@ final class ProbeTests: XCTestCase {
     }
 
     private let group = MultiThreadedEventLoopGroup(numberOfThreads: 4)
-    private let schema = try! Schema<Resolver, Void>.init {
+    private let schema = try! Schema<Resolver, Void> {
         Query {
-            Graphiti.Field("hello", at: Resolver.test)
+            Field("hello", at: Resolver.test)
         }
         Subscription {
             SubscriptionField("simple", as: String.self, atSub: Resolver.subscription)
@@ -45,8 +45,8 @@ final class ProbeTests: XCTestCase {
     }
 
     /// Setup a Process using a custom test consumer
-    func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestConsumer) {
-        let consumer = TestConsumer()
+    func consumer() -> (Pioneer<Resolver, Void>.WebSocketClient, TestClient) {
+        let consumer = TestClient()
         return (
             .init(
                 id: UUID(),
@@ -71,7 +71,7 @@ final class ProbeTests: XCTestCase {
         await probe.outgoing(with: "1", to: process, given: message)
 
         // Should receive the message and the completion
-        let results = await con.waitAllWithValue(requirement: 2)
+        let results = await con.pullMany(of: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"1\"") }) else {
             return XCTFail("No completion")
         }
@@ -100,7 +100,7 @@ final class ProbeTests: XCTestCase {
         await probe.once(for: process.id, with: "2", given: .init(query: "query { hello }", operationName: nil, variables: nil))
 
         // Should receive the message and the completion
-        let results = await consumer.waitAllWithValue(requirement: 2)
+        let results = await consumer.pullMany(of: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"2\"") }) else {
             return XCTFail("No completion")
         }
@@ -142,7 +142,7 @@ final class ProbeTests: XCTestCase {
         await probe.once(for: process.id, with: "3", given: .init(query: "query { idk }", operationName: nil, variables: nil))
 
         // Should receive the message and the completion
-        let results = await consumer.waitAllWithValue(requirement: 2)
+        let results = await consumer.pullMany(of: 2)
         guard let _ = results.first(where: { $0.contains("\"complete\"") && $0.contains("\"3\"") }) else {
             return XCTFail("No completion")
         }

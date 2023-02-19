@@ -11,79 +11,85 @@ import NIO
 import NIOWebSocket
 @testable import Pioneer
 
-struct TestConsumer: WebSocketable {
-    var buffer: Buffer = .init()
+/// A test websocket client that synchronous stores message send out in a concurent-safe manner
+actor TestClient: WebSocketable {
+    /// Push queue
+    private var push: [String] = []
+    /// Pull queue
+    private var pull: [(String) -> Void] = []
 
-    actor Buffer {
-        var store: [String] = []
-
-        func set(_ s: String) async {
-            store.append(s)
-            try? await Task.sleep(nanoseconds: 0)
+    /// Pull many messages from the queue (wait till completion)
+    func pullMany(of count: Int = 1) async -> [String] {
+        var res: [String] = []
+        for _ in 0 ..< count {
+            await res.append(pull())
         }
+        return res
+    }
 
-        func pop() -> String? {
-            guard !store.isEmpty else { return nil }
-            return store.removeFirst()
-        }
-
-        func popAll() -> [String] {
-            store
+    /// Pull a message from the queue (wait till completion)
+    func pull() async -> String {
+        await withCheckedContinuation { [unowned self] continuation in
+            self.unshift(using: continuation)
         }
     }
 
-    func out<S>(_ msg: S) where S: Collection, S.Element == Character {
-        guard let str = msg as? String else { return }
-        Task.init {
-            await buffer.set(str)
-        }
-    }
-
-    func terminate(code _: WebSocketErrorCode) async throws {}
-
-    func wait() async -> String {
-        await withCheckedContinuation { continuation in
-            Task.init {
-                while true {
-                    if let res = await buffer.pop() {
-                        continuation.resume(returning: res)
-                        return
-                    }
-                    try? await Task.sleep(nanoseconds: 0)
-                }
-            }
-        }
-    }
-
-    func waitAll() async -> [String] {
-        await withCheckedContinuation { continuation in
-            Task.init {
-                continuation.resume(returning: await buffer.popAll())
-            }
-        }
-    }
-
-    func waitAllWithValue(requirement: Int = 1) async -> [String] {
-        await withCheckedContinuation { continuation in
-            Task.init {
-                while true {
-                    let res = await buffer.popAll()
-                    if abs(res.startIndex - res.endIndex) >= requirement {
-                        continuation.resume(returning: res)
-                        return
-                    }
-                    try? await Task.sleep(nanoseconds: 0)
-                }
-            }
-        }
-    }
-
-    func waitUntil(time: TimeInterval) async -> String? {
+    /// Pull a message until a certain time
+    func pull(until time: TimeInterval) async -> String? {
         let start = Date()
         var res = String?.none
         while abs(start.timeIntervalSinceNow) < time {
-            res = await buffer.pop()
+            res = push.first
+            // reset cycle and prevents too much busy waiting
+            await Task.yield()
         }
         return res
+    }
+
+    /// Push a message to the queue
+    func push(_ s: String) {
+        if !pull.isEmpty {
+            let pulling = pull.removeFirst()
+            pulling(s)
+            return
+        }
+        push.append(s)
+    }
+
+    /// Nonisolated version of unshift
+    private nonisolated func unshift(using continuation: CheckedContinuation<String, Never>) {
+        Task { [unowned self] in
+            await self.unshift(continuation: continuation)
+        }
+    }
+
+    /// Pull a message from the queue or await for a message to be pushed
+    private func unshift(continuation: CheckedContinuation<String, Never>) async {
+        if !push.isEmpty {
+            continuation.resume(returning: push.removeFirst())
+            return
+        }
+        pull.append { res in
+            continuation.resume(returning: res)
+        }
+    }
+
+    /// Empty the queue
+    private func empty() {
+        pull.forEach { $0("") }
+        push.removeAll()
+        pull.removeAll()
+    }
+
+    nonisolated func out<S>(_ msg: S) where S: Collection, S.Element == Character {
+        guard let str = msg as? String else { return }
+        Task { [unowned self] in
+            await Task.yield()
+            await self.push(str)
+        }
+    }
+
+    func terminate(code _: WebSocketErrorCode) async throws {
+        empty()
     }
 }
