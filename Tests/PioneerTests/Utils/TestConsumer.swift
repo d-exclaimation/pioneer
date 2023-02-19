@@ -30,7 +30,7 @@ actor TestClient: WebSocketable {
     /// Pull a message from the queue (wait till completion)
     func pull() async -> String {
         await withCheckedContinuation { [unowned self] continuation in
-            self.unshift(continuation: continuation)
+            self.unshift(using: continuation)
         }
     }
 
@@ -46,6 +46,7 @@ actor TestClient: WebSocketable {
         return res
     }
 
+    /// Push a message to the queue
     func push(_ s: String) {
         if !pull.isEmpty {
             let pulling = pull.removeFirst()
@@ -55,7 +56,15 @@ actor TestClient: WebSocketable {
         push.append(s)
     }
 
-    private func unshift(continuation: CheckedContinuation<String, Never>) {
+    /// Nonisolated version of unshift
+    private nonisolated func unshift(using continuation: CheckedContinuation<String, Never>) {
+        Task { [unowned self] in
+            await self.unshift(continuation: continuation)
+        }
+    }
+
+    /// Pull a message from the queue or await for a message to be pushed
+    private func unshift(continuation: CheckedContinuation<String, Never>) async {
         if !push.isEmpty {
             continuation.resume(returning: push.removeFirst())
             return
@@ -65,6 +74,7 @@ actor TestClient: WebSocketable {
         }
     }
 
+    /// Empty the queue
     private func empty() {
         pull.forEach { $0("") }
         push.removeAll()
