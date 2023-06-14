@@ -82,18 +82,33 @@ public extension Pioneer {
             self.websocketGuard = websocketGuard
         }
 
+        private func matchingPath(to request: Request) -> Bool {
+            request.matching(path: path) 
+                || request.matching(path: path + ["websocket"])
+                || request.matching(path: path + ["playground"])
+                || request.matching(path: path + ["http"])
+        }
+
         /// Check whether request should be served by Pioneer
         /// - Parameter request: The incoming request
         /// - Returns: True if should be served
         private func shouldServe(to request: Request) -> Bool {
-            (request.method == .POST || request.method == .GET) && request.matching(path: path)
+            (request.method == .POST || request.method == .GET) && matchingPath(to: request)
         }
 
         /// What type of service should Pioneer serve for this request
         /// - Parameter request: The incoming request
         /// - Returns: A service to be done
         private func serving(to request: Request) async throws -> Serve {
-            if request.method == .POST {
+            if request.pathComponents.last == "playground" {
+                return server.playground == .disable ? .ignore : .playground
+            }
+
+            if request.pathComponents.last == "websocket" && server.websocketProtocol.isAccepting {
+                return .upgrade
+            }
+
+            if request.method == .POST || request.pathComponents.last == "http" {
                 return .operation
             }
 
