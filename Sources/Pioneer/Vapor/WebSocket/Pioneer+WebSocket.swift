@@ -35,7 +35,7 @@ public extension Pioneer {
 
     /// Should upgrade callback
     internal func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
-        req.eventLoop.next().makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
+        req.eventLoop.makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
     }
 
     /// On upgrade callback
@@ -46,17 +46,18 @@ public extension Pioneer {
 
         let timeout = timeout(using: ws, keepAlive: keepAlive)
 
-        // Task for consuming WebSocket messages to avoid cyclic references and provide cleaner code
-        let receiving = Task {
-            let stream = AsyncStream(String.self) { con in
-                ws.onText { con.yield($1) }
+        let stream = AsyncStream(String.self) { con in
+            ws.onText { con.yield($1) }
 
-                con.onTermination = { @Sendable _ in
-                    guard ws.isClosed else { return }
-                    _ = ws.close()
-                }
+            con.onTermination = { @Sendable _ in
+                guard ws.isClosed else { return }
+                _ = ws.close()
             }
+        }
 
+        // Task for consuming WebSocket messages to avoid cyclic references and provide cleaner code
+
+        let receiving = Task {
             for await message in stream {
                 await receiveMessage(
                     cid: cid, io: ws,
