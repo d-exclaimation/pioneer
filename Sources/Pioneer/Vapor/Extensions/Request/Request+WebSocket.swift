@@ -13,6 +13,6 @@ public extension Request {
         guard let connection = headers.first(name: .connection), let upgrade = headers.first(name: .upgrade) else {
             return false
         }
-        return connection.lowercased() == "upgrade" && upgrade.lowercased() == "websocket"
+        return connection.lowercased().contains("upgrade") && upgrade.lowercased().contains("websocket")
     }
 }
