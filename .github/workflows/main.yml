@@ -9,9 +9,9 @@ on:
       - 'version-*'
 
 jobs:
-  five-five:
+  five-six:
     container: 
-      image: swift:xenial
+      image: swift:5.6
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

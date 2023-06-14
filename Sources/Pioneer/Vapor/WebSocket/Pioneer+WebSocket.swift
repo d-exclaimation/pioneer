@@ -35,28 +35,30 @@ public extension Pioneer {
 
     /// Should upgrade callback
     internal func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
-        req.eventLoop.next().makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
+        req.eventLoop.makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
     }
 
     /// On upgrade callback
     internal func onUpgrade(req: Request, ws: WebSocket, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) {
         let cid = UUID()
 
+        // Tasks for handling keep alive internal and connectiontimeout
         let keepAlive = keepAlive(using: ws)
-
         let timeout = timeout(using: ws, keepAlive: keepAlive)
 
-        // Task for consuming WebSocket messages to avoid cyclic references and provide cleaner code
-        let receiving = Task {
-            let stream = AsyncStream(String.self) { con in
-                ws.onText { con.yield($1) }
 
-                con.onTermination = { @Sendable _ in
-                    guard ws.isClosed else { return }
-                    _ = ws.close()
-                }
+        // Synchronously consume WebSocket messages as a stream to avoid wrapping in a Task and cyclic references
+        let stream = AsyncStream(String.self) { con in
+            ws.onText { con.yield($1) }
+
+            con.onTermination = { @Sendable _ in
+                guard ws.isClosed else { return }
+                _ = ws.close()
             }
+        }
 
+        // Task for consuming WebSocket messages collected from the stream 
+        let receiving = Task {
             for await message in stream {
                 await receiveMessage(
                     cid: cid, io: ws,
