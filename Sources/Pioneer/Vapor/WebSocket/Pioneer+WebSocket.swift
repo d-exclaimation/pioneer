@@ -21,6 +21,10 @@ public extension Pioneer {
     func webSocketHandler(req: Request, context: @escaping VaporWebSocketContext, guard: @escaping VaporWebSocketGuard) async throws -> Response {
         /// Explicitly handle Websocket upgrade with sub-protocol
         let protocolHeader: [String] = req.headers[.secWebSocketProtocol]
+            .flatMap { $0.split(separator: ",") }
+            .map { String($0) }
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+
         guard let _ = protocolHeader.first(where: websocketProtocol.isValid) else {
             return try GraphQLError(
                 message: "Unrecognized websocket protocol. Specify the 'sec-websocket-protocol' header with '\(websocketProtocol.name)'"
