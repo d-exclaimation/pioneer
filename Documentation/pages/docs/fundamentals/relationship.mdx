@@ -81,7 +81,7 @@ func schema() throws -> Schema<Resolver, Context> {
         Type(Car.self) {
             Field("id", at: \.id)
             Field("model", at: \.model)
-            Field("parts", at: Car.parts, at: [Part].self)
+            Field("parts", at: Car.parts, as: [Part].self)
         }
 
         Type(Part.self) {
