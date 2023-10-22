@@ -334,25 +334,25 @@ struct RedisPubSub: PubSub {
         }
 
         /// Get a downstream from the broadcast for the channel given
-        func downstream(to channel: String) async -> AsyncStream<Data> {
-            let broadcast = await subscribe(to: channel)
+        func downstream(to channel: String) async throws -> AsyncStream<Data> {
+            let broadcast = try await subscribe(to: channel)
             let downstream = await broadcast.downstream()
             return downstream.stream
         }
 
         /// Get the broadcast for the channel if exist, otherwise make a new one
-        private func subscribe(to channel: String) async -> Broadcast<Data> {
+        private func subscribe(to channel: String) async throws -> Broadcast<Data> {
             if let broadcast = broadcasting[channel] {
                 return broadcast
             }
             let broadcast = Broadcast<Data>()
             broadcasting[channel] = broadcast
-            await apply(from: .init(channel), to: broadcast)
+            try await apply(from: .init(channel), to: broadcast)
             return broadcast
         }
 
         /// Apply broadcasting to the Redis channel subscription
-        private func apply(from channel: RedisChannelName, to broadcast: Broadcast<Data>) async {
+        private func apply(from channel: RedisChannelName, to broadcast: Broadcast<Data>) async throws {
             do {
                 try await redis.subscribe(
                     to: channel,
@@ -372,32 +372,41 @@ struct RedisPubSub: PubSub {
                 .get()
             } catch {
               await broadcast.close()
+              throw error
             }
         }
 
         /// Pubblish the data (which is RESPValueConvertible) to the specific redis channel
-        func publish(for channel: String, _ value: Data) async {
-            let _ = try? await redis.publish(value, to: .init(channel)).get()
+        func publish(for channel: String, _ value: Data) async throws {
+            let _ = try await redis.publish(value, to: .init(channel)).get()
         }
 
         /// Close the redis channel subscription and all of the downstreams
-        func close(for channel: String) async {
-            try? await redis.unsubscribe(from: .init(channel)).get()
+        func close(for channel: String) async throws {
+            try await redis.unsubscribe(from: .init(channel)).get()
             await broadcasting[channel]?.close()
         }
     }
 
     // MARK: -- Protocol required methods
 
-    public func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
-        AsyncStream<DataType> { con in
+    public func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type = DataType.self, for trigger: String) -> AsyncThrowingStream<DataType, Error> {
+        AsyncThrowingStream<DataType, Error> { con in
             let task = Task {
-                let stream = await dispatcher.downstream(to: trigger)
-                for await data in stream {
-                    guard let event = try? JSONDecoder().decode(DataType.self, data) else { continue }
-                    con.yield(event)
+                do {
+                    let stream = try await dispatcher.downstream(to: trigger)
+                    for await data in stream {
+                        do {
+                            let event = try JSONDecoder().decode(DataType.self, data)
+                            con.yield(event)
+                        } catch {
+                            con.finish(throwing: error)
+                        }
+                    }
+                    con.finish()
+                } catch {
+                    con.finish(throwing: error)
                 }
-                con.finish()
             }
             con.onTermination = { @Sendable _ in
                 task.cancel()
@@ -405,13 +414,13 @@ struct RedisPubSub: PubSub {
         }
     }
 
-    public func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async {
-        guard let data = try? JSONEncoder().encode(payload) else { return }
-        await dispatcher.publish(for: trigger, data)
+    public func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async throws {
+        let data = try JSONEncoder().encode(payload)
+        try await dispatcher.publish(for: trigger, data)
     }
 
-    public func close(for trigger: String) async {
-        await dispatcher.close(for: trigger)
+    public func close(for trigger: String) async throws {
+        try await dispatcher.close(for: trigger)
     }
 
     // MARK: - Properties
@@ -434,9 +443,9 @@ struct Message: Sendable, Codable { ... }
 struct Resolver {
     let pubsub: PubSub = app.environment.isRelease ? RedisPubSub(app.redis) : AsyncPubSub()
 
-    func create(ctx: Context, _: NoArguments) async -> Message {
+    func create(ctx: Context, _: NoArguments) async throws -> Message {
         let message = ...
-        await pubsub.publish(message)
+        try await pubsub.publish(message)
         return message
     }
 
