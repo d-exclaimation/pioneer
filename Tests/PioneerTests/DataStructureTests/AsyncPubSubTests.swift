@@ -11,7 +11,7 @@ import GraphQL
 import XCTest
 
 final class AsyncPubSubTests: XCTestCase {
-    /// AsyncPubSub getting `AsyncStream` and publishing data
+    /// AsyncPubSub getting `AsyncThrowingStream` and publishing data
     /// - Should be able to receive data from all AsyncStream with the same trigger
     /// - Should be able to filter published data to only the same type
     /// - Should be able to publish data after the consumers were set up
@@ -25,7 +25,7 @@ final class AsyncPubSubTests: XCTestCase {
 
         let task = Task {
             let stream = pubsub.asyncStream(Int.self, for: trigger)
-            for await each in stream {
+            for try await each in stream {
                 if each == 0 {
                     exp0.fulfill()
                 }
@@ -35,7 +35,7 @@ final class AsyncPubSubTests: XCTestCase {
 
         let task1 = Task {
             let stream = pubsub.asyncStream(Int.self, for: trigger)
-            for await each in stream {
+            for try await each in stream {
                 if each == 0 {
                     exp1.fulfill()
                 }
@@ -45,9 +45,6 @@ final class AsyncPubSubTests: XCTestCase {
 
         try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
 
-        // Should be skipped due to type mismatch
-        await pubsub.publish(for: trigger, payload: "invalid")
-
         // Should be received by both and trigger the expectations
         await pubsub.publish(for: trigger, payload: 0)
 
@@ -56,6 +53,36 @@ final class AsyncPubSubTests: XCTestCase {
         task.cancel()
         task1.cancel()
     }
+
+    /// AsyncPubSub getting `AsyncThrowingStream` and publishing data
+    /// - Should throw an error if the data is not the same type
+    func testWrongType() async {
+        let pubsub = AsyncPubSub()
+        let trigger = "1"
+
+        // Expectations
+        let exp0 = XCTestExpectation()
+
+        let task = Task {
+            let stream = pubsub.asyncStream(Int.self, for: trigger)
+            do {
+                for try await _ in stream {
+                    return
+                }
+            } catch {
+                exp0.fulfill()
+            }
+        }
+
+        try? await Task.sleep(nanoseconds: UInt64?.milliseconds(1))
+
+        await pubsub.publish(for: trigger, payload: "Wrong bloody payload")
+
+        wait(for: [exp0], timeout: 2)
+
+        task.cancel()
+    }
+
 
     /// AsyncPubSub closing all consumer for a specific trigger
     /// - Should close all consumer with the same trigger
@@ -68,7 +95,7 @@ final class AsyncPubSubTests: XCTestCase {
 
         let task = Task {
             let stream = pubsub.asyncStream(Bool.self, for: trigger)
-            for await _ in stream {
+            for try await _ in stream {
                 return
             }
             exp0.fulfill()
@@ -76,7 +103,7 @@ final class AsyncPubSubTests: XCTestCase {
 
         let task1 = Task {
             let stream = pubsub.asyncStream(Bool.self, for: trigger)
-            for await _ in stream {
+            for try await _ in stream {
                 return
             }
             exp1.fulfill()

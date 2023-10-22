@@ -484,7 +484,7 @@ struct Resolver {
         guard let book else {
             throw Abort(.internalServerError)
         }
-        await pubsub.publish(for: trigger, payload: book)
+        try await pubsub.publish(for: trigger, payload: book)
         return book
     }
 

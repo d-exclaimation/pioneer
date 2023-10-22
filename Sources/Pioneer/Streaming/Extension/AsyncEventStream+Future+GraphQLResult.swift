@@ -5,6 +5,7 @@
 //  Created by d-exclaimation on 3:38 PM.
 //
 
+import NIOCore
 import class GraphQL.ConcurrentEventStream
 import class GraphQL.Future
 import struct GraphQL.GraphQLResult

@@ -55,8 +55,7 @@ final class GraphitiTests: XCTestCase {
         }
 
         func onMessage(context _: Void, arguments _: NoArguments) -> EventStream<Message> {
-            let stream: AsyncStream<Message> = pubsub.asyncStream(for: "*")
-            return stream.toEventStream()
+            pubsub.asyncStream(for: "*").toEventStream()
         }
     }
 
