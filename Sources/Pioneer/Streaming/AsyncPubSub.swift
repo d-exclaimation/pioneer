@@ -27,7 +27,7 @@ public struct AsyncPubSub: PubSub, Sendable {
         /// Async stream return a new AsyncStream that is connected to the emitter that is assigned to the given key
         /// - Parameter key: The string topic / key used to find the emitter
         /// - Returns: An async stream that is linked to an emitter
-        internal func asyncStream(for key: String) async -> AsyncStream<Sendable> {
+        internal func asyncStream(for key: String) async -> AsyncThrowingStream<Sendable, Error> {
             let emitter = await subscribe(for: key)
             let downstream = await emitter.downstream()
             return downstream.stream
@@ -58,12 +58,15 @@ public struct AsyncPubSub: PubSub, Sendable {
     /// - Parameters:
     ///   - type: DataType of this AsyncStream
     ///   - trigger: The topic string used to differentiate what data should this stream be accepting
-    public func asyncStream<DataType: Sendable & Decodable>(_: DataType.Type = DataType.self, for trigger: String) -> AsyncStream<DataType> {
-        AsyncStream<DataType> { con in
+    public func asyncStream<DataType: Sendable & Decodable>(_: DataType.Type = DataType.self, for trigger: String) -> AsyncThrowingStream<DataType, Error> {
+        AsyncThrowingStream<DataType, Error> { con in
             let task = Task {
                 let pipe = await dispatcher.asyncStream(for: trigger)
-                for await untyped in pipe {
-                    guard let typed = untyped as? DataType else { continue }
+                for try await untyped in pipe {
+                    guard let typed = untyped as? DataType else { 
+                        con.finish(throwing: PubSubConversionError(reason: "Failed to convert \(untyped) to \(DataType.self)"))
+                        return
+                    }
                     con.yield(typed)
                 }
                 con.finish()

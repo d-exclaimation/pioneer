@@ -11,7 +11,7 @@ public protocol PubSub {
     /// - Parameters:
     ///   - type: DataType of this AsyncStream
     ///   - trigger: The topic string used to differentiate what data should this stream be accepting
-    func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type, for trigger: String) -> AsyncStream<DataType>
+    func asyncStream<DataType: Sendable & Decodable>(_ type: DataType.Type, for trigger: String) -> AsyncThrowingStream<DataType, Error>
 
     /// Publish a new data into the pubsub for a specific trigger.
     /// - Parameters:
@@ -22,4 +22,19 @@ public protocol PubSub {
     /// Close a specific trigger and deallocate every consumer of that trigger
     /// - Parameter trigger: The trigger this call takes effect on
     func close(for trigger: String) async
+}
+
+
+/// Type Conversion Error for the PubSub
+public struct PubSubConversionError: Error, @unchecked Sendable {
+    /// The detailed reasoning why conversion failed
+    public var reason: String
+
+    public init(reason: String) {
+        self.reason = reason
+    }
+
+    public var localizedDescription: String {
+        "PubSubConversionError: \"\(reason)\""
+    }
 }

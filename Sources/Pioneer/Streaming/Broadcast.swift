@@ -8,7 +8,7 @@ import struct Foundation.UUID
 
 /// An actor to broadcast messages to multiple downstream from a single upstream
 public actor Broadcast<MessageType: Sendable> {
-    public typealias Consumer = AsyncStream<MessageType>.Continuation
+    public typealias Consumer = AsyncThrowingStream<MessageType, Error>.Continuation
 
     private var consumers: [UUID: Consumer] = [:]
 
@@ -84,21 +84,21 @@ public struct Downstream<Element: Sendable>: AsyncSequence {
     /// The id of the stream
     public let id: UUID
     /// The stream itself
-    public let stream: AsyncStream<Element>
+    public let stream: AsyncThrowingStream<Element, Error>
 
     public init(
         _ elementType: Element.Type = Element.self,
-        bufferingPolicy limit: AsyncStream<Element>.Continuation.BufferingPolicy = .unbounded,
-        _ build: @escaping (UUID, AsyncStream<Element>.Continuation) -> Void
+        bufferingPolicy limit: AsyncThrowingStream<Element, Error>.Continuation.BufferingPolicy = .unbounded,
+        _ build: @escaping (UUID, AsyncThrowingStream<Element, Error>.Continuation) -> Void
     ) {
         let id = UUID()
         self.id = id
-        self.stream = AsyncStream<Element>(elementType, bufferingPolicy: limit) { con in
+        self.stream = AsyncThrowingStream<Element, Error>(elementType, bufferingPolicy: limit) { con in
             build(id, con)
         }
     }
 
-    public func makeAsyncIterator() -> AsyncStream<Element>.AsyncIterator {
+    public func makeAsyncIterator() -> AsyncThrowingStream<Element, Error>.AsyncIterator {
         stream.makeAsyncIterator()
     }
 }
