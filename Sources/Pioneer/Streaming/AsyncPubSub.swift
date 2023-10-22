@@ -81,7 +81,7 @@ public struct AsyncPubSub: PubSub, Sendable {
     /// - Parameters:
     ///   - trigger: The trigger this data will be published to
     ///   - payload: The data being emitted
-    public func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async {
+    public func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async  {
         await dispatcher.publish(for: trigger, payload)
     }
 

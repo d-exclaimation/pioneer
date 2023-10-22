@@ -17,11 +17,11 @@ public protocol PubSub {
     /// - Parameters:
     ///   - trigger: The trigger this data will be published to
     ///   - payload: The data being emitted
-    func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async
+    func publish<DataType: Sendable & Encodable>(for trigger: String, payload: DataType) async throws
 
     /// Close a specific trigger and deallocate every consumer of that trigger
     /// - Parameter trigger: The trigger this call takes effect on
-    func close(for trigger: String) async
+    func close(for trigger: String) async throws
 }
 
 
