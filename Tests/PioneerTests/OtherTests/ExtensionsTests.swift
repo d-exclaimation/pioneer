@@ -33,7 +33,7 @@ final class ExtensionsTests: XCTestCase {
             return expectation
         })
 
-        await fulfillment(of: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 2)
     }
 
     /// JSON String to Structure

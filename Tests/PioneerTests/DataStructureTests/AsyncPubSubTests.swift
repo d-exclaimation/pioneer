@@ -48,7 +48,7 @@ final class AsyncPubSubTests: XCTestCase {
         // Should be received by both and trigger the expectations
         await pubsub.publish(for: trigger, payload: 0)
 
-        await fulfillment(of: [exp0, exp1], timeout: 2)
+        wait(for: [exp0, exp1], timeout: 2)
 
         task.cancel()
         task1.cancel()
@@ -78,7 +78,7 @@ final class AsyncPubSubTests: XCTestCase {
 
         await pubsub.publish(for: trigger, payload: "Wrong bloody payload")
 
-        await fulfillment(of: [exp0], timeout: 2)
+        wait(for: [exp0], timeout: 2)
 
         task.cancel()
     }
@@ -115,7 +115,7 @@ final class AsyncPubSubTests: XCTestCase {
         // then exit the loop and trigger the expectation
         await pubsub.close(for: trigger)
 
-        await fulfillment(of: [exp0, exp1], timeout: 2)
+        wait(for: [exp0, exp1], timeout: 2)
 
         task.cancel()
         task1.cancel()
