@@ -1,9 +1,11 @@
-import { Callout } from 'nextra-theme-docs'
+import { Callout } from "nextra-theme-docs";
+import Tag from "../../../components/tag";
 
 # GraphQL over HTTP
 
 <Callout type="info" emoji="🏅">
-Pioneer is a GraphQL over HTTP spec compliant server [implementation](https://github.com/graphql/graphql-http#servers)
+  Pioneer is a GraphQL over HTTP spec compliant server
+  [implementation](https://github.com/graphql/graphql-http#servers)
 </Callout>
 
 GraphQL spec define how a GraphQL operation is supposed to be performed through HTTP. The spec specify that operations can be done through either **GET** and **POST** request. Both of these are supported by Pioneer.
@@ -23,15 +25,15 @@ let server = Pioneer(
 
 Here are the available strategies:
 
-| HTTPStrategy             | GET                                                                                      | POST                                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `onlyPost`               | -                                                                                        | <span style={{color: "lime"}}>Query</span> <span style={{color: "gold"}}>Mutation</span>   |
-| `onlyGet`                | <span style={{color: "lime"}}>Query</span> <span style={{color: "gold"}}>Mutation</span> | -                                                                                          |
-| `queryOnlyGet`           | <span style={{color: "lime"}}>Query</span>                                               | <span style={{color: "lime"}}>Query</span> <span style={{color: "gold"}}>Mutation</span>   |
-| `mutationOnlyPost`       | <span style={{color: "lime"}}>Query</span> <span style={{color: "gold"}}>Mutation</span> | <span style={{color: "gold"}}>Mutation</span>                                              |
-| `splitQueryAndMutation`  | <span style={{color: "lime"}}>Query</span>                                               | <span style={{color: "gold"}}>Mutation</span>                                              |
-| `queryOnlyGet`           | <span style={{color: "lime"}}><i>Query*</i></span>                                       | <span style={{color: "lime"}}>Query</span> <span style={{color: "gold"}}>Mutation</span>   |
-| `both`                   | <span style={{color: "lime"}}>Query</span> <span style={{color: "gold"}}>Mutation</span> | <span style={{color: "lime"}}>Query</span> <span style={{color: "gold"}}>Mutation</span>   |
+| HTTPStrategy            | GET                                                                            | POST                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `onlyPost`              | -                                                                              | <Tag text="Query" variant="success"/> <Tag text="Mutation" variant="warning"/> |
+| `onlyGet`               | <Tag text="Query" variant="success"/> <Tag text="Mutation" variant="warning"/> | -                                                                              |
+| `queryOnlyGet`          | <Tag text="Query" variant="success"/>                                          | <Tag text="Query" variant="success"/> <Tag text="Mutation" variant="warning"/> |
+| `mutationOnlyPost`      | <Tag text="Query" variant="success"/> <Tag text="Mutation" variant="warning"/> | <Tag text="Mutation" variant="warning"/>                                       |
+| `splitQueryAndMutation` | <Tag text="Query" variant="success"/>                                          | <Tag text="Mutation" variant="warning"/>                                       |
+| `csrfPrevention`        | <Tag text="Query*" variant="primary"/>                                         | <Tag text="Query" variant="success"/> <Tag text="Mutation" variant="warning"/> |
+| `both`                  | <Tag text="Query" variant="success"/> <Tag text="Mutation" variant="warning"/> | <Tag text="Query" variant="success"/> <Tag text="Mutation" variant="warning"/> |
 
 _\*: Apollo's [CSRF and XS-Search prevention](https://www.apollographql.com/docs/apollo-server/security/cors#preventing-cross-site-request-forgery-csrf) is enabled. More [here](#csrf-and-xs-search)_
 
@@ -42,9 +44,8 @@ _\*: Apollo's [CSRF and XS-Search prevention](https://www.apollographql.com/docs
 [Cross-Origin Resource Sharing]() (CORS) is an HTTP-header-based protocol that enables a server to dictate which origins can access its resources. Put another way, your server can specify which websites can tell a user's browser to talk to your server, and precisely which types of HTTP requests are allowed.
 
 <Callout type="info">
-Any CORS middleware should be applied before Pioneer take effect.
+  Any CORS middleware should be applied before Pioneer take effect.
 </Callout>
-
 
 ### CSRF and XS-Search
 
@@ -60,7 +61,10 @@ To avoid CSRF (and also XS-Search attacks), GraphQL servers should refuse to exe
 Pioneer uses the same mechanic to prevent these types of attacks as [Apollo Server](https://www.apollographql.com/docs/apollo-server/), described [here](https://www.apollographql.com/docs/apollo-server/security/cors#preventing-cross-site-request-forgery-csrf).
 
 <Callout type="info">
-If you set the http strategy to `.queryOnlyGet` or `.onlyPost` and as long as you ensure that only mutations can have side effects, you are somewhat protected from the "side effects" aspect of CSRFs even without enabling CSRF protection.
+  If you set the http strategy to `.queryOnlyGet` or `.onlyPost` and as long as
+  you ensure that only mutations can have side effects, you are somewhat
+  protected from the "side effects" aspect of CSRFs even without enabling CSRF
+  protection.
 </Callout>
 
 To enable it, just change the [HTTPStrategy](#http-strategy) to [.csrfPrevention](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pioneer/httpstrategy-swift.enum/csrfprevention), which will add additional restrictions to any GraphQL request going through HTTP.
@@ -82,7 +86,6 @@ It should have no impact on legitimate use of your graph except in these two cas
 - You implemented and have enabled file uploads through your GraphQL server using `multipart/form-data`.
 
 If either of these apply to you and you want to keep the prevention mechanic, you should configure the relevant clients to send a non-empty `Apollo-Require-Preflight` header along with all requests.
-
 
 ## GraphQL over HTTP spec compliance
 
