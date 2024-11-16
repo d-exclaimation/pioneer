@@ -8,4 +8,4 @@
 import struct GraphQL.GraphQLResult
 import protocol Vapor.Content
 
-extension GraphQLResult: Content {}
+extension GraphQLResult: Vapor.Content {}

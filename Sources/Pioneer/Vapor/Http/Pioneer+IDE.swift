@@ -19,7 +19,7 @@ extension Pioneer {
         case .sandbox:
             return serve(html: embeddedSandboxHtml)
         case let .redirect(to: cloud):
-            return req.redirect(to: cloud.url, type: .permanent)
+            return req.redirect(to: cloud.url, redirectType: .permanent)
         case .disable:
             return Response(status: .notFound)
         }

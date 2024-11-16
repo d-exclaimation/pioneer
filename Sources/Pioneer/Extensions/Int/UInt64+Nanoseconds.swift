@@ -4,6 +4,7 @@
 //
 //  Created by d-exclaimation on 14:19.
 //
+import Vapor
 
 public extension Optional where WrappedType == UInt64 {
     /// Convert the given value in seconds into nanoseconds
