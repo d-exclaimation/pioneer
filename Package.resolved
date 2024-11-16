@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/GraphQLSwift/Graphiti.git",
         "state": {
           "branch": null,
-          "revision": "f80bd1342e52b9ee9e19f7f017dc4545e6c3cb6d",
-          "version": "1.10.1"
+          "revision": "ed06f0608a72176fd572763660e7492bfb53a419",
+          "version": "1.15.1"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
         "state": {
           "branch": null,
-          "revision": "1b9d48ce0f0ad8280f75ce9914579aaac5881bc6",
-          "version": "2.5.1"
+          "revision": "ec809df8cce95d6aea820f70f04067abc08080f2",
+          "version": "2.10.3"
         }
       },
       {

@@ -19,7 +19,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/GraphQLSwift/GraphQL.git", from: "2.4.5"),
-        .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.2.2"),
+        .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.15.1"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.77.0"),
     ],
     targets: [

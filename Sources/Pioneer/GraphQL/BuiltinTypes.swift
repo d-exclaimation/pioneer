@@ -44,8 +44,20 @@ public struct ID: Codable, ExpressibleByStringLiteral, CustomStringConvertible, 
 
     /// Apply scalar to Graphiti schema to allow the use of ID.
     public static func asScalar<Resolver, Context>() -> Scalar<Resolver, Context, Self> {
-        .init(ID.self, as: "ID")
-            .description("The ID scalar type represents a unique identifier, often used to refetch an object or as the key for a cache. The ID type is serialized in the same way as a String; however, defining it as an ID signifies that it is not intended to be human‐readable")
+        .init(
+            ID.self,
+            as: "ID",
+            serialize: { value, _ in
+                try GraphQLID.serialize(value: value)
+            },
+            parseValue:  { inputValue, _ in
+                try GraphQLID.parseValue(value: inputValue)
+            },
+            parseLiteral:  { ast, _ in
+                try GraphQLID.parseLiteral(valueAST: ast)
+            }
+        )
+        .description("The ID scalar type represents a unique identifier, often used to refetch an object or as the key for a cache. The ID type is serialized in the same way as a String; however, defining it as an ID signifies that it is not intended to be human‐readable")
     }
 
     /// Create a new ID from UUID
