@@ -78,9 +78,11 @@ final class HTTPQueryTests: XCTestCase {
         let gql3 = GraphQLRequest(query: "query { error { id, name } }")
         let gql4 = GraphQLRequest(query: "query { invalid }")
 
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task{
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware(), at: .beginning)
@@ -181,9 +183,11 @@ final class HTTPQueryTests: XCTestCase {
         let gql3 = "query=" + "query { error { id, name } }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
         let gql4 = "query=" + "query { invalid }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
 
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task{
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware(), at: .beginning)

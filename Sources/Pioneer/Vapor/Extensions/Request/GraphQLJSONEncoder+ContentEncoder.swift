@@ -8,7 +8,7 @@
 import class GraphQL.GraphQLJSONEncoder
 import Vapor
 
-extension GraphQLJSONEncoder: ContentEncoder {
+extension GraphQLJSONEncoder: Vapor.ContentEncoder {
     public func encode<E>(_ encodable: E, to body: inout NIOCore.ByteBuffer, headers: inout NIOHTTP1.HTTPHeaders) throws where E: Encodable {
         headers.contentType = .json
         try body.writeBytes(self.encode(encodable))

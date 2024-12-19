@@ -38,6 +38,7 @@ public extension Pioneer {
     }
 
     /// Should upgrade callback
+    @Sendable
     internal func shouldUpgrade(req: Request) -> EventLoopFuture<HTTPHeaders?> {
         req.eventLoop.makeSucceededFuture(.init([("Sec-WebSocket-Protocol", websocketProtocol.name)]))
     }
