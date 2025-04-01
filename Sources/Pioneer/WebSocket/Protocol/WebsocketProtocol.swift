@@ -9,7 +9,7 @@ import struct Foundation.Data
 
 public extension Pioneer {
     /// Websocket sub-protocol
-    enum WebsocketProtocol {
+    enum WebsocketProtocol: Sendable {
         /// `subscriptions-transport-ws/graphql-ws`
         @available(*, deprecated, message: "Legacy protocol: Use `.graphqlWs` instead")
         case subscriptionsTransportWs

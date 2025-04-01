@@ -13,7 +13,7 @@ import enum GraphQL.OperationType
 import NIO
 
 /// Pioneer GraphQL Server for handling all GraphQL operations
-public struct Pioneer<Resolver, Context> {
+public struct Pioneer<Resolver: Sendable, Context: Sendable>: Sendable {
     /// Graphiti schema used to execute operations
     public private(set) var schema: GraphQLSchema
     /// Resolver used by the GraphQL schema

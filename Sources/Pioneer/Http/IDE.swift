@@ -7,7 +7,7 @@
 
 public extension Pioneer {
     /// GraphQL Hosted IDE
-    enum IDE: Equatable {
+    enum IDE: Equatable, Sendable {
         @available(*, deprecated, message: "Use `GraphiQL or Apollo Sandbox instead`")
         case playground
 
@@ -23,7 +23,7 @@ public extension Pioneer {
         /// Disabled any IDEs
         case disable
 
-        public enum Cloud {
+        public enum Cloud: Sendable {
             /// Cloud version of Apollo Sandbox
             case apolloSandbox
 
