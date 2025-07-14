@@ -214,12 +214,12 @@ public extension Pioneer {
               copy them directly into your environment, or perhaps include them in your
               favored resource bundler.
              -->
-            <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+            <link rel="stylesheet" href="https://unpkg.com/graphiql@4.1.2/graphiql.min.css" />
           </head>
 
           <body>
             <div id="graphiql">Loading...</div>
-            <script src="https://unpkg.com/graphiql/graphiql.min.js" type="application/javascript"></script>
+            <script src="https://unpkg.com/graphiql@4.1.2/graphiql.min.js" type="application/javascript"></script>
              <!--
               This line add subscriptions-transport-ws for better protocol options
              -->
