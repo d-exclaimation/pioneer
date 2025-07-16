@@ -48,11 +48,11 @@ public struct ID: Codable, ExpressibleByStringLiteral, CustomStringConvertible, 
             ID.self,
             as: "ID",
             serialize: { value, _ in
-                guard let idValue = value as? ID else {
-                    throw GraphQLError(message: "Failed to cast value \(value) to ID type")
+                if let idValue = value as? ID {
+                    return try GraphQLID.serialize(value: idValue.id)
+                } else {
+                    return try GraphQLID.serialize(value: value)
                 }
-                    
-                return try GraphQLID.serialize(value: idValue.id)
             },
             parseValue:  { inputValue, _ in
                 try GraphQLID.parseValue(value: inputValue)

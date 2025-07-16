@@ -69,5 +69,5 @@ public func subscribeGraphQL(
         eventLoopGroup: eventLoopGroup,
         variableValues: variables ?? [:],
         operationName: operationName
-    ).get()
+    )
 }

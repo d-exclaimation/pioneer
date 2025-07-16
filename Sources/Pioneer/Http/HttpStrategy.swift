@@ -10,7 +10,7 @@ import enum NIOHTTP1.HTTPMethod
 
 public extension Pioneer {
     /// HTTP Operation and routing strategy for GraphQL
-    enum HTTPStrategy {
+    enum HTTPStrategy: Sendable {
         /// Only allow `POST` GraphQL Request, most common choice
         case onlyPost
         /// Only allow `GET` GraphQL Request, not recommended for most

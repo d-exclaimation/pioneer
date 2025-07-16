@@ -27,13 +27,15 @@ public extension Pioneer {
         host: String = "127.0.0.1",
         env: String = "development",
         cors: CORSMiddleware.Configuration? = nil
-    ) throws {
-        let app = try Application(
+    ) async throws {
+        let app = try await Application.make(
             .specified(port: port, host: host, env: env)
         )
 
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.logger = .init(label: "pioneer-graphql")
@@ -43,7 +45,7 @@ public extension Pioneer {
             app.middleware.use(CORSMiddleware(configuration: cors), at: .beginning)
         }
 
-        try app.run()
+        try await app.execute()
     }
 
     /// Create and run a standalone server with Pioneer
@@ -67,8 +69,8 @@ public extension Pioneer {
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
-    ) throws {
-        try vaporServer(
+    ) async throws {
+        try await vaporServer(
             middleware: vaporMiddleware(
                 body: body,
                 at: path,
@@ -102,8 +104,8 @@ public extension Pioneer {
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
-    ) throws {
-        try vaporServer(
+    ) async throws {
+        try await vaporServer(
             middleware: vaporMiddleware(
                 body: body,
                 at: path,
@@ -134,8 +136,8 @@ public extension Pioneer {
         body: HTTPBodyStreamStrategy = .collect,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
-    ) throws where Context == Void {
-        try vaporServer(
+    ) async throws where Context == Void {
+        try await vaporServer(
             middleware: vaporMiddleware(
                 body: body,
                 at: path,
@@ -169,8 +171,8 @@ public extension Pioneer {
         websocketContext: @escaping VaporWebSocketContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
-    ) throws {
-        try vaporServer(
+    ) async throws {
+        try await vaporServer(
             middleware: vaporMiddleware(
                 body: body,
                 at: path,
@@ -204,8 +206,8 @@ public extension Pioneer {
         context: @escaping VaporHTTPContext,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
-    ) throws {
-        try vaporServer(
+    ) async throws {
+        try await vaporServer(
             middleware: vaporMiddleware(
                 body: body,
                 at: path,
@@ -236,8 +238,8 @@ public extension Pioneer {
         body: HTTPBodyStreamStrategy = .collect,
         websocketGuard: @escaping VaporWebSocketGuard = { _, _ in },
         cors: CORSMiddleware.Configuration? = nil
-    ) throws where Context == Void {
-        try vaporServer(
+    ) async throws where Context == Void {
+        try await vaporServer(
             middleware: vaporMiddleware(
                 body: body,
                 at: path,

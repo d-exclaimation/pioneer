@@ -40,10 +40,12 @@ final class ContextTests: XCTestCase {
     /// Context Builder:
     /// - Should get the proper context given the right headers
     /// - Should rethrow error from the context builder
-    func testContextBuilderThrowing() throws {
-        let app = Application(.testing)
+    func testContextBuilderThrowing() async throws {
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         // Construct context for each request
@@ -63,21 +65,21 @@ final class ContextTests: XCTestCase {
         )
 
         // Was able to get the context and the auth header
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { test }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
             headers: .init([("Authorization", "Bearer Hello")])
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
             XCTAssertEqual(res.headers[.authorization].first, .some("Bearer Hello"))
             XCTAssert(res.body.string.contains("Hello"))
         }
 
         // Was not able to get the context and the auth header
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { test }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .unauthorized)
         }
     }

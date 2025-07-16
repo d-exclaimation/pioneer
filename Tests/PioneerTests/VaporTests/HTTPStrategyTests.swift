@@ -38,375 +38,389 @@ final class HTTPStrategyTests: XCTestCase {
         }
     }
 
-    func testOnlyPost() throws {
+    func testOnlyPost() async throws {
         let server = Pioneer(schema: schema, resolver: .init(), httpStrategy: .onlyPost)
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware())
 
         // Test query through GET should be denied
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test mutation through GET should be denied
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test query through POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
     }
 
-    func testOnlyGet() throws {
+    func testOnlyGet() async throws {
         let server = Pioneer(schema: schema, resolver: .init(), httpStrategy: .onlyGet)
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware())
 
         // Test query through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test query through POST should be denied
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test mutation through POST should be denied
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
     }
 
-    func testQueryOnlyGet() throws {
+    func testQueryOnlyGet() async throws {
         let server = Pioneer(schema: schema, resolver: .init(), httpStrategy: .queryOnlyGet)
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware())
 
         // Test query through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through GET should be denied
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test query through POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
     }
 
-    func testMutationOnlyPost() throws {
+    func testMutationOnlyPost() async throws {
         let server = Pioneer(schema: schema, resolver: .init(), httpStrategy: .mutationOnlyPost)
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware())
 
         // Test query through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test query through POST should be denied
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
     }
 
-    func testSplit() throws {
+    func testSplit() async throws {
         let server = Pioneer(schema: schema, resolver: .init(), httpStrategy: .splitQueryAndMutation)
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware())
 
         // Test query through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through GET should be denied
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test query through POST should be denied
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
     }
 
-    func testBoth() throws {
+    func testBoth() async throws {
         let server = Pioneer(schema: schema, resolver: .init(), httpStrategy: .both)
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware())
 
         // Test query through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test query through POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation through POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
     }
 
-    func testCsrfPrevention() throws {
+    func testCsrfPrevention() async throws {
         let server = Pioneer(schema: schema, resolver: .init(), httpStrategy: .csrfPrevention)
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer {
-            app.shutdown()
+            Task {
+                try await app.asyncShutdown()
+            }
         }
 
         app.middleware.use(server.vaporMiddleware())
 
         // Test query through GET should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test query with bad content type should be denied
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
             headers: .init([("Content-Type", "text/plain")])
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test query with bad content type but with Apollo-Require-Preflight should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)",
             headers: .init([("Content-Type", "text/plain"), ("Apollo-Require-Preflight", "true")])
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test query with bad content type but with X-Apollo-Operation-Name should be allowed
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("query Operation { fetch }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)&operationName=Operation",
             headers: .init([("Content-Type", "text/plain"), ("X-Apollo-Operation-Name", "Operation")])
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation in GET should be denied
-        try app.testable().test(
+        try await app.testable().test(
             .GET,
             "/graphql?query=\("mutation { update(bool: true) }".addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)"
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .badRequest)
         }
 
         // Test query in POST should be allowed
         let body0 = ByteBuffer(data: GraphQLRequest(query: "query { fetch }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body0.writableBytes.description)]),
             body: body0
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test mutation in POST should be allowed
         let body1 = ByteBuffer(data: GraphQLRequest(query: "mutation { update(bool: true) }").json!)
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "application/json"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertEqual(res.status, .ok)
         }
 
         // Test multipart/form-data in POST should be allowed since POST is not vunerble to CSRF
-        try app.testable().test(
+        try await app.testable().test(
             .POST,
             "/graphql",
             headers: .init([("Content-Type", "multipart/form-data"), ("Content-Length", body1.writableBytes.description)]),
             body: body1
-        ) { res in
+        ) { res async throws in
             XCTAssertNotEqual(res.status, .ok)
         }
     }

@@ -15,8 +15,8 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/GraphQLSwift/GraphQL.git", from: "2.10.3"),
-        .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "1.15.1"),
+        .package(url: "https://github.com/GraphQLSwift/GraphQL.git", "2.10.3" ..< "4.0.0"),
+        .package(url: "https://github.com/GraphQLSwift/Graphiti.git", "1.15.1" ..< "3.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.106.3"),
     ],
     targets: [
