@@ -16,7 +16,7 @@ public actor Broadcast<MessageType: Sendable> {
     /// - Parameter stream: The AsyncSequence used to push messages
     /// - Returns: The Task used to consumed it
     public func pipe<Sequence: AsyncSequence>(_ stream: Sequence) -> Task<Void, Error> where Sequence.Element == MessageType {
-        Task { [unowned self] in
+        Task { [self] in
             for try await each in stream {
                 await self.publish(each)
             }
