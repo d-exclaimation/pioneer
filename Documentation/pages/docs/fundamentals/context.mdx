@@ -115,7 +115,7 @@ app.middleware.use(
 All of the resolvers would have access to this context and can get the `pubsub` property from it and use it.
 
 ```swift showLineNumbers copy
-func onOrder(ctx: Context, args: NoArguments) -> EventStream<Order> {
-    ctx.pubsub.asyncStream(Order.self, for: "*:order").toEventStream()
+func onOrder(ctx: Context, args: NoArguments) -> AsyncStream<Order> {
+    ctx.pubsub.asyncStream(Order.self, for: "*:order")
 }
 ```

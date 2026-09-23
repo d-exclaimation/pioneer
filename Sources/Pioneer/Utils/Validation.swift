@@ -8,7 +8,7 @@
 import GraphQL
 
 /// Function that describe a validation rule for an operation
-public typealias ValidationRule = (ValidationContext) -> Visitor
+public typealias ValidationRule = @Sendable (ValidationContext) -> Visitor
 
 public extension Pioneer {
     /// Validation strategy to add custom rules that is executed before any resolver is executed

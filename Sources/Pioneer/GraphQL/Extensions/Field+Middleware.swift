@@ -7,7 +7,7 @@
 
 import class Graphiti.ArgumentComponent
 import struct Graphiti.ArgumentComponentBuilder
-import typealias Graphiti.ConcurrentResolve
+import typealias Graphiti.AsyncResolve
 import class Graphiti.Field
 import typealias Graphiti.SyncResolve
 
@@ -19,9 +19,9 @@ public extension Field where FieldType: Encodable {
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(
-            name: name,
-            arguments: [argument()],
-            concurrentResolve: buildResolver(from: function, using: middlewares)
+            name,
+            at: buildResolver(from: function, using: middlewares),
+            argument
         )
     }
 
@@ -33,36 +33,36 @@ public extension Field where FieldType: Encodable {
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(
-            name: name,
-            arguments: arguments(),
-            concurrentResolve: buildResolver(from: function, using: middlewares)
+            name,
+            at: buildResolver(from: function, using: middlewares),
+            arguments
         )
     }
 
     convenience init(
         _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
+        at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
         use middlewares: [GraphQLMiddleware<ObjectType, Context, Arguments, FieldType>],
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(
-            name: name,
-            arguments: [argument()],
-            concurrentResolve: buildResolver(from: function, using: middlewares)
+            name,
+            at: buildResolver(from: function, using: middlewares),
+            argument
         )
     }
 
     convenience init(
         _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
+        at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
         use middlewares: [GraphQLMiddleware<ObjectType, Context, Arguments, FieldType>],
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(
-            name: name,
-            arguments: arguments(),
-            concurrentResolve: buildResolver(from: function, using: middlewares)
+            name,
+            at: buildResolver(from: function, using: middlewares),
+            arguments
         )
     }
 }

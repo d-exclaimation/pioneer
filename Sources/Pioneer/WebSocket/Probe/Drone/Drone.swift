@@ -53,18 +53,12 @@ extension Pioneer {
             let subscriptionResult = await subscription(gql: gql)
 
             // Guard for getting the required subscriptions stream, if not send `next` with errors, and end subscription
-            guard let subscription = subscriptionResult.stream else {
-                let res = GraphQL.GraphQLResult(errors: subscriptionResult.errors)
-                client.out(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
-                client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
-                return
-            }
-
-            // Guard for getting the async stream, if not sent `next` saying failure in convertion, and end subscription
-            guard let asyncStream = subscription.asyncStream() else {
-                let res = GraphQL.GraphQLResult(errors: [
-                    .init(message: "Internal server error, failed to fetch AsyncThrowingStream"),
-                ])
+            let asyncStream: AsyncThrowingStream<GraphQLResult, Error>
+            switch subscriptionResult {
+            case .success(let stream):
+                asyncStream = stream
+            case .failure(let error):
+                let res = GraphQL.GraphQLResult(errors: error.errors)
                 client.out(GraphQLMessage.from(type: proto.next, id: oid, res).jsonString)
                 client.out(GraphQLMessage(id: oid, type: proto.complete).jsonString)
                 return
@@ -121,21 +115,18 @@ extension Pioneer {
 
         // MARK: - Utility methods
 
-        /// Build context and execute subscription from GraphQL Resolver and Schema, await the future value and catch error into a SubscriptionResult
-        private func subscription(gql: GraphQLRequest) async -> SubscriptionResult {
+        /// Build context and execute subscription from GraphQL Resolver and Schema, and catch error into a SubscriptionResult
+        private func subscription(gql: GraphQLRequest) async -> Result<AsyncThrowingStream<GraphQLResult, Error>, GraphQLErrors> {
             do {
                 let ctx = try await client.context(gql)
                 return try await subscribeOperation(for: gql, with: ctx, using: client.ev)
             } catch {
-                return .init(
-                    stream: nil,
-                    errors: [.init(error)]
-                )
+                return .failure(.init([.init(error)]))
             }
         }
 
         /// Execute long lived GraphQL Operation as a subscription
-        private func subscribeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async throws -> SubscriptionResult {
+        private func subscribeOperation(for gql: GraphQLRequest, with ctx: Context, using eventLoop: EventLoopGroup) async throws -> Result<AsyncThrowingStream<GraphQLResult, Error>, GraphQLErrors> {
             try await subscribeGraphQL(
                 schema: schema,
                 request: gql.query,

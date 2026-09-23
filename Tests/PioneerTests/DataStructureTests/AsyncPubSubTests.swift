@@ -119,26 +119,4 @@ final class AsyncPubSubTests: XCTestCase {
         task.cancel()
         task1.cancel()
     }
-
-    func testAsyncStream() async throws {
-        // EventStream.async
-        let stream1 = EventStream<Int>
-            .async { con in
-                con.yield(1)
-                con.finish()
-            }
-        for try await each in stream1.sequence {
-            XCTAssertEqual(each, 1)
-        }
-
-        // AsyncEventStream.async
-        let stream2 = AsyncEventStream<Int, AsyncThrowingStream<Int, Error>> { con in
-            con.yield(1)
-            con.finish()
-        }
-
-        for try await each in stream2.sequence {
-            XCTAssertEqual(each, 1)
-        }
-    }
 }

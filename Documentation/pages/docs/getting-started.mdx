@@ -415,15 +415,12 @@ try app.run()
 
 ### Subscription resolver
 
-Now, let's add the subscription resolver. Pioneer can resolve subscription as long as the return value is either:
-- [AsyncEventStream](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asynceventstream), or
-- `ConcurrentEventStream`
+Now, let's add the subscription resolver. Pioneer can resolve subscription as long as the return value is an `AsyncSequence`
 
 In this tutorial, we will be using Pioneer's built in [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/pubsub) system and its in-memory implementation, [AsyncPubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asyncpubsub)
 
 ```swift filename="Resolver.swift" {1,7-8,28-30} showLineNumbers copy
 import Pioneer
-import class GraphQL.EventStream
 import struct Graphiti.NoArguments
 import struct Vapor.Abort
 
@@ -449,8 +446,8 @@ struct Resolver {
         return book
     }
 
-    func bookAdded(ctx: Context, args: NoArguments) -> EventStream<Book> {
-        pubsub.asyncStream(Book.self, for: trigger).toEventStream()
+    func bookAdded(ctx: Context, args: NoArguments) -> AsyncStream<Book> {
+        pubsub.asyncStream(Book.self, for: trigger)
     }
 }
 ```
@@ -461,7 +458,6 @@ With [PubSub](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation
 
 ```swift filename="Resolver.swift" {25} showLineNumbers copy
 import Pioneer
-import class GraphQL.EventStream
 import struct Graphiti.NoArguments
 import struct Vapor.Abort
 
@@ -488,8 +484,8 @@ struct Resolver {
         return book
     }
 
-    func bookAdded(ctx: Context, args: NoArguments) -> EventStream<Book> {
-        pubsub.asyncStream(Book.self, for: trigger).toEventStream()
+    func bookAdded(ctx: Context, args: NoArguments) -> AsyncStream<Book> {
+        pubsub.asyncStream(Book.self, for: trigger)
     }
 }
 ```

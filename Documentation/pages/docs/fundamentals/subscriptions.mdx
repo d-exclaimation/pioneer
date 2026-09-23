@@ -6,93 +6,28 @@ Subscriptions are long-lasting GraphQL read operations that can update their res
 
 ## Resolving a subscription
 
-Resolvers for Subscription differ from resolvers for fields of other types. Specifically, Subscription resolvers require to return an implementation of `EventStream`.
+Resolvers for Subscription differ from resolvers for fields of other types. Specifically, Subscription resolvers require to return an implementation of `AsyncSequence`.
 
 ```swift {3-11,14-16} filename="Resolver.swift" showLineNumbers copy
 struct Resolver {
     // Example using an async stream generator
-    func hello(_: Context, _: NoArguments) async -> EventStream<String> {
-        let stream = AsyncStream { con in
+    func hello(_: Context, _: NoArguments) async -> AsyncStream<String> {
+        return AsyncStream { con in
             for word in ["Hello", "Bonjour", "Ciao"] {
                 con.yield(word)
             }
             con.finish()
         }
-        return stream.toEventStream()
     }
 
     // Example using pubsub
-    func hello(_: Context, _: NoArguments) async -> EventStream<String> {
-        pubsub.asyncStream(String.self, for: "HELLO_MESSAGE").toEventStrem()
+    func hello(_: Context, _: NoArguments) async -> AsyncStream<String> {
+        pubsub.asyncStream(String.self, for: "HELLO_MESSAGE")
     }
 }
 ```
 
-For the subscription to work under [Pioneer](/) the resolver function must return an `EventStream` of type: 
-- [AsyncEventStream](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation/pioneer/asynceventstream) 
-  > Can be from any `AsyncSequence`, a standard protocol in Swift 5.5 for asynchronous, sequential, iterated elements
-- [ConcurrentEventStream](https://github.com/GraphQLSwift/GraphQL/blob/dda63e412745832adaa4b4248501bebd9133a699/Sources/GraphQL/Subscription/EventStream.swift#L14) 
-  > Must be from a `AsyncThrowingStream`
-
-
-## AsyncEventStream
-
-Swift 5.5 brought in a reactive stream like feature in the form of a protocol named `AsyncSequence`.
-
-Pioneer provide an implementation of `EventStream` named [AsyncEventStream](#asynceventstream) that takes a generic `AsyncSequence`. This mean you can create an event stream using this class from any `AsyncSequence`.
-
-```swift showLineNumbers copy
-let eventStream: EventStream<Int> = AsyncEventStream(from: MyIntAsyncSequence())
-```
-
-### Extensions for AsyncSequence
-
-Converting can be done as well with using the extended method for all `AsyncSequence`. This method also allow the [AsyncEventStream](#asynceventstream) to emit an initial and/or an ending value. 
-
-```swift {2,6,10} showLineNumbers copy
-let eventStream = AsyncStream<Int>(...)
-    .toEventStream()
-
-// Initial value before any stream values
-let eventStream1 = AsyncStream<Int>(...)
-    .toEventStream(initialValue: 0)
-
-// End value after stream finishes (excluding termination and value is lazily loaded; hence the function there)
-let eventStream2 = AsyncStream<Int>(...)
-    .toEventStream(initialValue: 0, endValue: { 10 })
-```
-
-
-### Termination callback
-
-By default, [AsyncEventStream](#asynceventstream) will cancel the task consuming the provided `AsyncSequence` when converting to an `AsyncStream` of a different type. For something like `AsyncStream`, this cancellation will trigger its termination callback so resources can be deallocated and prevent memory leaks of any kind.
-
-However, a custom `AsyncSequence` might have a different trigger and approach in termination. Hence, `.toEventStream` alllow an explicit termination callback when converting to `EventStream`.
-
-<Callout type="success" emoji="✅">
-In the termination callback, you are provided with an enum that specify the two cases where termination can occur.
-</Callout>
-
-```swift {4-8} showLineNumbers copy
-let sequence = MyAsyncSequence()
-
-let eventStream = sequence.toEventStream(
-    onTermination: { termination in
-        if case .cancelled = termination {
-            sequence.cancel()
-        }
-    }
-)
-```
-
-Cases where stream is no longer consumed / stopped and termination will require to be triggered:
-1. Stream ended itself
-2. Client send a explicit stop request to end the subscription (might be before stream ended)
-3. Client disconnect and implicitly stop any running subscription
-
-<Callout type="info" emoji="⚡️">
-Termination callback can be implicitly inferred built-in `AsyncSequence` and ones created by a [PubSub](#pubsub-as-protocol).
-</Callout>
+For the subscription to work under [Pioneer](/) the resolver function must return a type that conforms to `AsyncSequence`.
 
 ## AsyncPubSub
 

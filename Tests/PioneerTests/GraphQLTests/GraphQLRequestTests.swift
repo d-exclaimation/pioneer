@@ -6,7 +6,7 @@
 //  Copyright © 2021 d-exclaimation. All rights reserved.
 //
 
-import class GraphQL.Field
+import struct GraphQL.Field
 import class GraphQL.OperationDefinition
 import enum GraphQL.OperationType
 import func GraphQL.parse

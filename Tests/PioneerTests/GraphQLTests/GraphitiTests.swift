@@ -1,5 +1,5 @@
 //
-//  GraphitiAsyncEventStreamTests.swift
+//  GraphitiTests.swift
 //  Pioneer
 //
 //  Created by d-exclaimation on 7:17 PM.
@@ -54,8 +54,8 @@ final class GraphitiTests: XCTestCase {
             return message
         }
 
-        func onMessage(context _: Void, arguments _: NoArguments) -> EventStream<Message> {
-            pubsub.asyncStream(for: "*").toEventStream()
+        func onMessage(context _: Void, arguments _: NoArguments) -> AsyncThrowingStream<Message, Error> {
+            pubsub.asyncStream(for: "*")
         }
     }
 
@@ -72,7 +72,7 @@ final class GraphitiTests: XCTestCase {
     /// 3. Should be able to get EventStream and AsyncStream
     /// 4. Should get all passed messages when consuming
     /// 5. Should get those messages in the correct order and format
-    func testAsyncSequenceSubscription() throws {
+    func testAsyncSequenceSubscription() async throws {
         let schema = try Schema<Resolver, Void> {
             Type(Message.self) {
                 Field("id", at: \.id)
@@ -102,24 +102,16 @@ final class GraphitiTests: XCTestCase {
         let query = """
         subscription {
             onMessage {
-                id, content       
+                id, content
             }
         }
         """
 
         // -- Performing Subscriptions --
 
-        let subscriptionResult = try schema
-            .subscribe(request: query, resolver: resolver, context: (), eventLoopGroup: group)
-            .wait()
-
-        guard let subscription = subscriptionResult.stream else {
-            return XCTFail(subscriptionResult.errors.description)
-        }
-
-        guard let asyncStream = subscription.asyncStream() else {
-            return XCTFail("Stream failed to be casted into proper types \(subscription))")
-        }
+        let asyncStream = try await schema
+            .subscribe(request: query, resolver: resolver, context: ())
+            .get()
 
         // -- End --
 
@@ -128,8 +120,7 @@ final class GraphitiTests: XCTestCase {
         // -- Consuming stream --
 
         let task = Task.init {
-            for try await future in asyncStream {
-                let message = try await future.get()
+            for try await message in asyncStream {
                 let expected = GraphQLResult(data: [
                     "onMessage": [
                         "id": "bob",

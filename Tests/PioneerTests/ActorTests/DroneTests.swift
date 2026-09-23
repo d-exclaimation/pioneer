@@ -7,7 +7,6 @@
 //
 
 import Graphiti
-import class GraphQL.EventStream
 import class NIO.MultiThreadedEventLoopGroup
 @testable import Pioneer
 import XCTest
@@ -22,35 +21,25 @@ final class DroneTests: XCTestCase {
         /// Should:
         ///     - Send Hello and finish the stream
         ///     - Print done when finished
-        func simple(_: Void, _: NoArguments) -> EventStream<String> {
-            let stream = AsyncStream(String.self) { continuation in
+        func simple(_: Void, _: NoArguments) -> AsyncStream<String> {
+            return AsyncStream(String.self) { continuation in
                 continuation.yield("Hello")
                 continuation.finish()
             }
-            return stream.toEventStream(
-                onTermination: { _ in
-                    print("Done")
-                }
-            )
         }
 
         /// Simple 1 message subscriptions with a delay
         /// Should:
         ///     - Send hello after a delay and finish the stream
         ///     - Print done when finished
-        func delayed(_: Void, _: NoArguments) -> EventStream<String> {
-            let stream = AsyncStream(String.self) { continuation in
+        func delayed(_: Void, _: NoArguments) -> AsyncStream<String> {
+            return AsyncStream(String.self) { continuation in
                 Task.init {
                     try await Task.sleep(nanoseconds: 1000 * 1000 * 250)
                     continuation.yield("Hello")
                     continuation.finish()
                 }
             }
-            return stream.toEventStream(
-                onTermination: { _ in
-                    print("Done")
-                }
-            )
         }
     }
 

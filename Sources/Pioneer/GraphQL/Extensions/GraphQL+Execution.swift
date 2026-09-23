@@ -34,10 +34,9 @@ public func executeGraphQL(
         request: request,
         rootValue: resolver,
         context: context,
-        eventLoopGroup: eventLoopGroup,
         variableValues: variables ?? [:],
         operationName: operationName
-    ).get()
+    )
 }
 
 /// Execute streaming based GraphQL Operation
@@ -60,13 +59,12 @@ public func subscribeGraphQL(
     eventLoopGroup: EventLoopGroup,
     variables: [String: Map]? = nil,
     operationName: String? = nil
-) async throws -> SubscriptionResult {
+) async throws -> Result<AsyncThrowingStream<GraphQLResult, Error>, GraphQLErrors> {
     try await graphqlSubscribe(
         schema: schema,
         request: request,
         rootValue: resolver,
         context: context,
-        eventLoopGroup: eventLoopGroup,
         variableValues: variables ?? [:],
         operationName: operationName
     )

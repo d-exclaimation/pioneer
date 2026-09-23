@@ -5,7 +5,7 @@
 //  Created by d-exclaimation on 17:38.
 //
 
-import typealias Graphiti.ConcurrentResolve
+import typealias Graphiti.AsyncResolve
 import typealias Graphiti.SyncResolve
 
 /// A struct to group of all parameters for a resolvers
@@ -37,7 +37,7 @@ public typealias GraphQLMiddleware<Root, Context, Args, ResolveType> = (
 public func buildResolver<Root, Context, Args, ResolveType>(
     from function: @escaping SyncResolve<Root, Context, Args, ResolveType>,
     using middlewares: [GraphQLMiddleware<Root, Context, Args, ResolveType>]
-) -> ConcurrentResolve<Root, Context, Args, ResolveType> {
+) -> AsyncResolve<Root, Context, Args, ResolveType> {
     { root in
         { ctx, args in
             let info = ResolverParameters(root: root, context: ctx, args: args)
@@ -59,9 +59,9 @@ public func buildResolver<Root, Context, Args, ResolveType>(
 ///   - middlewares: The middlewares to wrap the resolvers
 /// - Returns: A single resolver with middleware applied
 public func buildResolver<Root, Context, Args, ResolveType>(
-    from function: @escaping ConcurrentResolve<Root, Context, Args, ResolveType>,
+    from function: @escaping AsyncResolve<Root, Context, Args, ResolveType>,
     using middlewares: [GraphQLMiddleware<Root, Context, Args, ResolveType>]
-) -> ConcurrentResolve<Root, Context, Args, ResolveType> {
+) -> AsyncResolve<Root, Context, Args, ResolveType> {
     { root in
         { ctx, args in
             let info = ResolverParameters(root: root, context: ctx, args: args)

@@ -7,7 +7,6 @@
 //
 
 import Graphiti
-import class GraphQL.EventStream
 import class NIO.MultiThreadedEventLoopGroup
 @testable import Pioneer
 import XCTest
@@ -16,8 +15,8 @@ final class ProbeTests: XCTestCase {
     /// Simple resolver with a single subscriptions
     struct Resolver {
         func test(_: Void, _: NoArguments) -> String { "test" }
-        func subscription(_: Void, _: NoArguments) -> EventStream<String> {
-            AsyncStream.just("hello").toEventStream()
+        func subscription(_: Void, _: NoArguments) -> AsyncStream<String> {
+            AsyncStream.just("hello")
         }
     }
 
