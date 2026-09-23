@@ -69,21 +69,22 @@ extension Pioneer {
             }
 
             let future = execute(gql, client: client)
+            let nextTypename = proto.next
 
-            pipeToSelf(future: future) { [unowned self] sink, res in
+            pipeToSelf(future: future) { sink, res in
                 switch res {
                 case let .success(value):
                     await sink.outgoing(
                         with: oid,
                         to: client,
-                        given: .from(type: self.proto.next, id: oid, value)
+                        given: .from(type: nextTypename, id: oid, value)
                     )
                 case let .failure(error):
                     let result: GraphQLResult = .init(data: nil, errors: [error.graphql])
                     await sink.outgoing(
                         with: oid,
                         to: client,
-                        given: .from(type: self.proto.next, id: oid, result)
+                        given: .from(type: nextTypename, id: oid, result)
                     )
                 }
             }
@@ -102,7 +103,7 @@ extension Pioneer {
 
         /// Build context and execute short-lived GraphQL Operation inside an event loop
         private func execute(_ gql: GraphQLRequest, client: WebSocketClient) -> Task<GraphQLResult, Error> {
-            Task { [unowned self] in
+            Task { [self] in
                 let ctx = try await client.context(gql)
                 return try await executeGraphQL(
                     schema: self.schema,
