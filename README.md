@@ -37,8 +37,8 @@ try server.standaloneServer(
 
 ## Usage/Examples
 
-- [Documentation](https://pioneer.dexclaimation.com/docs)
-- [Getting started](https://pioneer.dexclaimation.com/docs/getting-started)
+- [Documentation](https://pioneer-graphql.netlify.app)
+- [Getting started](https://pioneer-graphql.netlify.app/getting-started/)
 - [API References](https://swiftpackageindex.com/d-exclaimation/pioneer/documentation)
 - [Example](https://github.com/d-exclaimation/pioneer-example)
 
